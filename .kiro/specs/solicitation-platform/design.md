@@ -1,292 +1,821 @@
-# Design Document - Task 1 Context
+# Design Document - Task 2: Implement Core Data Models
+
+## Task Context
+
+**Current Task**: Task 2 - Implement core data models
+**Focus**: Create Java classes for Candidate, Context, Subject, Score, and configuration models
 
 ## Overview
 
-The General Solicitation Platform is a cloud-native, event-driven system built on AWS using Java. This document focuses on the infrastructure and project setup required for Task 1.
+Task 2 implements the foundational data models that represent solicitation candidates and program configurations. These models serve as the canonical representation used throughout the platform.
 
-**Current Focus**: Task 1 - Set up project structure and core infrastructure
+### Design Principles for Task 2
 
-## Technology Stack
+1. **Immutability**: Use immutable objects where possible to prevent accidental modifications
+2. **Validation**: Validate all required fields at construction time
+3. **Extensibility**: Support arbitrary context dimensions and score types
+4. **Serialization**: Ensure proper JSON serialization for storage and API responses
+5. **Type Safety**: Use strong typing to prevent errors at compile time
 
-### Core Technologies
-- **Language**: Java 17
-- **Build Tool**: Maven
-- **AWS Services**: Lambda, DynamoDB, Step Functions, EventBridge, CloudWatch
-- **Infrastructure as Code**: AWS CDK or CloudFormation
-- **Logging**: SLF4J + Logback + CloudWatch Logs
-- **Testing**: JUnit 5, jqwik (property-based testing)
+## Data Models
 
-### AWS Services Architecture
+### Candidate Model
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     AWS Infrastructure                       │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│  ┌──────────────┐      ┌──────────────┐                    │
-│  │  EventBridge │─────▶│    Lambda    │                    │
-│  │   (Scheduler)│      │  (Functions) │                    │
-│  └──────────────┘      └──────┬───────┘                    │
-│                               │                             │
-│  ┌──────────────┐            │        ┌──────────────┐    │
-│  │     Step     │◀───────────┴───────▶│   DynamoDB   │    │
-│  │  Functions   │                     │   (Tables)   │    │
-│  └──────────────┘                     └──────────────┘    │
-│                                                              │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │              CloudWatch Logs & Metrics                │  │
-│  └──────────────────────────────────────────────────────┘  │
-│                                                              │
-└─────────────────────────────────────────────────────────────┘
-```
+The Candidate model is the core data structure representing a solicitation opportunity.
 
-## Project Structure
+```java
+package com.solicitation.model;
 
-```
-solicitation-platform/
-├── pom.xml                          # Maven configuration
-├── infrastructure/                   # IaC definitions
-│   ├── dynamodb-tables.yaml         # DynamoDB table definitions
-│   ├── lambda-functions.yaml        # Lambda configurations
-│   ├── step-functions.yaml          # Workflow definitions
-│   └── eventbridge-rules.yaml       # Event rules
-├── src/
-│   ├── main/
-│   │   ├── java/com/solicitation/
-│   │   │   ├── model/               # Data models
-│   │   │   ├── storage/             # DynamoDB repositories
-│   │   │   ├── connector/           # Data connectors
-│   │   │   ├── scoring/             # Scoring engine
-│   │   │   ├── filter/              # Filter pipeline
-│   │   │   ├── serving/             # Serving API
-│   │   │   ├── channel/             # Channel adapters
-│   │   │   ├── workflow/            # Workflow handlers
-│   │   │   ├── config/              # Configuration
-│   │   │   └── util/                # Utilities
-│   │   └── resources/
-│   │       ├── logback.xml          # Logging configuration
-│   │       └── application.properties
-│   └── test/
-│       └── java/com/solicitation/   # Test files
-├── scripts/
-│   ├── build.sh                     # Build script
-│   └── deploy.sh                    # Deployment script
-└── .github/
-    └── workflows/
-        └── build.yml                # CI/CD pipeline
-```
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import lombok.Builder;
+import lombok.Value;
 
-## DynamoDB Schema Design
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
+import java.util.List;
+import java.util.Map;
 
-### Candidates Table
-
-```
-Table Name: Candidates
-Primary Key: 
-  PK: CUSTOMER#{customerId}#PROGRAM#{programId}#MARKETPLACE#{marketplaceId}
-  SK: SUBJECT#{subjectType}#{subjectId}
-
-Attributes:
-  - context (List of Maps)
-  - subject (Map)
-  - scores (Map)
-  - attributes (Map)
-  - metadata (Map)
-  - rejectionHistory (List)
-  - ttl (Number, for automatic expiration)
-
-GSI-1 (ProgramChannelIndex):
-  PK: PROGRAM#{programId}#CHANNEL#{channelId}
-  SK: SCORE#{scoreValue}#CUSTOMER#{customerId}
-  
-GSI-2 (ProgramDateIndex):
-  PK: PROGRAM#{programId}#DATE#{YYYY-MM-DD}
-  SK: CREATED#{timestamp}#CUSTOMER#{customerId}
-
-Capacity Mode: On-Demand
-TTL Attribute: ttl
-```
-
-### ProgramConfig Table
-
-```
-Table Name: ProgramConfig
-Primary Key:
-  PK: PROGRAM#{programId}
-  SK: MARKETPLACE#{marketplaceId}
-
-Attributes:
-  - programName (String)
-  - enabled (Boolean)
-  - dataConnectors (List)
-  - scoringModels (List)
-  - filterChain (Map)
-  - channels (List)
-  - batchSchedule (String)
-  - reactiveEnabled (Boolean)
-  - candidateTTLDays (Number)
-
-Capacity Mode: On-Demand
-```
-
-### ScoreCache Table
-
-```
-Table Name: ScoreCache
-Primary Key:
-  PK: CUSTOMER#{customerId}#SUBJECT#{subjectId}
-  SK: MODEL#{modelId}
-
-Attributes:
-  - score (Map with value, confidence, timestamp)
-  - ttl (Number)
-
-Capacity Mode: On-Demand
-TTL Attribute: ttl
-```
-
-## Lambda Function Configurations
-
-### ETL Lambda
-- **Memory**: 1024 MB
-- **Timeout**: 300 seconds
-- **Environment Variables**: DATA_SOURCE_CONFIG, BATCH_SIZE
-- **IAM Permissions**: DynamoDB read/write, Athena query, S3 read
-
-### Filter Lambda
-- **Memory**: 512 MB
-- **Timeout**: 60 seconds
-- **Environment Variables**: FILTER_CONFIG
-- **IAM Permissions**: DynamoDB read, external service calls
-
-### Score Lambda
-- **Memory**: 1024 MB
-- **Timeout**: 120 seconds
-- **Environment Variables**: MODEL_ENDPOINTS, FEATURE_STORE_CONFIG
-- **IAM Permissions**: DynamoDB read/write, SageMaker invoke, feature store access
-
-### Store Lambda
-- **Memory**: 512 MB
-- **Timeout**: 60 seconds
-- **Environment Variables**: BATCH_SIZE
-- **IAM Permissions**: DynamoDB batch write
-
-### Serve Lambda
-- **Memory**: 512 MB
-- **Timeout**: 30 seconds
-- **Environment Variables**: CACHE_CONFIG
-- **IAM Permissions**: DynamoDB read, API Gateway integration
-
-## Logging Configuration
-
-### Structured Logging Format
-
-```json
-{
-  "timestamp": "2026-01-16T10:30:00.000Z",
-  "level": "INFO",
-  "correlationId": "uuid-1234-5678",
-  "service": "solicitation-platform",
-  "component": "ETLLambda",
-  "message": "Processing batch",
-  "context": {
-    "programId": "retail",
-    "marketplace": "US",
-    "batchSize": 1000
-  }
+/**
+ * Represents a solicitation candidate - a potential opportunity to solicit
+ * customer response for a specific subject.
+ */
+@Value
+@Builder(toBuilder = true)
+@JsonDeserialize(builder = Candidate.CandidateBuilder.class)
+public class Candidate {
+    
+    /**
+     * Unique identifier for the customer
+     */
+    @NotNull
+    @JsonProperty("customerId")
+    String customerId;
+    
+    /**
+     * Multi-dimensional context describing the solicitation scenario
+     * Must contain at least one context (e.g., marketplace, program, vertical)
+     */
+    @NotEmpty
+    @Valid
+    @JsonProperty("context")
+    List<Context> context;
+    
+    /**
+     * The subject being solicited for response
+     */
+    @NotNull
+    @Valid
+    @JsonProperty("subject")
+    Subject subject;
+    
+    /**
+     * Scores from various ML models
+     * Key: modelId, Value: Score object
+     */
+    @JsonProperty("scores")
+    Map<String, Score> scores;
+    
+    /**
+     * Attributes describing the solicitation opportunity
+     */
+    @NotNull
+    @Valid
+    @JsonProperty("attributes")
+    CandidateAttributes attributes;
+    
+    /**
+     * System-level metadata for tracking
+     */
+    @NotNull
+    @Valid
+    @JsonProperty("metadata")
+    CandidateMetadata metadata;
+    
+    /**
+     * History of rejections (if any)
+     */
+    @JsonProperty("rejectionHistory")
+    List<RejectionRecord> rejectionHistory;
+    
+    @JsonPOJOBuilder(withPrefix = "")
+    public static class CandidateBuilder {
+    }
 }
 ```
 
-### Log Levels
-- **ERROR**: System errors, exceptions, failures
-- **WARN**: Degraded performance, fallback usage, retries
-- **INFO**: Normal operations, workflow progress, metrics
-- **DEBUG**: Detailed debugging information (disabled in production)
+### Context Model
 
-### PII Redaction Rules
-- Email addresses: `user@example.com` → `u***@e***.com`
-- Phone numbers: `+1-555-1234` → `+1-***-****`
-- Customer IDs: Keep first 4 chars, mask rest
-- Addresses: Redact completely
+```java
+package com.solicitation.model;
 
-## CI/CD Pipeline
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
+import lombok.Value;
 
-### Build Stage
-1. Checkout code
-2. Run Maven build (`mvn clean package`)
-3. Run unit tests
-4. Run property-based tests
-5. Generate code coverage report
-6. Build Lambda deployment packages
+import javax.validation.constraints.NotBlank;
 
-### Deploy Stage (Dev)
-1. Deploy infrastructure (CDK/CloudFormation)
-2. Deploy Lambda functions
-3. Run integration tests
-4. Verify deployment health
+/**
+ * Represents a dimension of context for a candidate
+ * Examples: marketplace, program, vertical
+ */
+@Value
+@Builder
+public class Context {
+    
+    /**
+     * Type of context (e.g., "marketplace", "program", "vertical")
+     */
+    @NotBlank
+    @JsonProperty("type")
+    String type;
+    
+    /**
+     * Identifier for this context dimension
+     */
+    @NotBlank
+    @JsonProperty("id")
+    String id;
+}
+```
 
-### Deploy Stage (Staging/Prod)
-1. Manual approval required
-2. Deploy infrastructure
-3. Deploy Lambda functions
-4. Run smoke tests
-5. Monitor metrics for 30 minutes
-6. Rollback on errors
+### Subject Model
 
-## Maven Dependencies
+```java
+package com.solicitation.model;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
+import lombok.Value;
+
+import javax.validation.constraints.NotBlank;
+import java.util.Map;
+
+/**
+ * Represents the subject being solicited for response
+ * Examples: product, video, music track, service, event
+ */
+@Value
+@Builder
+public class Subject {
+    
+    /**
+     * Type of subject (e.g., "product", "video", "track", "service")
+     */
+    @NotBlank
+    @JsonProperty("type")
+    String type;
+    
+    /**
+     * Unique identifier for the subject
+     */
+    @NotBlank
+    @JsonProperty("id")
+    String id;
+    
+    /**
+     * Optional metadata about the subject
+     */
+    @JsonProperty("metadata")
+    Map<String, Object> metadata;
+}
+```
+
+### Score Model
+
+```java
+package com.solicitation.model;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
+import lombok.Value;
+
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import java.time.Instant;
+
+/**
+ * Represents a score from an ML model
+ */
+@Value
+@Builder
+public class Score {
+    
+    /**
+     * Identifier of the model that produced this score
+     */
+    @NotBlank
+    @JsonProperty("modelId")
+    String modelId;
+    
+    /**
+     * Score value (typically 0.0 to 1.0)
+     */
+    @NotNull
+    @JsonProperty("value")
+    Double value;
+    
+    /**
+     * Confidence in the score (0.0 to 1.0)
+     */
+    @Min(0)
+    @Max(1)
+    @JsonProperty("confidence")
+    Double confidence;
+    
+    /**
+     * When the score was computed
+     */
+    @NotNull
+    @JsonProperty("timestamp")
+    Instant timestamp;
+    
+    /**
+     * Optional metadata about the scoring
+     */
+    @JsonProperty("metadata")
+    Map<String, Object> metadata;
+}
+```
+
+### CandidateAttributes Model
+
+```java
+package com.solicitation.model;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
+import lombok.Value;
+
+import javax.validation.constraints.NotNull;
+import java.time.Instant;
+import java.util.Map;
+
+/**
+ * Attributes describing the solicitation opportunity
+ */
+@Value
+@Builder
+public class CandidateAttributes {
+    
+    /**
+     * When the triggering event occurred
+     */
+    @NotNull
+    @JsonProperty("eventDate")
+    Instant eventDate;
+    
+    /**
+     * Preferred delivery date (optional)
+     */
+    @JsonProperty("deliveryDate")
+    Instant deliveryDate;
+    
+    /**
+     * Timing window for solicitation (optional)
+     */
+    @JsonProperty("timingWindow")
+    String timingWindow;
+    
+    /**
+     * Order value if applicable (optional)
+     */
+    @JsonProperty("orderValue")
+    Double orderValue;
+    
+    /**
+     * Whether media (images/video) is eligible
+     */
+    @JsonProperty("mediaEligible")
+    Boolean mediaEligible;
+    
+    /**
+     * Channel eligibility flags
+     * Key: channel name (e.g., "email", "in-app", "push")
+     * Value: true if eligible for that channel
+     */
+    @NotNull
+    @JsonProperty("channelEligibility")
+    Map<String, Boolean> channelEligibility;
+}
+```
+
+### CandidateMetadata Model
+
+```java
+package com.solicitation.model;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
+import lombok.Value;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
+import java.time.Instant;
+
+/**
+ * System-level metadata for candidate tracking
+ */
+@Value
+@Builder(toBuilder = true)
+public class CandidateMetadata {
+    
+    /**
+     * When the candidate was created
+     */
+    @NotNull
+    @JsonProperty("createdAt")
+    Instant createdAt;
+    
+    /**
+     * When the candidate was last updated
+     */
+    @NotNull
+    @JsonProperty("updatedAt")
+    Instant updatedAt;
+    
+    /**
+     * When the candidate expires (for TTL)
+     */
+    @NotNull
+    @JsonProperty("expiresAt")
+    Instant expiresAt;
+    
+    /**
+     * Version number for optimistic locking
+     */
+    @Positive
+    @JsonProperty("version")
+    Long version;
+    
+    /**
+     * ID of the data connector that created this candidate
+     */
+    @NotBlank
+    @JsonProperty("sourceConnectorId")
+    String sourceConnectorId;
+    
+    /**
+     * Workflow execution ID for traceability
+     */
+    @NotBlank
+    @JsonProperty("workflowExecutionId")
+    String workflowExecutionId;
+}
+```
+
+### RejectionRecord Model
+
+```java
+package com.solicitation.model;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
+import lombok.Value;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import java.time.Instant;
+
+/**
+ * Records why a candidate was rejected by a filter
+ */
+@Value
+@Builder
+public class RejectionRecord {
+    
+    /**
+     * ID of the filter that rejected the candidate
+     */
+    @NotBlank
+    @JsonProperty("filterId")
+    String filterId;
+    
+    /**
+     * Human-readable rejection reason
+     */
+    @NotBlank
+    @JsonProperty("reason")
+    String reason;
+    
+    /**
+     * Machine-readable reason code
+     */
+    @NotBlank
+    @JsonProperty("reasonCode")
+    String reasonCode;
+    
+    /**
+     * When the rejection occurred
+     */
+    @NotNull
+    @JsonProperty("timestamp")
+    Instant timestamp;
+}
+```
+
+## Configuration Models
+
+### ProgramConfig Model
+
+```java
+package com.solicitation.model.config;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
+import lombok.Value;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
+import java.util.List;
+
+/**
+ * Configuration for a solicitation program
+ */
+@Value
+@Builder
+public class ProgramConfig {
+    
+    /**
+     * Unique program identifier
+     */
+    @NotBlank
+    @JsonProperty("programId")
+    String programId;
+    
+    /**
+     * Human-readable program name
+     */
+    @NotBlank
+    @JsonProperty("programName")
+    String programName;
+    
+    /**
+     * Whether the program is enabled
+     */
+    @NotNull
+    @JsonProperty("enabled")
+    Boolean enabled;
+    
+    /**
+     * Marketplaces where this program operates
+     */
+    @NotEmpty
+    @JsonProperty("marketplaces")
+    List<String> marketplaces;
+    
+    /**
+     * Data connector configurations
+     */
+    @NotEmpty
+    @Valid
+    @JsonProperty("dataConnectors")
+    List<DataConnectorConfig> dataConnectors;
+    
+    /**
+     * Scoring model configurations
+     */
+    @NotEmpty
+    @Valid
+    @JsonProperty("scoringModels")
+    List<ScoringModelConfig> scoringModels;
+    
+    /**
+     * Filter chain configuration
+     */
+    @NotNull
+    @Valid
+    @JsonProperty("filterChain")
+    FilterChainConfig filterChain;
+    
+    /**
+     * Channel configurations
+     */
+    @NotEmpty
+    @Valid
+    @JsonProperty("channels")
+    List<ChannelConfig> channels;
+    
+    /**
+     * Batch schedule (cron expression, optional)
+     */
+    @JsonProperty("batchSchedule")
+    String batchSchedule;
+    
+    /**
+     * Whether reactive mode is enabled
+     */
+    @NotNull
+    @JsonProperty("reactiveEnabled")
+    Boolean reactiveEnabled;
+    
+    /**
+     * Candidate TTL in days
+     */
+    @Positive
+    @JsonProperty("candidateTTLDays")
+    Integer candidateTTLDays;
+    
+    /**
+     * Timing window in days (optional)
+     */
+    @JsonProperty("timingWindowDays")
+    Integer timingWindowDays;
+}
+```
+
+### FilterConfig Model
+
+```java
+package com.solicitation.model.config;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
+import lombok.Value;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.PositiveOrZero;
+import java.util.Map;
+
+/**
+ * Configuration for a single filter
+ */
+@Value
+@Builder
+public class FilterConfig {
+    
+    /**
+     * Unique filter identifier
+     */
+    @NotBlank
+    @JsonProperty("filterId")
+    String filterId;
+    
+    /**
+     * Type of filter (TRUST, ELIGIBILITY, BUSINESS_RULE, QUALITY, CAPACITY)
+     */
+    @NotBlank
+    @JsonProperty("filterType")
+    String filterType;
+    
+    /**
+     * Whether the filter is enabled
+     */
+    @NotNull
+    @JsonProperty("enabled")
+    Boolean enabled;
+    
+    /**
+     * Filter-specific parameters
+     */
+    @JsonProperty("parameters")
+    Map<String, Object> parameters;
+    
+    /**
+     * Execution order (lower numbers execute first)
+     */
+    @PositiveOrZero
+    @JsonProperty("order")
+    Integer order;
+}
+```
+
+### ChannelConfig Model
+
+```java
+package com.solicitation.model.config;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
+import lombok.Value;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import java.util.Map;
+
+/**
+ * Configuration for a delivery channel
+ */
+@Value
+@Builder
+public class ChannelConfig {
+    
+    /**
+     * Unique channel identifier
+     */
+    @NotBlank
+    @JsonProperty("channelId")
+    String channelId;
+    
+    /**
+     * Type of channel (EMAIL, IN_APP, PUSH, VOICE, SMS)
+     */
+    @NotBlank
+    @JsonProperty("channelType")
+    String channelType;
+    
+    /**
+     * Whether the channel is enabled
+     */
+    @NotNull
+    @JsonProperty("enabled")
+    Boolean enabled;
+    
+    /**
+     * Whether shadow mode is enabled
+     */
+    @NotNull
+    @JsonProperty("shadowMode")
+    Boolean shadowMode;
+    
+    /**
+     * Channel-specific configuration
+     */
+    @JsonProperty("config")
+    Map<String, Object> config;
+}
+```
+
+## Validation Strategy
+
+### Field Validation
+
+Use Java Bean Validation (JSR 380) annotations:
+- `@NotNull`: Field must not be null
+- `@NotBlank`: String must not be null or empty
+- `@NotEmpty`: Collection must not be null or empty
+- `@Valid`: Cascade validation to nested objects
+- `@Positive`: Number must be positive
+- `@Min/@Max`: Number range validation
+
+### Custom Validation
+
+For complex validation logic, implement custom validators:
+
+```java
+package com.solicitation.model.validation;
+
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
+
+public class ContextValidator implements ConstraintValidator<ValidContext, List<Context>> {
+    
+    @Override
+    public boolean isValid(List<Context> contexts, ConstraintValidatorContext context) {
+        if (contexts == null || contexts.isEmpty()) {
+            return false;
+        }
+        
+        // Ensure at least one context is present
+        // Validate context types are known
+        // Check for duplicate context types
+        
+        return true;
+    }
+}
+```
+
+## Testing Strategy
+
+### Unit Tests
+
+Test each model class:
+- Valid construction with all required fields
+- Validation failures for missing/invalid fields
+- JSON serialization/deserialization
+- Builder pattern functionality
+- Immutability (where applicable)
+
+### Property-Based Tests
+
+Implement property tests for:
+
+**Property 2: Candidate model completeness**
+- Generate random candidates
+- Verify all required fields are present
+- Verify validation catches missing fields
+
+**Property 3: Context extensibility**
+- Generate random context types and IDs
+- Verify they can be stored without data loss
+- Verify JSON round-trip preserves values
+
+**Property 4: Version monotonicity**
+- Generate candidate with version N
+- Update to version N+1
+- Verify version increases and timestamp updates
+
+**Property 30: Program configuration validation**
+- Generate random program configs
+- Verify validation catches missing required fields
+- Verify valid configs pass validation
+
+## Implementation Checklist
+
+### Task 2.1: Create Candidate model with all fields
+- [ ] Create Candidate class with all fields
+- [ ] Create Context class
+- [ ] Create Subject class
+- [ ] Create Score class
+- [ ] Create CandidateAttributes class
+- [ ] Create CandidateMetadata class
+- [ ] Create RejectionRecord class
+- [ ] Add Jackson annotations for JSON serialization
+- [ ] Add validation annotations
+- [ ] Implement builder pattern
+- [ ] Add JavaDoc documentation
+
+### Task 2.2: Write property test for candidate model completeness
+- [ ] Set up property testing framework (jqwik or QuickTheories)
+- [ ] Create arbitrary generators for all model classes
+- [ ] Implement Property 2 test
+- [ ] Verify test catches validation failures
+- [ ] Run test with 100+ iterations
+
+### Task 2.3: Write property test for context extensibility
+- [ ] Create arbitrary generators for Context
+- [ ] Implement Property 3 test
+- [ ] Verify JSON round-trip preserves data
+- [ ] Run test with 100+ iterations
+
+### Task 2.4: Create configuration models
+- [ ] Create ProgramConfig class
+- [ ] Create FilterConfig class
+- [ ] Create ChannelConfig class
+- [ ] Create DataConnectorConfig class
+- [ ] Create ScoringModelConfig class
+- [ ] Create FilterChainConfig class
+- [ ] Add validation logic
+- [ ] Add JavaDoc documentation
+
+### Task 2.5: Write property test for program configuration validation
+- [ ] Create arbitrary generators for config classes
+- [ ] Implement Property 30 test
+- [ ] Verify validation catches missing fields
+- [ ] Run test with 100+ iterations
+
+## Dependencies
 
 ```xml
+<!-- pom.xml additions for Task 2 -->
 <dependencies>
-  <!-- AWS SDK -->
-  <dependency>
-    <groupId>software.amazon.awssdk</groupId>
-    <artifactId>dynamodb</artifactId>
-  </dependency>
-  <dependency>
-    <groupId>software.amazon.awssdk</groupId>
-    <artifactId>lambda</artifactId>
-  </dependency>
-  <dependency>
-    <groupId>software.amazon.awssdk</groupId>
-    <artifactId>sfn</artifactId>
-  </dependency>
-  
-  <!-- Lambda Runtime -->
-  <dependency>
-    <groupId>com.amazonaws</groupId>
-    <artifactId>aws-lambda-java-core</artifactId>
-  </dependency>
-  
-  <!-- Logging -->
-  <dependency>
-    <groupId>org.slf4j</groupId>
-    <artifactId>slf4j-api</artifactId>
-  </dependency>
-  <dependency>
-    <groupId>ch.qos.logback</groupId>
-    <artifactId>logback-classic</artifactId>
-  </dependency>
-  
-  <!-- JSON Processing -->
-  <dependency>
-    <groupId>com.fasterxml.jackson.core</groupId>
-    <artifactId>jackson-databind</artifactId>
-  </dependency>
-  
-  <!-- Testing -->
-  <dependency>
-    <groupId>org.junit.jupiter</groupId>
-    <artifactId>junit-jupiter</artifactId>
-    <scope>test</scope>
-  </dependency>
-  <dependency>
-    <groupId>net.jqwik</groupId>
-    <artifactId>jqwik</artifactId>
-    <scope>test</scope>
-  </dependency>
+    <!-- Lombok for reducing boilerplate -->
+    <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <version>1.18.30</version>
+        <scope>provided</scope>
+    </dependency>
+    
+    <!-- Jackson for JSON serialization -->
+    <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>2.15.3</version>
+    </dependency>
+    
+    <dependency>
+        <groupId>com.fasterxml.jackson.datatype</groupId>
+        <artifactId>jackson-datatype-jsr310</artifactId>
+        <version>2.15.3</version>
+    </dependency>
+    
+    <!-- Bean Validation -->
+    <dependency>
+        <groupId>javax.validation</groupId>
+        <artifactId>validation-api</artifactId>
+        <version>2.0.1.Final</version>
+    </dependency>
+    
+    <dependency>
+        <groupId>org.hibernate.validator</groupId>
+        <artifactId>hibernate-validator</artifactId>
+        <version>7.0.5.Final</version>
+    </dependency>
+    
+    <!-- Property-based testing -->
+    <dependency>
+        <groupId>net.jqwik</groupId>
+        <artifactId>jqwik</artifactId>
+        <version>1.7.4</version>
+        <scope>test</scope>
+    </dependency>
 </dependencies>
 ```
 
 ## Next Steps
 
-After Task 1 completion, Task 2 will implement the core data models using the infrastructure established here.
+After Task 2 completion:
+- Task 3 will implement DynamoDB storage layer using these models
+- Task 5 will implement data connectors that create these models
+- Task 6 will implement scoring engine that populates score fields

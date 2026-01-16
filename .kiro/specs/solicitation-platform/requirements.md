@@ -1,69 +1,101 @@
-# Requirements Document - Task 1 Context
+# Requirements Document - Task 2: Implement Core Data Models
 
-## Introduction
+## Task Context
 
-The General Solicitation Platform is a flexible, extensible system that decouples data sources, scoring systems, filtering mechanisms, and notification channels to solicit customer responses across multiple product verticals.
+**Current Task**: Task 2 - Implement core data models
+**Focus**: Create the unified candidate model and configuration models with proper validation
 
-**Current Focus**: Task 1 - Set up project structure and core infrastructure
-
-## Glossary
+## Glossary (Task 2 Relevant Terms)
 
 - **Candidate**: A potential solicitation opportunity (customer-subject pair with context)
+- **Subject**: The item being solicited for response (product, video, music track, service, event, experience, content piece)
+- **Context**: Multi-dimensional metadata describing the solicitation scenario (marketplace, program, vertical)
 - **Program**: An independent solicitation configuration with specific rules, channels, and data sources
-- **DynamoDB**: AWS NoSQL database service used for candidate storage
-- **Lambda**: AWS serverless compute service for running application code
-- **Step Functions**: AWS workflow orchestration service
-- **EventBridge**: AWS event bus service for event-driven architecture
-- **CloudWatch**: AWS monitoring and logging service
+- **Score**: Evaluation of candidate quality with value, confidence, and timestamp
+- **CandidateAttributes**: Properties describing the solicitation opportunity (event date, delivery date, channel eligibility)
+- **CandidateMetadata**: System-level tracking information (timestamps, version, source)
 
-## Relevant Requirements for Task 1
+## Requirements for Task 2
 
-### Foundational Infrastructure Requirements
+### Requirement 2: Unified Candidate Model
 
-All requirements depend on proper infrastructure setup. Task 1 establishes the foundation for:
+**User Story:** As a system architect, I want a single canonical representation for all solicitation candidates, so that downstream components work consistently across programs.
 
-- **Data Storage**: DynamoDB tables for candidates, configurations, and caches
-- **Compute**: Lambda functions for all processing logic
-- **Orchestration**: Step Functions for batch and reactive workflows
-- **Events**: EventBridge for scheduling and event-driven triggers
-- **Observability**: CloudWatch for logging, metrics, and alarms
-- **Deployment**: Infrastructure as Code (CDK/CloudFormation) for reproducible deployments
-- **CI/CD**: Automated build and deployment pipelines
+#### Acceptance Criteria
 
-### Specific Requirements Addressed
+1. THE Candidate_Storage SHALL store candidates with context array, subject, customer, event metadata, scores, and attributes
+2. WHEN a candidate is created, THE system SHALL validate all required fields are present
+3. THE candidate model SHALL support arbitrary score types with value, confidence, and timestamp
+4. THE candidate model SHALL include channel eligibility flags per supported channel
+5. WHEN a candidate is updated, THE system SHALL increment the version number and update the timestamp
 
-**Requirement 5.1**: DynamoDB Schema Design
-- Primary key: `CustomerId:Program:Marketplace`
-- GSI for program-specific queries
-- GSI for channel-specific queries
-- TTL for automatic candidate expiration
+### Requirement 1.3: Context Extensibility
 
-**Requirement 5.3**: Query Support
-- THE Candidate_Storage SHALL provide GSI for querying by program and by channel
+**From Requirement 1: Data Ingestion Framework**
 
-**Requirement 8.1**: Batch Ingestion Workflow
-- WHEN a batch workflow is scheduled, THE system SHALL execute ETL, filtering, scoring, and storage in sequence
+#### Acceptance Criteria
 
-**Requirement 9.1**: Reactive Solicitation Workflow
-- WHEN a customer event occurs, THE system SHALL create a candidate within 1 second end-to-end
+3. THE unified candidate model SHALL support extensible context dimensions including marketplace, program, and vertical
 
-**Requirement 12.2**: Structured Logging
-- WHEN workflows fail, THE system SHALL emit structured logs with correlation IDs
+### Requirement 10: Program Configuration Management
 
-**Requirement 18.4**: PII Redaction
-- WHEN PII is logged, THE system SHALL redact sensitive fields
+**User Story:** As a program administrator, I want to configure solicitation programs independently, so that I can customize behavior per business vertical.
 
-## Success Criteria for Task 1
+#### Acceptance Criteria
 
-1. ✅ Maven project builds successfully with all dependencies
-2. ✅ DynamoDB tables can be created via IaC
-3. ✅ Lambda functions can be deployed
-4. ✅ Step Functions workflows are defined
-5. ✅ EventBridge rules are configured
-6. ✅ Logging framework outputs structured logs with correlation IDs
-7. ✅ CI/CD pipeline runs successfully
-8. ✅ Project follows Java best practices and AWS Well-Architected Framework
+1. WHEN a program is created, THE system SHALL validate all required configuration fields
+2. THE program configuration SHALL specify data sources, filter chains, scoring models, channels, and schedules
+3. WHEN a program is disabled, THE system SHALL stop all workflows and prevent new candidate creation
+4. THE system SHALL support per-marketplace program configuration overrides
+5. WHEN configuration changes, THE system SHALL apply them without requiring system restart
+
+## Correctness Properties for Task 2
+
+### Property 2: Candidate model completeness
+
+*For any* candidate stored in the system, it must contain all required fields: customerId, context array (with at least one context), subject, metadata with timestamps, and version number.
+
+**Validates: Requirements 2.1, 2.2**
+
+### Property 3: Context extensibility
+
+*For any* valid context type and id combination, the candidate model must be able to store it in the context array without data loss.
+
+**Validates: Requirements 1.3, 2.3**
+
+### Property 4: Version monotonicity
+
+*For any* candidate, if it is updated, the new version number must be strictly greater than the previous version number, and the updatedAt timestamp must be greater than or equal to the previous updatedAt timestamp.
+
+**Validates: Requirements 2.5**
+
+### Property 30: Program configuration validation
+
+*For any* program configuration, all required fields (programId, dataConnectors, filterChain, channels) must be present and valid, or the configuration must be rejected with detailed error messages.
+
+**Validates: Requirements 10.1**
+
+## Success Criteria for Task 2
+
+1. ✅ Candidate model class created with all required fields
+2. ✅ Context, Subject, Score classes implemented
+3. ✅ CandidateAttributes and CandidateMetadata classes implemented
+4. ✅ JSON serialization/deserialization working correctly
+5. ✅ Field validation logic implemented
+6. ✅ ProgramConfig, FilterConfig, ChannelConfig classes created
+7. ✅ Configuration validation logic implemented
+8. ✅ Property tests pass for candidate completeness, context extensibility, and version monotonicity
+9. ✅ Property test passes for program configuration validation
+
+## Implementation Notes
+
+- Use Java records or POJOs with proper encapsulation
+- Add Jackson annotations for JSON serialization
+- Implement builder pattern for complex objects
+- Use Java Bean Validation (JSR 380) for field validation
+- Ensure immutability where appropriate
+- Add comprehensive JavaDoc documentation
 
 ## Next Steps
 
-After Task 1 completion, Task 2 will implement core data models (Candidate, Context, Subject, etc.) building on this infrastructure foundation.
+After Task 2 completion, Task 3 will implement the DynamoDB storage layer using these data models.
