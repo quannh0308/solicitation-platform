@@ -1,4 +1,10 @@
-# Maven
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+*.gradle.kts.swp
+
+# Maven (legacy - keeping for reference)
 target/
 pom.xml.tag
 pom.xml.releaseBackup
