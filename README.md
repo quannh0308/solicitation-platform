@@ -4,7 +4,7 @@ A flexible, extensible system that decouples data sources, scoring systems, filt
 
 ## Project Overview
 
-This is a cloud-native, event-driven system built on AWS using Java 17 with a **multi-module Maven architecture**. The platform enables:
+This is a cloud-native, event-driven system built on AWS using Java 17 with a **multi-module Gradle architecture**. The platform enables:
 - Flexible data source integration
 - Pluggable scoring models
 - Configurable filtering pipelines
@@ -15,7 +15,7 @@ This is a cloud-native, event-driven system built on AWS using Java 17 with a **
 ## Technology Stack
 
 - **Language**: Java 17
-- **Build Tool**: Maven (Multi-Module)
+- **Build Tool**: Gradle 8.5 with Kotlin DSL (Multi-Module)
 - **Architecture**: 13 independent modules (8 libraries + 5 deployable Lambdas)
 - **AWS Services**: Lambda, DynamoDB, Step Functions, EventBridge, CloudWatch
 - **Logging**: SLF4J + Logback + CloudWatch Logs
@@ -23,7 +23,7 @@ This is a cloud-native, event-driven system built on AWS using Java 17 with a **
 
 ## Multi-Module Architecture
 
-The project uses a multi-module Maven structure for better modularity and independent deployment:
+The project uses a multi-module Gradle structure for better modularity and independent deployment:
 
 ### Library Modules (Reusable Components)
 - **solicitation-common**: Shared utilities, logging, PII redaction
@@ -48,7 +48,11 @@ The project uses a multi-module Maven structure for better modularity and indepe
 
 ```
 solicitation-platform/
-├── pom.xml                          # Maven configuration
+├── build.gradle.kts                 # Root Gradle build configuration
+├── settings.gradle.kts              # Gradle settings (module definitions)
+├── gradlew                          # Gradle wrapper script
+├── gradle/                          # Gradle wrapper files
+├── */build.gradle.kts               # Module-specific build files
 ├── infrastructure/                   # IaC definitions
 │   ├── dynamodb-tables.yaml         # DynamoDB table definitions
 │   ├── lambda-functions.yaml        # Lambda configurations
@@ -84,34 +88,38 @@ solicitation-platform/
 
 ### Build All Modules
 ```bash
-mvn clean install
+./gradlew build
 ```
 
 ### Build Specific Module
 ```bash
-cd solicitation-workflow-etl
-mvn clean package
+./gradlew :solicitation-workflow-etl:build
 ```
 
 ### Build Only Deployable Lambdas
 ```bash
-mvn clean package -pl solicitation-workflow-etl,solicitation-workflow-filter,solicitation-workflow-score,solicitation-workflow-store,solicitation-workflow-reactive -am
+./gradlew :solicitation-workflow-etl:shadowJar :solicitation-workflow-filter:shadowJar :solicitation-workflow-score:shadowJar :solicitation-workflow-store:shadowJar :solicitation-workflow-reactive:shadowJar
 ```
 
 ### Run Tests
 ```bash
-mvn test
+./gradlew test
 ```
 
-### Run Tests with Coverage
+### Run Tests for Specific Module
 ```bash
-mvn clean test jacoco:report
+./gradlew :solicitation-models:test
+```
+
+### Clean Build
+```bash
+./gradlew clean build
 ```
 
 ### Create Lambda Deployment Packages
 ```bash
-mvn clean package
-# Shaded JARs will be in each workflow module's target/ directory
+./gradlew shadowJar
+# Shaded JARs will be in each workflow module's build/libs/ directory
 ```
 
 ## Dependencies
@@ -153,11 +161,11 @@ mvn clean package
 
 After building, 5 independent Lambda JARs are created:
 
-1. `solicitation-workflow-etl/target/solicitation-workflow-etl-1.0.0-SNAPSHOT.jar`
-2. `solicitation-workflow-filter/target/solicitation-workflow-filter-1.0.0-SNAPSHOT.jar`
-3. `solicitation-workflow-score/target/solicitation-workflow-score-1.0.0-SNAPSHOT.jar`
-4. `solicitation-workflow-store/target/solicitation-workflow-store-1.0.0-SNAPSHOT.jar`
-5. `solicitation-workflow-reactive/target/solicitation-workflow-reactive-1.0.0-SNAPSHOT.jar`
+1. `solicitation-workflow-etl/build/libs/solicitation-workflow-etl-1.0.0-SNAPSHOT.jar`
+2. `solicitation-workflow-filter/build/libs/solicitation-workflow-filter-1.0.0-SNAPSHOT.jar`
+3. `solicitation-workflow-score/build/libs/solicitation-workflow-score-1.0.0-SNAPSHOT.jar`
+4. `solicitation-workflow-store/build/libs/solicitation-workflow-store-1.0.0-SNAPSHOT.jar`
+5. `solicitation-workflow-reactive/build/libs/solicitation-workflow-reactive-1.0.0-SNAPSHOT.jar`
 
 Each JAR is uploaded to S3 and deployed independently to its respective Lambda function.
 
@@ -196,9 +204,9 @@ The platform uses structured JSON logging with:
 ## Development Workflow
 
 1. **Make changes** to source code in specific module
-2. **Run tests** locally: `mvn test` (in module directory or root)
-3. **Build module**: `mvn clean package` (in module directory)
-4. **Build all**: `mvn clean install` (from root)
+2. **Run tests** locally: `./gradlew test` or `./gradlew :module-name:test`
+3. **Build module**: `./gradlew :module-name:build`
+4. **Build all**: `./gradlew build`
 5. **Deploy to dev**: Use deployment scripts or CI/CD pipeline
 6. **Run integration tests**
 7. **Deploy to staging/prod** with approval
@@ -207,25 +215,25 @@ The platform uses structured JSON logging with:
 
 ### Adding a New Connector
 1. Create new module: `solicitation-connectors-kinesis/`
-2. Add `pom.xml` with parent reference
+2. Add `build.gradle.kts` with dependencies
 3. Implement `DataConnector` interface
-4. Add module to parent POM
-5. Build: `mvn clean install`
+4. Add module to `settings.gradle.kts`
+5. Build: `./gradlew build`
 
 ### Adding a New Filter
 1. Add filter class to `solicitation-filters` module
 2. Implement `Filter` interface
 3. Register in `FilterChainExecutor`
 4. Add tests
-5. Build: `mvn clean install`
+5. Build: `./gradlew :solicitation-filters:build`
 
 ### Adding a New Lambda
 1. Create new module: `solicitation-workflow-<name>/`
-2. Add `pom.xml` with dependencies
+2. Add `build.gradle.kts` with dependencies and shadow plugin
 3. Implement Lambda handler
-4. Add Shade plugin configuration
+4. Add module to `settings.gradle.kts`
 5. Update CloudFormation template
-6. Build: `mvn clean package`
+6. Build: `./gradlew :solicitation-workflow-<name>:shadowJar`
 
 See [MULTI-MODULE-ARCHITECTURE.md](MULTI-MODULE-ARCHITECTURE.md) for detailed instructions.
 
@@ -247,16 +255,18 @@ After project setup (Task 1), the following tasks will be implemented:
 - Task 5: Scoring engine in `solicitation-scoring`
 - And more...
 
-## Benefits of Multi-Module Architecture
+## Benefits of Multi-Module Gradle Architecture
 
 ✅ **Independent Deployment**: Deploy only what changed
 ✅ **Smaller JARs**: Faster Lambda cold starts
-✅ **Clear Dependencies**: Explicit module relationships
-✅ **Better Testing**: Test modules independently
+✅ **Clear Dependencies**: Explicit module relationships with Gradle's dependency management
+✅ **Better Testing**: Test modules independently with parallel test execution
 ✅ **Team Ownership**: Different teams own different modules
 ✅ **Easy Extension**: Add connectors/filters/channels without touching core
 ✅ **Code Reuse**: Library modules shared across Lambdas
 ✅ **Selective Builds**: Build only changed modules (faster CI/CD)
+✅ **Faster Builds**: Gradle's incremental compilation and build cache
+✅ **Kotlin DSL**: Type-safe build scripts with IDE support
 
 ## License
 

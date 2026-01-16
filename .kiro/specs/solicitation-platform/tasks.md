@@ -115,7 +115,7 @@ Task 2 is complete when:
 4. ✅ All property tests pass with 100+ iterations
 5. ✅ Unit tests cover edge cases and error conditions
 6. ✅ Code follows Java best practices and is well-documented
-7. ✅ Maven build succeeds with no warnings
+7. ✅ Gradle build succeeds with no warnings (`./gradlew build`)
 
 ---
 

@@ -95,6 +95,8 @@
 - Use Java Bean Validation (JSR 380) for field validation
 - Ensure immutability where appropriate
 - Add comprehensive JavaDoc documentation
+- Project uses Gradle build system with Kotlin DSL (build.gradle.kts files)
+- Lombok plugin is configured in root build.gradle.kts and applied to all subprojects
 
 ## Next Steps
 

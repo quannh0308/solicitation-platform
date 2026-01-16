@@ -89,33 +89,33 @@ if [ "$JAVA_VERSION" -lt 17 ]; then
 fi
 echo -e "${GREEN}✓ Java $JAVA_VERSION${NC}"
 
-if ! command -v mvn &> /dev/null; then
-    echo -e "${RED}Maven is not installed${NC}"
+if [ ! -f "./gradlew" ]; then
+    echo -e "${RED}Gradle wrapper not found${NC}"
     exit 1
 fi
-echo -e "${GREEN}✓ Maven $(mvn -version | head -n 1 | awk '{print $3}')${NC}"
+echo -e "${GREEN}✓ Gradle (wrapper)${NC}"
 
 echo ""
 
 # Clean build if requested
 if [ "$CLEAN_BUILD" = true ]; then
     echo -e "${YELLOW}Cleaning previous build...${NC}"
-    mvn clean
+    ./gradlew clean
     echo -e "${GREEN}✓ Clean complete${NC}"
     echo ""
 fi
 
-# Build Maven project
-echo -e "${YELLOW}Building Maven project...${NC}"
+# Build Gradle project
+echo -e "${YELLOW}Building Gradle project...${NC}"
 
-MVN_ARGS="package"
+GRADLE_ARGS="build"
 if [ "$SKIP_TESTS" = true ]; then
-    MVN_ARGS="$MVN_ARGS -DskipTests"
+    GRADLE_ARGS="$GRADLE_ARGS -x test"
     echo -e "${YELLOW}Skipping tests${NC}"
 fi
 
 # Build all modules
-mvn $MVN_ARGS
+./gradlew $GRADLE_ARGS
 
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}✓ Build successful${NC}"
@@ -140,7 +140,7 @@ LAMBDA_MODULES=(
 ALL_JARS_EXIST=true
 
 for module in "${LAMBDA_MODULES[@]}"; do
-    JAR_FILE="$module/target/$module-1.0-SNAPSHOT.jar"
+    JAR_FILE="$module/build/libs/$module-1.0.0-SNAPSHOT.jar"
     if [ -f "$JAR_FILE" ]; then
         SIZE=$(du -h "$JAR_FILE" | cut -f1)
         echo -e "${GREEN}✓ $module ($SIZE)${NC}"
@@ -164,7 +164,7 @@ mkdir -p "$DEPLOY_DIR"
 
 # Copy Lambda JARs to deployment directory
 for module in "${LAMBDA_MODULES[@]}"; do
-    JAR_FILE="$module/target/$module-1.0-SNAPSHOT.jar"
+    JAR_FILE="$module/build/libs/$module-1.0.0-SNAPSHOT.jar"
     LAMBDA_NAME=$(echo "$module" | sed 's/solicitation-workflow-//')
     cp "$JAR_FILE" "$DEPLOY_DIR/${LAMBDA_NAME}-lambda.jar"
 done

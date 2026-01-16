@@ -766,51 +766,25 @@ Implement property tests for:
 
 ## Dependencies
 
-```xml
-<!-- pom.xml additions for Task 2 -->
-<dependencies>
-    <!-- Lombok for reducing boilerplate -->
-    <dependency>
-        <groupId>org.projectlombok</groupId>
-        <artifactId>lombok</artifactId>
-        <version>1.18.30</version>
-        <scope>provided</scope>
-    </dependency>
+```kotlin
+// solicitation-models/build.gradle.kts additions for Task 2
+dependencies {
+    // Internal dependencies
+    implementation(project(":solicitation-common"))
+
+    // JSON Processing
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.15.2")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2")
+
+    // Bean Validation
+    implementation("javax.validation:validation-api:2.0.1.Final")
+    implementation("org.hibernate.validator:hibernate-validator:7.0.5.Final")
+    implementation("org.glassfish:jakarta.el:4.0.2") // Required for Hibernate Validator
     
-    <!-- Jackson for JSON serialization -->
-    <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-databind</artifactId>
-        <version>2.15.3</version>
-    </dependency>
-    
-    <dependency>
-        <groupId>com.fasterxml.jackson.datatype</groupId>
-        <artifactId>jackson-datatype-jsr310</artifactId>
-        <version>2.15.3</version>
-    </dependency>
-    
-    <!-- Bean Validation -->
-    <dependency>
-        <groupId>javax.validation</groupId>
-        <artifactId>validation-api</artifactId>
-        <version>2.0.1.Final</version>
-    </dependency>
-    
-    <dependency>
-        <groupId>org.hibernate.validator</groupId>
-        <artifactId>hibernate-validator</artifactId>
-        <version>7.0.5.Final</version>
-    </dependency>
-    
-    <!-- Property-based testing -->
-    <dependency>
-        <groupId>net.jqwik</groupId>
-        <artifactId>jqwik</artifactId>
-        <version>1.7.4</version>
-        <scope>test</scope>
-    </dependency>
-</dependencies>
+    // Lombok is applied via plugin in root build.gradle.kts
+    // Property-based testing (jqwik) is included in root build.gradle.kts
+}
 ```
 
 ## Next Steps
