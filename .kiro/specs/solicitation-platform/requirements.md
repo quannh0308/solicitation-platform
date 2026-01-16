@@ -89,14 +89,13 @@
 
 ## Implementation Notes
 
-- Use Java records or POJOs with proper encapsulation
-- Add Jackson annotations for JSON serialization
-- Implement builder pattern for complex objects
-- Use Java Bean Validation (JSR 380) for field validation
-- Ensure immutability where appropriate
-- Add comprehensive JavaDoc documentation
+- Use Kotlin data classes for immutable models
+- Add Jackson annotations for JSON serialization (jackson-module-kotlin)
+- Use Bean Validation (JSR 380) for field validation with @field: prefix
+- Ensure immutability with val properties
+- Add comprehensive KDoc documentation
 - Project uses Gradle build system with Kotlin DSL (build.gradle.kts files)
-- Lombok plugin is configured in root build.gradle.kts and applied to all subprojects
+- Kotlin 1.9.21 with JVM target 17
 
 ## Next Steps
 

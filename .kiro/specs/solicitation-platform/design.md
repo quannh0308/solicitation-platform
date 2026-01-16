@@ -3,7 +3,7 @@
 ## Task Context
 
 **Current Task**: Task 2 - Implement core data models
-**Focus**: Create Java classes for Candidate, Context, Subject, Score, and configuration models
+**Focus**: Create Kotlin data classes for Candidate, Context, Subject, Score, and configuration models
 
 ## Overview
 
@@ -11,11 +11,12 @@ Task 2 implements the foundational data models that represent solicitation candi
 
 ### Design Principles for Task 2
 
-1. **Immutability**: Use immutable objects where possible to prevent accidental modifications
+1. **Immutability**: Use Kotlin data classes for immutable objects by default
 2. **Validation**: Validate all required fields at construction time
 3. **Extensibility**: Support arbitrary context dimensions and score types
 4. **Serialization**: Ensure proper JSON serialization for storage and API responses
-5. **Type Safety**: Use strong typing to prevent errors at compile time
+5. **Type Safety**: Leverage Kotlin's null safety and strong typing
+6. **Conciseness**: Use Kotlin's concise syntax to reduce boilerplate
 
 ## Data Models
 
@@ -23,31 +24,58 @@ Task 2 implements the foundational data models that represent solicitation candi
 
 The Candidate model is the core data structure representing a solicitation opportunity.
 
-```java
-package com.solicitation.model;
+```kotlin
+package com.solicitation.model
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
-import lombok.Builder;
-import lombok.Value;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
-import java.util.List;
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonProperty
+import javax.validation.Valid
+import javax.validation.constraints.NotEmpty
+import javax.validation.constraints.NotNull
+import java.time.Instant
 
 /**
  * Represents a solicitation candidate - a potential opportunity to solicit
  * customer response for a specific subject.
+ *
+ * @property customerId Unique identifier for the customer
+ * @property context Multi-dimensional context describing the solicitation scenario
+ * @property subject The subject being solicited for response
+ * @property scores Scores from various ML models (key: modelId, value: Score)
+ * @property attributes Attributes describing the solicitation opportunity
+ * @property metadata System-level metadata for tracking
+ * @property rejectionHistory History of rejections (if any)
  */
-@Value
-@Builder(toBuilder = true)
-@JsonDeserialize(builder = Candidate.CandidateBuilder.class)
-public class Candidate {
+data class Candidate(
+    @field:NotNull
+    @JsonProperty("customerId")
+    val customerId: String,
     
+    @field:NotEmpty
+    @field:Valid
+    @JsonProperty("context")
+    val context: List<Context>,
+    
+    @field:NotNull
+    @field:Valid
+    @JsonProperty("subject")
+    val subject: Subject,
+    
+    @JsonProperty("scores")
+    val scores: Map<String, Score>? = null,
+    
+    @field:NotNull
+    @field:Valid
+    @JsonProperty("attributes")
+    val attributes: CandidateAttributes,
+    
+    @field:NotNull
+    @field:Valid
+    @JsonProperty("metadata")
+    val metadata: CandidateMetadata,
+    
+    @JsonProperty("rejectionHistory")
+    val rejectionHistory: List<RejectionRecord>? = null
+)
     /**
      * Unique identifier for the customer
      */
@@ -109,578 +137,410 @@ public class Candidate {
 
 ### Context Model
 
-```java
-package com.solicitation.model;
+```kotlin
+package com.solicitation.model
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
-import lombok.Value;
-
-import javax.validation.constraints.NotBlank;
+import com.fasterxml.jackson.annotation.JsonProperty
+import javax.validation.constraints.NotBlank
 
 /**
- * Represents a dimension of context for a candidate
+ * Represents a dimension of context for a candidate.
  * Examples: marketplace, program, vertical
+ *
+ * @property type Type of context (e.g., "marketplace", "program", "vertical")
+ * @property id Identifier for this context dimension
  */
-@Value
-@Builder
-public class Context {
-    
-    /**
-     * Type of context (e.g., "marketplace", "program", "vertical")
-     */
-    @NotBlank
+data class Context(
+    @field:NotBlank
     @JsonProperty("type")
-    String type;
+    val type: String,
     
-    /**
-     * Identifier for this context dimension
-     */
-    @NotBlank
+    @field:NotBlank
     @JsonProperty("id")
-    String id;
-}
+    val id: String
+)
 ```
 
 ### Subject Model
 
-```java
-package com.solicitation.model;
+```kotlin
+package com.solicitation.model
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
-import lombok.Value;
-
-import javax.validation.constraints.NotBlank;
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonProperty
+import javax.validation.constraints.NotBlank
 
 /**
- * Represents the subject being solicited for response
+ * Represents the subject being solicited for response.
  * Examples: product, video, music track, service, event
+ *
+ * @property type Type of subject (e.g., "product", "video", "track", "service")
+ * @property id Unique identifier for the subject
+ * @property metadata Optional metadata about the subject
  */
-@Value
-@Builder
-public class Subject {
-    
-    /**
-     * Type of subject (e.g., "product", "video", "track", "service")
-     */
-    @NotBlank
+data class Subject(
+    @field:NotBlank
     @JsonProperty("type")
-    String type;
+    val type: String,
     
-    /**
-     * Unique identifier for the subject
-     */
-    @NotBlank
+    @field:NotBlank
     @JsonProperty("id")
-    String id;
+    val id: String,
     
-    /**
-     * Optional metadata about the subject
-     */
     @JsonProperty("metadata")
-    Map<String, Object> metadata;
-}
+    val metadata: Map<String, Any>? = null
+)
 ```
 
 ### Score Model
 
-```java
-package com.solicitation.model;
+```kotlin
+package com.solicitation.model
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
-import lombok.Value;
-
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import java.time.Instant;
+import com.fasterxml.jackson.annotation.JsonProperty
+import javax.validation.constraints.Max
+import javax.validation.constraints.Min
+import javax.validation.constraints.NotBlank
+import javax.validation.constraints.NotNull
+import java.time.Instant
 
 /**
- * Represents a score from an ML model
+ * Represents a score from an ML model.
+ *
+ * @property modelId Identifier of the model that produced this score
+ * @property value Score value (typically 0.0 to 1.0)
+ * @property confidence Confidence in the score (0.0 to 1.0)
+ * @property timestamp When the score was computed
+ * @property metadata Optional metadata about the scoring
  */
-@Value
-@Builder
-public class Score {
-    
-    /**
-     * Identifier of the model that produced this score
-     */
-    @NotBlank
+data class Score(
+    @field:NotBlank
     @JsonProperty("modelId")
-    String modelId;
+    val modelId: String,
     
-    /**
-     * Score value (typically 0.0 to 1.0)
-     */
-    @NotNull
+    @field:NotNull
     @JsonProperty("value")
-    Double value;
+    val value: Double,
     
-    /**
-     * Confidence in the score (0.0 to 1.0)
-     */
-    @Min(0)
-    @Max(1)
+    @field:Min(0)
+    @field:Max(1)
     @JsonProperty("confidence")
-    Double confidence;
+    val confidence: Double? = null,
     
-    /**
-     * When the score was computed
-     */
-    @NotNull
+    @field:NotNull
     @JsonProperty("timestamp")
-    Instant timestamp;
+    val timestamp: Instant,
     
-    /**
-     * Optional metadata about the scoring
-     */
     @JsonProperty("metadata")
-    Map<String, Object> metadata;
-}
+    val metadata: Map<String, Any>? = null
+)
 ```
 
 ### CandidateAttributes Model
 
-```java
-package com.solicitation.model;
+```kotlin
+package com.solicitation.model
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
-import lombok.Value;
-
-import javax.validation.constraints.NotNull;
-import java.time.Instant;
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonProperty
+import javax.validation.constraints.NotNull
+import java.time.Instant
 
 /**
- * Attributes describing the solicitation opportunity
+ * Attributes describing the solicitation opportunity.
+ *
+ * @property eventDate When the triggering event occurred
+ * @property deliveryDate Preferred delivery date (optional)
+ * @property timingWindow Timing window for solicitation (optional)
+ * @property orderValue Order value if applicable (optional)
+ * @property mediaEligible Whether media (images/video) is eligible
+ * @property channelEligibility Channel eligibility flags
  */
-@Value
-@Builder
-public class CandidateAttributes {
-    
-    /**
-     * When the triggering event occurred
-     */
-    @NotNull
+data class CandidateAttributes(
+    @field:NotNull
     @JsonProperty("eventDate")
-    Instant eventDate;
+    val eventDate: Instant,
     
-    /**
-     * Preferred delivery date (optional)
-     */
     @JsonProperty("deliveryDate")
-    Instant deliveryDate;
+    val deliveryDate: Instant? = null,
     
-    /**
-     * Timing window for solicitation (optional)
-     */
     @JsonProperty("timingWindow")
-    String timingWindow;
+    val timingWindow: String? = null,
     
-    /**
-     * Order value if applicable (optional)
-     */
     @JsonProperty("orderValue")
-    Double orderValue;
+    val orderValue: Double? = null,
     
-    /**
-     * Whether media (images/video) is eligible
-     */
     @JsonProperty("mediaEligible")
-    Boolean mediaEligible;
+    val mediaEligible: Boolean? = null,
     
-    /**
-     * Channel eligibility flags
-     * Key: channel name (e.g., "email", "in-app", "push")
-     * Value: true if eligible for that channel
-     */
-    @NotNull
+    @field:NotNull
     @JsonProperty("channelEligibility")
-    Map<String, Boolean> channelEligibility;
-}
+    val channelEligibility: Map<String, Boolean>
+)
 ```
 
 ### CandidateMetadata Model
 
-```java
-package com.solicitation.model;
+```kotlin
+package com.solicitation.model
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
-import lombok.Value;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
-import java.time.Instant;
+import com.fasterxml.jackson.annotation.JsonProperty
+import javax.validation.constraints.NotBlank
+import javax.validation.constraints.NotNull
+import javax.validation.constraints.Positive
+import java.time.Instant
 
 /**
- * System-level metadata for candidate tracking
+ * System-level metadata for candidate tracking.
+ *
+ * @property createdAt When the candidate was created
+ * @property updatedAt When the candidate was last updated
+ * @property expiresAt When the candidate expires (for TTL)
+ * @property version Version number for optimistic locking
+ * @property sourceConnectorId ID of the data connector that created this candidate
+ * @property workflowExecutionId Workflow execution ID for traceability
  */
-@Value
-@Builder(toBuilder = true)
-public class CandidateMetadata {
-    
-    /**
-     * When the candidate was created
-     */
-    @NotNull
+data class CandidateMetadata(
+    @field:NotNull
     @JsonProperty("createdAt")
-    Instant createdAt;
+    val createdAt: Instant,
     
-    /**
-     * When the candidate was last updated
-     */
-    @NotNull
+    @field:NotNull
     @JsonProperty("updatedAt")
-    Instant updatedAt;
+    val updatedAt: Instant,
     
-    /**
-     * When the candidate expires (for TTL)
-     */
-    @NotNull
+    @field:NotNull
     @JsonProperty("expiresAt")
-    Instant expiresAt;
+    val expiresAt: Instant,
     
-    /**
-     * Version number for optimistic locking
-     */
-    @Positive
+    @field:Positive
     @JsonProperty("version")
-    Long version;
+    val version: Long,
     
-    /**
-     * ID of the data connector that created this candidate
-     */
-    @NotBlank
+    @field:NotBlank
     @JsonProperty("sourceConnectorId")
-    String sourceConnectorId;
+    val sourceConnectorId: String,
     
-    /**
-     * Workflow execution ID for traceability
-     */
-    @NotBlank
+    @field:NotBlank
     @JsonProperty("workflowExecutionId")
-    String workflowExecutionId;
-}
+    val workflowExecutionId: String
+)
 ```
 
 ### RejectionRecord Model
 
-```java
-package com.solicitation.model;
+```kotlin
+package com.solicitation.model
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
-import lombok.Value;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import java.time.Instant;
+import com.fasterxml.jackson.annotation.JsonProperty
+import javax.validation.constraints.NotBlank
+import javax.validation.constraints.NotNull
+import java.time.Instant
 
 /**
- * Records why a candidate was rejected by a filter
+ * Records why a candidate was rejected by a filter.
+ *
+ * @property filterId ID of the filter that rejected the candidate
+ * @property reason Human-readable rejection reason
+ * @property reasonCode Machine-readable reason code
+ * @property timestamp When the rejection occurred
  */
-@Value
-@Builder
-public class RejectionRecord {
-    
-    /**
-     * ID of the filter that rejected the candidate
-     */
-    @NotBlank
+data class RejectionRecord(
+    @field:NotBlank
     @JsonProperty("filterId")
-    String filterId;
+    val filterId: String,
     
-    /**
-     * Human-readable rejection reason
-     */
-    @NotBlank
+    @field:NotBlank
     @JsonProperty("reason")
-    String reason;
+    val reason: String,
     
-    /**
-     * Machine-readable reason code
-     */
-    @NotBlank
+    @field:NotBlank
     @JsonProperty("reasonCode")
-    String reasonCode;
+    val reasonCode: String,
     
-    /**
-     * When the rejection occurred
-     */
-    @NotNull
+    @field:NotNull
     @JsonProperty("timestamp")
-    Instant timestamp;
-}
+    val timestamp: Instant
+)
 ```
 
 ## Configuration Models
 
 ### ProgramConfig Model
 
-```java
-package com.solicitation.model.config;
+```kotlin
+package com.solicitation.model.config
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
-import lombok.Value;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonProperty
+import javax.validation.Valid
+import javax.validation.constraints.NotBlank
+import javax.validation.constraints.NotEmpty
+import javax.validation.constraints.NotNull
+import javax.validation.constraints.Positive
 
 /**
- * Configuration for a solicitation program
+ * Configuration for a solicitation program.
  */
-@Value
-@Builder
-public class ProgramConfig {
-    
-    /**
-     * Unique program identifier
-     */
-    @NotBlank
+data class ProgramConfig(
+    @field:NotBlank
     @JsonProperty("programId")
-    String programId;
+    val programId: String,
     
-    /**
-     * Human-readable program name
-     */
-    @NotBlank
+    @field:NotBlank
     @JsonProperty("programName")
-    String programName;
+    val programName: String,
     
-    /**
-     * Whether the program is enabled
-     */
-    @NotNull
+    @field:NotNull
     @JsonProperty("enabled")
-    Boolean enabled;
+    val enabled: Boolean,
     
-    /**
-     * Marketplaces where this program operates
-     */
-    @NotEmpty
+    @field:NotEmpty
     @JsonProperty("marketplaces")
-    List<String> marketplaces;
+    val marketplaces: List<String>,
     
-    /**
-     * Data connector configurations
-     */
-    @NotEmpty
-    @Valid
+    @field:NotEmpty
+    @field:Valid
     @JsonProperty("dataConnectors")
-    List<DataConnectorConfig> dataConnectors;
+    val dataConnectors: List<DataConnectorConfig>,
     
-    /**
-     * Scoring model configurations
-     */
-    @NotEmpty
-    @Valid
+    @field:NotEmpty
+    @field:Valid
     @JsonProperty("scoringModels")
-    List<ScoringModelConfig> scoringModels;
+    val scoringModels: List<ScoringModelConfig>,
     
-    /**
-     * Filter chain configuration
-     */
-    @NotNull
-    @Valid
+    @field:NotNull
+    @field:Valid
     @JsonProperty("filterChain")
-    FilterChainConfig filterChain;
+    val filterChain: FilterChainConfig,
     
-    /**
-     * Channel configurations
-     */
-    @NotEmpty
-    @Valid
+    @field:NotEmpty
+    @field:Valid
     @JsonProperty("channels")
-    List<ChannelConfig> channels;
+    val channels: List<ChannelConfig>,
     
-    /**
-     * Batch schedule (cron expression, optional)
-     */
     @JsonProperty("batchSchedule")
-    String batchSchedule;
+    val batchSchedule: String? = null,
     
-    /**
-     * Whether reactive mode is enabled
-     */
-    @NotNull
+    @field:NotNull
     @JsonProperty("reactiveEnabled")
-    Boolean reactiveEnabled;
+    val reactiveEnabled: Boolean,
     
-    /**
-     * Candidate TTL in days
-     */
-    @Positive
+    @field:Positive
     @JsonProperty("candidateTTLDays")
-    Integer candidateTTLDays;
+    val candidateTTLDays: Int,
     
-    /**
-     * Timing window in days (optional)
-     */
     @JsonProperty("timingWindowDays")
-    Integer timingWindowDays;
-}
+    val timingWindowDays: Int? = null
+)
 ```
 
 ### FilterConfig Model
 
-```java
-package com.solicitation.model.config;
+```kotlin
+package com.solicitation.model.config
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
-import lombok.Value;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.PositiveOrZero;
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonProperty
+import javax.validation.constraints.NotBlank
+import javax.validation.constraints.NotNull
+import javax.validation.constraints.PositiveOrZero
 
 /**
- * Configuration for a single filter
+ * Configuration for a single filter.
  */
-@Value
-@Builder
-public class FilterConfig {
-    
-    /**
-     * Unique filter identifier
-     */
-    @NotBlank
+data class FilterConfig(
+    @field:NotBlank
     @JsonProperty("filterId")
-    String filterId;
+    val filterId: String,
     
-    /**
-     * Type of filter (TRUST, ELIGIBILITY, BUSINESS_RULE, QUALITY, CAPACITY)
-     */
-    @NotBlank
+    @field:NotBlank
     @JsonProperty("filterType")
-    String filterType;
+    val filterType: String,
     
-    /**
-     * Whether the filter is enabled
-     */
-    @NotNull
+    @field:NotNull
     @JsonProperty("enabled")
-    Boolean enabled;
+    val enabled: Boolean,
     
-    /**
-     * Filter-specific parameters
-     */
     @JsonProperty("parameters")
-    Map<String, Object> parameters;
+    val parameters: Map<String, Any>? = null,
     
-    /**
-     * Execution order (lower numbers execute first)
-     */
-    @PositiveOrZero
+    @field:PositiveOrZero
     @JsonProperty("order")
-    Integer order;
-}
+    val order: Int
+)
 ```
 
 ### ChannelConfig Model
 
-```java
-package com.solicitation.model.config;
+```kotlin
+package com.solicitation.model.config
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
-import lombok.Value;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonProperty
+import javax.validation.constraints.NotBlank
+import javax.validation.constraints.NotNull
 
 /**
- * Configuration for a delivery channel
+ * Configuration for a delivery channel.
  */
-@Value
-@Builder
-public class ChannelConfig {
-    
-    /**
-     * Unique channel identifier
-     */
-    @NotBlank
+data class ChannelConfig(
+    @field:NotBlank
     @JsonProperty("channelId")
-    String channelId;
+    val channelId: String,
     
-    /**
-     * Type of channel (EMAIL, IN_APP, PUSH, VOICE, SMS)
-     */
-    @NotBlank
+    @field:NotBlank
     @JsonProperty("channelType")
-    String channelType;
+    val channelType: String,
     
-    /**
-     * Whether the channel is enabled
-     */
-    @NotNull
+    @field:NotNull
     @JsonProperty("enabled")
-    Boolean enabled;
+    val enabled: Boolean,
     
-    /**
-     * Whether shadow mode is enabled
-     */
-    @NotNull
+    @field:NotNull
     @JsonProperty("shadowMode")
-    Boolean shadowMode;
+    val shadowMode: Boolean,
     
-    /**
-     * Channel-specific configuration
-     */
     @JsonProperty("config")
-    Map<String, Object> config;
-}
+    val config: Map<String, Any>? = null
+)
 ```
 
 ## Validation Strategy
 
 ### Field Validation
 
-Use Java Bean Validation (JSR 380) annotations:
-- `@NotNull`: Field must not be null
-- `@NotBlank`: String must not be null or empty
-- `@NotEmpty`: Collection must not be null or empty
-- `@Valid`: Cascade validation to nested objects
-- `@Positive`: Number must be positive
+Use Bean Validation (JSR 380) annotations with Kotlin:
+- `@field:NotNull`: Field must not be null
+- `@field:NotBlank`: String must not be null or empty
+- `@field:NotEmpty`: Collection must not be null or empty
+- `@field:Valid`: Cascade validation to nested objects
+- `@field:Positive`: Number must be positive
+- `@field:Min/@Max`: Number range validation
+
+**Note**: In Kotlin, use `@field:` prefix for validation annotations to apply them to the backing field rather than the property getter.
 - `@Min/@Max`: Number range validation
 
 ### Custom Validation
 
-For complex validation logic, implement custom validators:
+For complex validation logic, implement custom validators in Kotlin:
 
-```java
-package com.solicitation.model.validation;
+```kotlin
+package com.solicitation.model.validation
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import javax.validation.ConstraintValidator
+import javax.validation.ConstraintValidatorContext
 
-public class ContextValidator implements ConstraintValidator<ValidContext, List<Context>> {
+class ContextValidator : ConstraintValidator<ValidContext, List<Context>> {
     
-    @Override
-    public boolean isValid(List<Context> contexts, ConstraintValidatorContext context) {
-        if (contexts == null || contexts.isEmpty()) {
-            return false;
+    override fun isValid(
+        contexts: List<Context>?,
+        context: ConstraintValidatorContext
+    ): Boolean {
+        if (contexts.isNullOrEmpty()) {
+            return false
         }
         
         // Ensure at least one context is present
         // Validate context types are known
         // Check for duplicate context types
         
-        return true;
+        return true
     }
 }
 ```
@@ -723,20 +583,19 @@ Implement property tests for:
 ## Implementation Checklist
 
 ### Task 2.1: Create Candidate model with all fields
-- [ ] Create Candidate class with all fields
-- [ ] Create Context class
-- [ ] Create Subject class
-- [ ] Create Score class
-- [ ] Create CandidateAttributes class
-- [ ] Create CandidateMetadata class
-- [ ] Create RejectionRecord class
+- [ ] Create Candidate data class with all fields
+- [ ] Create Context data class
+- [ ] Create Subject data class
+- [ ] Create Score data class
+- [ ] Create CandidateAttributes data class
+- [ ] Create CandidateMetadata data class
+- [ ] Create RejectionRecord data class
 - [ ] Add Jackson annotations for JSON serialization
-- [ ] Add validation annotations
-- [ ] Implement builder pattern
-- [ ] Add JavaDoc documentation
+- [ ] Add validation annotations (with @field: prefix)
+- [ ] Add KDoc documentation
 
 ### Task 2.2: Write property test for candidate model completeness
-- [ ] Set up property testing framework (jqwik or QuickTheories)
+- [ ] Set up property testing framework (jqwik)
 - [ ] Create arbitrary generators for all model classes
 - [ ] Implement Property 2 test
 - [ ] Verify test catches validation failures
@@ -749,14 +608,14 @@ Implement property tests for:
 - [ ] Run test with 100+ iterations
 
 ### Task 2.4: Create configuration models
-- [ ] Create ProgramConfig class
-- [ ] Create FilterConfig class
-- [ ] Create ChannelConfig class
-- [ ] Create DataConnectorConfig class
-- [ ] Create ScoringModelConfig class
-- [ ] Create FilterChainConfig class
+- [ ] Create ProgramConfig data class
+- [ ] Create FilterConfig data class
+- [ ] Create ChannelConfig data class
+- [ ] Create DataConnectorConfig data class
+- [ ] Create ScoringModelConfig data class
+- [ ] Create FilterChainConfig data class
 - [ ] Add validation logic
-- [ ] Add JavaDoc documentation
+- [ ] Add KDoc documentation
 
 ### Task 2.5: Write property test for program configuration validation
 - [ ] Create arbitrary generators for config classes
@@ -772,17 +631,21 @@ dependencies {
     // Internal dependencies
     implementation(project(":solicitation-common"))
 
-    // JSON Processing
+    // JSON Processing - Jackson with Kotlin support
     implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.15.2")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
+
+    // Kotlin Serialization (alternative to Jackson)
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
 
     // Bean Validation
     implementation("javax.validation:validation-api:2.0.1.Final")
     implementation("org.hibernate.validator:hibernate-validator:7.0.5.Final")
     implementation("org.glassfish:jakarta.el:4.0.2") // Required for Hibernate Validator
     
-    // Lombok is applied via plugin in root build.gradle.kts
+    // Kotlin standard library and reflection (included via root build.gradle.kts)
     // Property-based testing (jqwik) is included in root build.gradle.kts
 }
 ```

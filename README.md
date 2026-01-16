@@ -4,7 +4,7 @@ A flexible, extensible system that decouples data sources, scoring systems, filt
 
 ## Project Overview
 
-This is a cloud-native, event-driven system built on AWS using Java 17 with a **multi-module Gradle architecture**. The platform enables:
+This is a cloud-native, event-driven system built on AWS using Kotlin with a **multi-module Gradle architecture**. The platform enables:
 - Flexible data source integration
 - Pluggable scoring models
 - Configurable filtering pipelines
@@ -14,12 +14,12 @@ This is a cloud-native, event-driven system built on AWS using Java 17 with a **
 
 ## Technology Stack
 
-- **Language**: Java 17
+- **Language**: Kotlin 1.9.21 (JVM Target 17)
 - **Build Tool**: Gradle 8.5 with Kotlin DSL (Multi-Module)
 - **Architecture**: 13 independent modules (8 libraries + 5 deployable Lambdas)
 - **AWS Services**: Lambda, DynamoDB, Step Functions, EventBridge, CloudWatch
-- **Logging**: SLF4J + Logback + CloudWatch Logs
-- **Testing**: JUnit 5, jqwik (property-based testing)
+- **Logging**: SLF4J + Logback + CloudWatch Logs + kotlin-logging
+- **Testing**: JUnit 5, jqwik (property-based testing), MockK
 
 ## Multi-Module Architecture
 
@@ -255,7 +255,7 @@ After project setup (Task 1), the following tasks will be implemented:
 - Task 5: Scoring engine in `solicitation-scoring`
 - And more...
 
-## Benefits of Multi-Module Gradle Architecture
+## Benefits of Multi-Module Gradle + Kotlin Architecture
 
 ✅ **Independent Deployment**: Deploy only what changed
 ✅ **Smaller JARs**: Faster Lambda cold starts
@@ -267,6 +267,10 @@ After project setup (Task 1), the following tasks will be implemented:
 ✅ **Selective Builds**: Build only changed modules (faster CI/CD)
 ✅ **Faster Builds**: Gradle's incremental compilation and build cache
 ✅ **Kotlin DSL**: Type-safe build scripts with IDE support
+✅ **Null Safety**: Kotlin's null safety prevents NPEs at compile time
+✅ **Concise Code**: Kotlin reduces boilerplate by ~40% compared to Java
+✅ **Data Classes**: Built-in immutability and copy functionality
+✅ **Coroutines**: Native async/await support for better Lambda performance
 
 ## License
 

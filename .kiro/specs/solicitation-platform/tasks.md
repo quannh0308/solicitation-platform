@@ -32,18 +32,18 @@ Create the unified candidate model and configuration models that serve as the ca
 #### Subtasks:
 
 - [ ] 2.1 Create Candidate model with all fields
-  - Implement Context, Subject, Score, CandidateAttributes, CandidateMetadata classes
+  - Implement Context, Subject, Score, CandidateAttributes, CandidateMetadata data classes
   - Add JSON serialization/deserialization annotations
   - Implement validation for required fields
   - _Requirements: 2.1, 2.2, 2.3, 2.4_
   - _Files to create_:
-    - `solicitation-models/src/main/java/com/solicitation/model/Candidate.java`
-    - `solicitation-models/src/main/java/com/solicitation/model/Context.java`
-    - `solicitation-models/src/main/java/com/solicitation/model/Subject.java`
-    - `solicitation-models/src/main/java/com/solicitation/model/Score.java`
-    - `solicitation-models/src/main/java/com/solicitation/model/CandidateAttributes.java`
-    - `solicitation-models/src/main/java/com/solicitation/model/CandidateMetadata.java`
-    - `solicitation-models/src/main/java/com/solicitation/model/RejectionRecord.java`
+    - `solicitation-models/src/main/kotlin/com/solicitation/model/Candidate.kt`
+    - `solicitation-models/src/main/kotlin/com/solicitation/model/Context.kt`
+    - `solicitation-models/src/main/kotlin/com/solicitation/model/Subject.kt`
+    - `solicitation-models/src/main/kotlin/com/solicitation/model/Score.kt`
+    - `solicitation-models/src/main/kotlin/com/solicitation/model/CandidateAttributes.kt`
+    - `solicitation-models/src/main/kotlin/com/solicitation/model/CandidateMetadata.kt`
+    - `solicitation-models/src/main/kotlin/com/solicitation/model/RejectionRecord.kt`
 
 - [ ]* 2.2 Write property test for candidate model completeness
   - **Property 2: Candidate model completeness**
@@ -51,8 +51,8 @@ Create the unified candidate model and configuration models that serve as the ca
   - Verify all required fields are present in any candidate
   - Verify validation catches missing fields
   - _Files to create_:
-    - `solicitation-models/src/test/java/com/solicitation/model/CandidatePropertyTest.java`
-    - `solicitation-models/src/test/java/com/solicitation/model/arbitraries/CandidateArbitraries.java`
+    - `solicitation-models/src/test/kotlin/com/solicitation/model/CandidatePropertyTest.kt`
+    - `solicitation-models/src/test/kotlin/com/solicitation/model/arbitraries/CandidateArbitraries.kt`
 
 - [ ]* 2.3 Write property test for context extensibility
   - **Property 3: Context extensibility**
@@ -60,19 +60,19 @@ Create the unified candidate model and configuration models that serve as the ca
   - Verify any valid context type/id can be stored without data loss
   - Verify JSON round-trip preserves context values
   - _Files to create_:
-    - `solicitation-models/src/test/java/com/solicitation/model/ContextPropertyTest.java`
+    - `solicitation-models/src/test/kotlin/com/solicitation/model/ContextPropertyTest.kt`
 
 - [ ] 2.4 Create configuration models (ProgramConfig, FilterConfig, ChannelConfig)
   - Implement program registry data structures
   - Add validation logic for configuration fields
   - _Requirements: 10.1, 10.2_
   - _Files to create_:
-    - `solicitation-models/src/main/java/com/solicitation/model/config/ProgramConfig.java`
-    - `solicitation-models/src/main/java/com/solicitation/model/config/FilterConfig.java`
-    - `solicitation-models/src/main/java/com/solicitation/model/config/ChannelConfig.java`
-    - `solicitation-models/src/main/java/com/solicitation/model/config/DataConnectorConfig.java`
-    - `solicitation-models/src/main/java/com/solicitation/model/config/ScoringModelConfig.java`
-    - `solicitation-models/src/main/java/com/solicitation/model/config/FilterChainConfig.java`
+    - `solicitation-models/src/main/kotlin/com/solicitation/model/config/ProgramConfig.kt`
+    - `solicitation-models/src/main/kotlin/com/solicitation/model/config/FilterConfig.kt`
+    - `solicitation-models/src/main/kotlin/com/solicitation/model/config/ChannelConfig.kt`
+    - `solicitation-models/src/main/kotlin/com/solicitation/model/config/DataConnectorConfig.kt`
+    - `solicitation-models/src/main/kotlin/com/solicitation/model/config/ScoringModelConfig.kt`
+    - `solicitation-models/src/main/kotlin/com/solicitation/model/config/FilterChainConfig.kt`
 
 - [ ]* 2.5 Write property test for program configuration validation
   - **Property 30: Program configuration validation**
@@ -80,21 +80,21 @@ Create the unified candidate model and configuration models that serve as the ca
   - Verify all required fields must be present
   - Verify validation rejects invalid configurations
   - _Files to create_:
-    - `solicitation-models/src/test/java/com/solicitation/model/config/ProgramConfigPropertyTest.java`
-    - `solicitation-models/src/test/java/com/solicitation/model/arbitraries/ConfigArbitraries.java`
+    - `solicitation-models/src/test/kotlin/com/solicitation/model/config/ProgramConfigPropertyTest.kt`
+    - `solicitation-models/src/test/kotlin/com/solicitation/model/arbitraries/ConfigArbitraries.kt`
 
 ---
 
 ## Testing Requirements
 
 ### Property-Based Testing
-- Use **jqwik** framework for Java property-based tests
+- Use **jqwik** framework for Kotlin property-based tests
 - Minimum **100 iterations** per property test
 - Each property test must reference its design document property number
 - Tag format: `@Property` annotation with comment `// Property {number}: {description}`
 
 ### Test Organization
-- Unit tests in `src/test/java` matching source package structure
+- Unit tests in `src/test/kotlin` matching source package structure
 - Property tests in same location with `PropertyTest` suffix
 - Arbitrary generators in `arbitraries` subpackage for reuse
 
@@ -102,7 +102,7 @@ Create the unified candidate model and configuration models that serve as the ca
 - Test valid object construction
 - Test validation failures for missing/invalid fields
 - Test JSON serialization/deserialization round-trip
-- Test builder pattern functionality
+- Test data class copy functionality
 
 ---
 
