@@ -1,0 +1,267 @@
+# General Solicitation Platform
+
+A flexible, extensible system that decouples data sources, scoring systems, filtering mechanisms, and notification channels to solicit customer responses across multiple product verticals.
+
+## Project Overview
+
+This is a cloud-native, event-driven system built on AWS using Java 17 with a **multi-module Maven architecture**. The platform enables:
+- Flexible data source integration
+- Pluggable scoring models
+- Configurable filtering pipelines
+- Multi-channel notification delivery
+- Batch and reactive processing workflows
+- Independent module deployment
+
+## Technology Stack
+
+- **Language**: Java 17
+- **Build Tool**: Maven (Multi-Module)
+- **Architecture**: 13 independent modules (8 libraries + 5 deployable Lambdas)
+- **AWS Services**: Lambda, DynamoDB, Step Functions, EventBridge, CloudWatch
+- **Logging**: SLF4J + Logback + CloudWatch Logs
+- **Testing**: JUnit 5, jqwik (property-based testing)
+
+## Multi-Module Architecture
+
+The project uses a multi-module Maven structure for better modularity and independent deployment:
+
+### Library Modules (Reusable Components)
+- **solicitation-common**: Shared utilities, logging, PII redaction
+- **solicitation-models**: Data models (Candidate, Context, Subject, Score)
+- **solicitation-storage**: DynamoDB repository layer
+- **solicitation-connectors**: Data source connectors (Athena, S3)
+- **solicitation-scoring**: Scoring engine with ML integration
+- **solicitation-filters**: Filter pipeline for eligibility rules
+- **solicitation-serving**: Low-latency serving API logic
+- **solicitation-channels**: Channel adapters (email, push, in-app, voice)
+
+### Deployable Modules (Lambda Functions)
+- **solicitation-workflow-etl**: ETL Lambda for data extraction
+- **solicitation-workflow-filter**: Filter Lambda for eligibility checks
+- **solicitation-workflow-score**: Score Lambda for ML model execution
+- **solicitation-workflow-store**: Store Lambda for DynamoDB writes
+- **solicitation-workflow-reactive**: Reactive Lambda for real-time events
+
+**See [MULTI-MODULE-ARCHITECTURE.md](MULTI-MODULE-ARCHITECTURE.md) for detailed architecture documentation.**
+
+## Project Structure
+
+```
+solicitation-platform/
+├── pom.xml                          # Maven configuration
+├── infrastructure/                   # IaC definitions
+│   ├── dynamodb-tables.yaml         # DynamoDB table definitions
+│   ├── lambda-functions.yaml        # Lambda configurations
+│   ├── step-functions.yaml          # Workflow definitions
+│   └── eventbridge-rules.yaml       # Event rules
+├── src/
+│   ├── main/
+│   │   ├── java/com/solicitation/
+│   │   │   ├── model/               # Data models
+│   │   │   ├── storage/             # DynamoDB repositories
+│   │   │   ├── connector/           # Data connectors
+│   │   │   ├── scoring/             # Scoring engine
+│   │   │   ├── filter/              # Filter pipeline
+│   │   │   ├── serving/             # Serving API
+│   │   │   ├── channel/             # Channel adapters
+│   │   │   ├── workflow/            # Workflow handlers
+│   │   │   ├── config/              # Configuration
+│   │   │   └── util/                # Utilities
+│   │   └── resources/
+│   │       ├── logback.xml          # Logging configuration
+│   │       └── application.properties
+│   └── test/
+│       └── java/com/solicitation/   # Test files
+├── scripts/
+│   ├── build.sh                     # Build script
+│   └── deploy.sh                    # Deployment script
+└── .github/
+    └── workflows/
+        └── build.yml                # CI/CD pipeline
+```
+
+## Building the Project
+
+### Build All Modules
+```bash
+mvn clean install
+```
+
+### Build Specific Module
+```bash
+cd solicitation-workflow-etl
+mvn clean package
+```
+
+### Build Only Deployable Lambdas
+```bash
+mvn clean package -pl solicitation-workflow-etl,solicitation-workflow-filter,solicitation-workflow-score,solicitation-workflow-store,solicitation-workflow-reactive -am
+```
+
+### Run Tests
+```bash
+mvn test
+```
+
+### Run Tests with Coverage
+```bash
+mvn clean test jacoco:report
+```
+
+### Create Lambda Deployment Packages
+```bash
+mvn clean package
+# Shaded JARs will be in each workflow module's target/ directory
+```
+
+## Dependencies
+
+### AWS SDK (Managed via BOM)
+- DynamoDB (with Enhanced Client)
+- Lambda
+- Step Functions
+- EventBridge
+- CloudWatch & CloudWatch Logs
+- S3
+- Athena
+- SageMaker & Feature Store
+
+### Lambda Runtime
+- AWS Lambda Java Core
+- AWS Lambda Java Events
+
+### Logging
+- SLF4J API
+- Logback Classic & Core
+- CloudWatch Logs Appender
+
+### JSON Processing
+- Jackson Databind, Core, Annotations
+- Jackson JSR310 (Java 8 Date/Time support)
+
+### Testing
+- JUnit 5 (Jupiter)
+- jqwik (Property-Based Testing)
+- Mockito
+- AssertJ
+
+### Utilities
+- Apache Commons Lang3
+- Google Guava
+
+## Deployment Artifacts
+
+After building, 5 independent Lambda JARs are created:
+
+1. `solicitation-workflow-etl/target/solicitation-workflow-etl-1.0.0-SNAPSHOT.jar`
+2. `solicitation-workflow-filter/target/solicitation-workflow-filter-1.0.0-SNAPSHOT.jar`
+3. `solicitation-workflow-score/target/solicitation-workflow-score-1.0.0-SNAPSHOT.jar`
+4. `solicitation-workflow-store/target/solicitation-workflow-store-1.0.0-SNAPSHOT.jar`
+5. `solicitation-workflow-reactive/target/solicitation-workflow-reactive-1.0.0-SNAPSHOT.jar`
+
+Each JAR is uploaded to S3 and deployed independently to its respective Lambda function.
+
+## AWS Infrastructure
+
+The platform uses the following AWS services:
+
+### DynamoDB Tables
+- **Candidates**: Stores solicitation candidates with GSIs for program and channel queries
+- **ProgramConfig**: Stores program configurations
+- **ScoreCache**: Caches scoring results with TTL
+
+### Lambda Functions
+- **ETL Lambda**: Extracts and transforms data from sources
+- **Filter Lambda**: Applies filtering rules to candidates
+- **Score Lambda**: Computes scores using ML models
+- **Store Lambda**: Persists candidates to DynamoDB
+- **Serve Lambda**: Serves candidates via API
+
+### Step Functions
+- **Batch Ingestion Workflow**: Orchestrates ETL → Filter → Score → Store
+- **Reactive Solicitation Workflow**: Handles real-time event processing
+
+### EventBridge
+- Scheduled rules for batch processing
+- Event patterns for reactive workflows
+
+## Logging
+
+The platform uses structured JSON logging with:
+- Correlation IDs for request tracing
+- PII redaction for sensitive data
+- CloudWatch Logs integration
+- Configurable log levels (ERROR, WARN, INFO, DEBUG)
+
+## Development Workflow
+
+1. **Make changes** to source code in specific module
+2. **Run tests** locally: `mvn test` (in module directory or root)
+3. **Build module**: `mvn clean package` (in module directory)
+4. **Build all**: `mvn clean install` (from root)
+5. **Deploy to dev**: Use deployment scripts or CI/CD pipeline
+6. **Run integration tests**
+7. **Deploy to staging/prod** with approval
+
+## Adding New Components
+
+### Adding a New Connector
+1. Create new module: `solicitation-connectors-kinesis/`
+2. Add `pom.xml` with parent reference
+3. Implement `DataConnector` interface
+4. Add module to parent POM
+5. Build: `mvn clean install`
+
+### Adding a New Filter
+1. Add filter class to `solicitation-filters` module
+2. Implement `Filter` interface
+3. Register in `FilterChainExecutor`
+4. Add tests
+5. Build: `mvn clean install`
+
+### Adding a New Lambda
+1. Create new module: `solicitation-workflow-<name>/`
+2. Add `pom.xml` with dependencies
+3. Implement Lambda handler
+4. Add Shade plugin configuration
+5. Update CloudFormation template
+6. Build: `mvn clean package`
+
+See [MULTI-MODULE-ARCHITECTURE.md](MULTI-MODULE-ARCHITECTURE.md) for detailed instructions.
+
+## CI/CD Pipeline
+
+The project includes GitHub Actions workflow for:
+- Automated builds on PR
+- Unit and property-based testing
+- Code coverage reporting
+- Lambda deployment package creation
+- Deployment to dev/staging/prod environments
+
+## Next Steps
+
+After project setup (Task 1), the following tasks will be implemented:
+- Task 2: Core data models (Candidate, Context, Subject) in `solicitation-models`
+- Task 3: DynamoDB storage layer in `solicitation-storage`
+- Task 4: Data connectors in `solicitation-connectors`
+- Task 5: Scoring engine in `solicitation-scoring`
+- And more...
+
+## Benefits of Multi-Module Architecture
+
+✅ **Independent Deployment**: Deploy only what changed
+✅ **Smaller JARs**: Faster Lambda cold starts
+✅ **Clear Dependencies**: Explicit module relationships
+✅ **Better Testing**: Test modules independently
+✅ **Team Ownership**: Different teams own different modules
+✅ **Easy Extension**: Add connectors/filters/channels without touching core
+✅ **Code Reuse**: Library modules shared across Lambdas
+✅ **Selective Builds**: Build only changed modules (faster CI/CD)
+
+## License
+
+Internal use only.
+
+## Contact
+
+For questions or issues, please contact the platform team.

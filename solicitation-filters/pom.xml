@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.solicitation</groupId>
+        <artifactId>solicitation-platform-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>solicitation-filters</artifactId>
+    <packaging>jar</packaging>
+
+    <name>Solicitation Platform - Filters</name>
+    <description>Filter pipeline for eligibility and business rules</description>
+
+    <dependencies>
+        <!-- Internal dependencies -->
+        <dependency>
+            <groupId>com.solicitation</groupId>
+            <artifactId>solicitation-models</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.solicitation</groupId>
+            <artifactId>solicitation-common</artifactId>
+        </dependency>
+    </dependencies>
+</project>

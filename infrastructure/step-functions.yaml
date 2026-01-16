@@ -1,0 +1,530 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Step Functions State Machines for General Solicitation Platform'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+    Description: Environment name for resource naming
+
+  ProjectName:
+    Type: String
+    Default: solicitation-platform
+    Description: Project name for resource naming
+
+Resources:
+  # ============================================================================
+  # IAM Role for Step Functions
+  # ============================================================================
+
+  StepFunctionsExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ProjectName}-stepfunctions-role-${Environment}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: states.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: StepFunctionsExecutionPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              # Lambda invocation permissions
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource:
+                  - !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${ProjectName}-etl-${Environment}'
+                  - !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${ProjectName}-filter-${Environment}'
+                  - !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${ProjectName}-score-${Environment}'
+                  - !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${ProjectName}-store-${Environment}'
+              # CloudWatch Logs permissions
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogDelivery
+                  - logs:GetLogDelivery
+                  - logs:UpdateLogDelivery
+                  - logs:DeleteLogDelivery
+                  - logs:ListLogDeliveries
+                  - logs:PutResourcePolicy
+                  - logs:DescribeResourcePolicies
+                  - logs:DescribeLogGroups
+                Resource: '*'
+              # X-Ray tracing permissions
+              - Effect: Allow
+                Action:
+                  - xray:PutTraceSegments
+                  - xray:PutTelemetryRecords
+                  - xray:GetSamplingRules
+                  - xray:GetSamplingTargets
+                Resource: '*'
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: !Ref ProjectName
+
+  # ============================================================================
+  # Batch Ingestion Workflow State Machine
+  # ============================================================================
+
+  BatchIngestionStateMachine:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      StateMachineName: !Sub '${ProjectName}-batch-ingestion-${Environment}'
+      RoleArn: !GetAtt StepFunctionsExecutionRole.Arn
+      TracingConfiguration:
+        Enabled: true
+      LoggingConfiguration:
+        Level: ALL
+        IncludeExecutionData: true
+        Destinations:
+          - CloudWatchLogsLogGroup:
+              LogGroupArn: !GetAtt BatchIngestionLogGroup.Arn
+      DefinitionString: !Sub |
+        {
+          "Comment": "Batch Ingestion Workflow - ETL, Filter, Score, Store pipeline",
+          "StartAt": "ETL",
+          "States": {
+            "ETL": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Parameters": {
+                "FunctionName": "${ProjectName}-etl-${Environment}",
+                "Payload": {
+                  "programId.$": "$.programId",
+                  "marketplace.$": "$.marketplace",
+                  "batchId.$": "$.batchId",
+                  "correlationId.$": "$.correlationId"
+                }
+              },
+              "ResultPath": "$.etlResult",
+              "ResultSelector": {
+                "candidates.$": "$.Payload.candidates",
+                "count.$": "$.Payload.count",
+                "status.$": "$.Payload.status"
+              },
+              "Retry": [
+                {
+                  "ErrorEquals": [
+                    "Lambda.ServiceException",
+                    "Lambda.AWSLambdaException",
+                    "Lambda.SdkClientException"
+                  ],
+                  "IntervalSeconds": 2,
+                  "MaxAttempts": 3,
+                  "BackoffRate": 2
+                }
+              ],
+              "Catch": [
+                {
+                  "ErrorEquals": ["States.ALL"],
+                  "ResultPath": "$.error",
+                  "Next": "ETLFailed"
+                }
+              ],
+              "Next": "CheckETLResults"
+            },
+            "CheckETLResults": {
+              "Type": "Choice",
+              "Choices": [
+                {
+                  "Variable": "$.etlResult.count",
+                  "NumericGreaterThan": 0,
+                  "Next": "Filter"
+                }
+              ],
+              "Default": "NoDataToProcess"
+            },
+            "Filter": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Parameters": {
+                "FunctionName": "${ProjectName}-filter-${Environment}",
+                "Payload": {
+                  "candidates.$": "$.etlResult.candidates",
+                  "programId.$": "$.programId",
+                  "marketplace.$": "$.marketplace",
+                  "correlationId.$": "$.correlationId"
+                }
+              },
+              "ResultPath": "$.filterResult",
+              "ResultSelector": {
+                "candidates.$": "$.Payload.candidates",
+                "filtered.$": "$.Payload.filtered",
+                "passed.$": "$.Payload.passed"
+              },
+              "Retry": [
+                {
+                  "ErrorEquals": [
+                    "Lambda.ServiceException",
+                    "Lambda.AWSLambdaException",
+                    "Lambda.SdkClientException"
+                  ],
+                  "IntervalSeconds": 2,
+                  "MaxAttempts": 3,
+                  "BackoffRate": 2
+                }
+              ],
+              "Catch": [
+                {
+                  "ErrorEquals": ["States.ALL"],
+                  "ResultPath": "$.error",
+                  "Next": "FilterFailed"
+                }
+              ],
+              "Next": "CheckFilterResults"
+            },
+            "CheckFilterResults": {
+              "Type": "Choice",
+              "Choices": [
+                {
+                  "Variable": "$.filterResult.passed",
+                  "NumericGreaterThan": 0,
+                  "Next": "Score"
+                }
+              ],
+              "Default": "AllCandidatesFiltered"
+            },
+            "Score": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Parameters": {
+                "FunctionName": "${ProjectName}-score-${Environment}",
+                "Payload": {
+                  "candidates.$": "$.filterResult.candidates",
+                  "programId.$": "$.programId",
+                  "marketplace.$": "$.marketplace",
+                  "correlationId.$": "$.correlationId"
+                }
+              },
+              "ResultPath": "$.scoreResult",
+              "ResultSelector": {
+                "candidates.$": "$.Payload.candidates",
+                "scored.$": "$.Payload.scored"
+              },
+              "Retry": [
+                {
+                  "ErrorEquals": [
+                    "Lambda.ServiceException",
+                    "Lambda.AWSLambdaException",
+                    "Lambda.SdkClientException"
+                  ],
+                  "IntervalSeconds": 2,
+                  "MaxAttempts": 3,
+                  "BackoffRate": 2
+                }
+              ],
+              "Catch": [
+                {
+                  "ErrorEquals": ["States.ALL"],
+                  "ResultPath": "$.error",
+                  "Next": "ScoreFailed"
+                }
+              ],
+              "Next": "Store"
+            },
+            "Store": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Parameters": {
+                "FunctionName": "${ProjectName}-store-${Environment}",
+                "Payload": {
+                  "candidates.$": "$.scoreResult.candidates",
+                  "programId.$": "$.programId",
+                  "marketplace.$": "$.marketplace",
+                  "correlationId.$": "$.correlationId"
+                }
+              },
+              "ResultPath": "$.storeResult",
+              "ResultSelector": {
+                "stored.$": "$.Payload.stored",
+                "failed.$": "$.Payload.failed"
+              },
+              "Retry": [
+                {
+                  "ErrorEquals": [
+                    "Lambda.ServiceException",
+                    "Lambda.AWSLambdaException",
+                    "Lambda.SdkClientException"
+                  ],
+                  "IntervalSeconds": 2,
+                  "MaxAttempts": 3,
+                  "BackoffRate": 2
+                }
+              ],
+              "Catch": [
+                {
+                  "ErrorEquals": ["States.ALL"],
+                  "ResultPath": "$.error",
+                  "Next": "StoreFailed"
+                }
+              ],
+              "Next": "BatchSuccess"
+            },
+            "BatchSuccess": {
+              "Type": "Succeed"
+            },
+            "NoDataToProcess": {
+              "Type": "Succeed",
+              "Comment": "ETL returned no candidates to process"
+            },
+            "AllCandidatesFiltered": {
+              "Type": "Succeed",
+              "Comment": "All candidates were filtered out"
+            },
+            "ETLFailed": {
+              "Type": "Fail",
+              "Error": "ETLError",
+              "Cause": "ETL Lambda failed to extract and transform data"
+            },
+            "FilterFailed": {
+              "Type": "Fail",
+              "Error": "FilterError",
+              "Cause": "Filter Lambda failed to apply business rules"
+            },
+            "ScoreFailed": {
+              "Type": "Fail",
+              "Error": "ScoreError",
+              "Cause": "Score Lambda failed to compute scores"
+            },
+            "StoreFailed": {
+              "Type": "Fail",
+              "Error": "StoreError",
+              "Cause": "Store Lambda failed to persist candidates"
+            }
+          }
+        }
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Workflow
+          Value: BatchIngestion
+
+  # ============================================================================
+  # Reactive Solicitation Workflow State Machine
+  # ============================================================================
+
+  ReactiveSolicitationStateMachine:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      StateMachineName: !Sub '${ProjectName}-reactive-solicitation-${Environment}'
+      RoleArn: !GetAtt StepFunctionsExecutionRole.Arn
+      StateMachineType: EXPRESS
+      TracingConfiguration:
+        Enabled: true
+      LoggingConfiguration:
+        Level: ALL
+        IncludeExecutionData: true
+        Destinations:
+          - CloudWatchLogsLogGroup:
+              LogGroupArn: !GetAtt ReactiveSolicitationLogGroup.Arn
+      DefinitionString: !Sub |
+        {
+          "Comment": "Reactive Solicitation Workflow - Fast path for event-driven candidate creation",
+          "StartAt": "Filter",
+          "States": {
+            "Filter": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Parameters": {
+                "FunctionName": "${ProjectName}-filter-${Environment}",
+                "Payload": {
+                  "candidates.$": "$.candidates",
+                  "programId.$": "$.programId",
+                  "marketplace.$": "$.marketplace",
+                  "correlationId.$": "$.correlationId",
+                  "eventType.$": "$.eventType"
+                }
+              },
+              "ResultPath": "$.filterResult",
+              "ResultSelector": {
+                "candidates.$": "$.Payload.candidates",
+                "passed.$": "$.Payload.passed"
+              },
+              "Retry": [
+                {
+                  "ErrorEquals": [
+                    "Lambda.ServiceException",
+                    "Lambda.AWSLambdaException",
+                    "Lambda.SdkClientException"
+                  ],
+                  "IntervalSeconds": 1,
+                  "MaxAttempts": 2,
+                  "BackoffRate": 2
+                }
+              ],
+              "Catch": [
+                {
+                  "ErrorEquals": ["States.ALL"],
+                  "ResultPath": "$.error",
+                  "Next": "FilterFailed"
+                }
+              ],
+              "Next": "CheckFilterResults"
+            },
+            "CheckFilterResults": {
+              "Type": "Choice",
+              "Choices": [
+                {
+                  "Variable": "$.filterResult.passed",
+                  "NumericGreaterThan": 0,
+                  "Next": "Score"
+                }
+              ],
+              "Default": "CandidateFiltered"
+            },
+            "Score": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Parameters": {
+                "FunctionName": "${ProjectName}-score-${Environment}",
+                "Payload": {
+                  "candidates.$": "$.filterResult.candidates",
+                  "programId.$": "$.programId",
+                  "marketplace.$": "$.marketplace",
+                  "correlationId.$": "$.correlationId"
+                }
+              },
+              "ResultPath": "$.scoreResult",
+              "ResultSelector": {
+                "candidates.$": "$.Payload.candidates"
+              },
+              "Retry": [
+                {
+                  "ErrorEquals": [
+                    "Lambda.ServiceException",
+                    "Lambda.AWSLambdaException",
+                    "Lambda.SdkClientException"
+                  ],
+                  "IntervalSeconds": 1,
+                  "MaxAttempts": 2,
+                  "BackoffRate": 2
+                }
+              ],
+              "Catch": [
+                {
+                  "ErrorEquals": ["States.ALL"],
+                  "ResultPath": "$.error",
+                  "Next": "ScoreFailed"
+                }
+              ],
+              "Next": "Store"
+            },
+            "Store": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Parameters": {
+                "FunctionName": "${ProjectName}-store-${Environment}",
+                "Payload": {
+                  "candidates.$": "$.scoreResult.candidates",
+                  "programId.$": "$.programId",
+                  "marketplace.$": "$.marketplace",
+                  "correlationId.$": "$.correlationId"
+                }
+              },
+              "ResultPath": "$.storeResult",
+              "ResultSelector": {
+                "stored.$": "$.Payload.stored"
+              },
+              "Retry": [
+                {
+                  "ErrorEquals": [
+                    "Lambda.ServiceException",
+                    "Lambda.AWSLambdaException",
+                    "Lambda.SdkClientException"
+                  ],
+                  "IntervalSeconds": 1,
+                  "MaxAttempts": 2,
+                  "BackoffRate": 2
+                }
+              ],
+              "Catch": [
+                {
+                  "ErrorEquals": ["States.ALL"],
+                  "ResultPath": "$.error",
+                  "Next": "StoreFailed"
+                }
+              ],
+              "Next": "ReactiveSuccess"
+            },
+            "ReactiveSuccess": {
+              "Type": "Succeed"
+            },
+            "CandidateFiltered": {
+              "Type": "Succeed",
+              "Comment": "Candidate did not pass filter criteria"
+            },
+            "FilterFailed": {
+              "Type": "Fail",
+              "Error": "FilterError",
+              "Cause": "Filter Lambda failed in reactive workflow"
+            },
+            "ScoreFailed": {
+              "Type": "Fail",
+              "Error": "ScoreError",
+              "Cause": "Score Lambda failed in reactive workflow"
+            },
+            "StoreFailed": {
+              "Type": "Fail",
+              "Error": "StoreError",
+              "Cause": "Store Lambda failed in reactive workflow"
+            }
+          }
+        }
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Workflow
+          Value: ReactiveSolicitation
+
+  # ============================================================================
+  # CloudWatch Log Groups for Step Functions
+  # ============================================================================
+
+  BatchIngestionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/stepfunctions/${ProjectName}-batch-ingestion-${Environment}'
+      RetentionInDays: 30
+
+  ReactiveSolicitationLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/stepfunctions/${ProjectName}-reactive-solicitation-${Environment}'
+      RetentionInDays: 30
+
+# ============================================================================
+# Outputs
+# ============================================================================
+
+Outputs:
+  BatchIngestionStateMachineArn:
+    Description: ARN of the Batch Ingestion State Machine
+    Value: !GetAtt BatchIngestionStateMachine.Arn
+    Export:
+      Name: !Sub '${ProjectName}-batch-ingestion-arn-${Environment}'
+
+  ReactiveSolicitationStateMachineArn:
+    Description: ARN of the Reactive Solicitation State Machine
+    Value: !GetAtt ReactiveSolicitationStateMachine.Arn
+    Export:
+      Name: !Sub '${ProjectName}-reactive-solicitation-arn-${Environment}'
+
+  StepFunctionsExecutionRoleArn:
+    Description: ARN of the Step Functions execution role
+    Value: !GetAtt StepFunctionsExecutionRole.Arn
+    Export:
+      Name: !Sub '${ProjectName}-stepfunctions-role-arn-${Environment}'

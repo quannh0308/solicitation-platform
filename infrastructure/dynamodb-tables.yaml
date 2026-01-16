@@ -1,0 +1,175 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'DynamoDB tables for General Solicitation Platform'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+    Description: Environment name for resource naming
+
+Resources:
+  # Candidates Table
+  # Stores solicitation candidates with customer, program, and subject information
+  # Supports queries by program+channel and program+date via GSIs
+  CandidatesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub 'Candidates-${Environment}'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        # Primary Key attributes
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+        # GSI-1 (ProgramChannelIndex) attributes
+        - AttributeName: GSI1PK
+          AttributeType: S
+        - AttributeName: GSI1SK
+          AttributeType: S
+        # GSI-2 (ProgramDateIndex) attributes
+        - AttributeName: GSI2PK
+          AttributeType: S
+        - AttributeName: GSI2SK
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        # GSI-1: Query candidates by program and channel, sorted by score
+        - IndexName: ProgramChannelIndex
+          KeySchema:
+            - AttributeName: GSI1PK
+              KeyType: HASH
+            - AttributeName: GSI1SK
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        # GSI-2: Query candidates by program and date, sorted by creation time
+        - IndexName: ProgramDateIndex
+          KeySchema:
+            - AttributeName: GSI2PK
+              KeyType: HASH
+            - AttributeName: GSI2SK
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      SSESpecification:
+        SSEEnabled: true
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: SolicitationPlatform
+        - Key: ManagedBy
+          Value: CloudFormation
+
+  # ProgramConfig Table
+  # Stores program configuration including data connectors, scoring models, filters, and channels
+  ProgramConfigTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub 'ProgramConfig-${Environment}'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      SSESpecification:
+        SSEEnabled: true
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: SolicitationPlatform
+        - Key: ManagedBy
+          Value: CloudFormation
+
+  # ScoreCache Table
+  # Caches scoring results for customer-subject-model combinations
+  # Uses TTL for automatic cache expiration
+  ScoreCacheTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub 'ScoreCache-${Environment}'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      SSESpecification:
+        SSEEnabled: true
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: SolicitationPlatform
+        - Key: ManagedBy
+          Value: CloudFormation
+
+Outputs:
+  CandidatesTableName:
+    Description: Name of the Candidates DynamoDB table
+    Value: !Ref CandidatesTable
+    Export:
+      Name: !Sub '${AWS::StackName}-CandidatesTable'
+
+  CandidatesTableArn:
+    Description: ARN of the Candidates DynamoDB table
+    Value: !GetAtt CandidatesTable.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-CandidatesTableArn'
+
+  ProgramConfigTableName:
+    Description: Name of the ProgramConfig DynamoDB table
+    Value: !Ref ProgramConfigTable
+    Export:
+      Name: !Sub '${AWS::StackName}-ProgramConfigTable'
+
+  ProgramConfigTableArn:
+    Description: ARN of the ProgramConfig DynamoDB table
+    Value: !GetAtt ProgramConfigTable.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-ProgramConfigTableArn'
+
+  ScoreCacheTableName:
+    Description: Name of the ScoreCache DynamoDB table
+    Value: !Ref ScoreCacheTable
+    Export:
+      Name: !Sub '${AWS::StackName}-ScoreCacheTable'
+
+  ScoreCacheTableArn:
+    Description: ARN of the ScoreCache DynamoDB table
+    Value: !GetAtt ScoreCacheTable.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-ScoreCacheTableArn'

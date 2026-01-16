@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- 
+        Logback Configuration for General Solicitation Platform
+        
+        Features:
+        - Structured JSON logging for CloudWatch Logs
+        - Correlation ID support for request tracing
+        - PII redaction for sensitive data
+        - Environment-specific log levels
+        - Lambda-optimized console output
+    -->
+
+    <!-- Environment-specific properties -->
+    <property name="LOG_LEVEL" value="${LOG_LEVEL:-INFO}" />
+    <property name="ENVIRONMENT" value="${ENVIRONMENT:-dev}" />
+    <property name="SERVICE_NAME" value="solicitation-platform" />
+
+    <!-- JSON encoder for structured logging -->
+    <appender name="CONSOLE_JSON" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <!-- Standard fields -->
+            <includeMdcKeyName>correlationId</includeMdcKeyName>
+            <includeMdcKeyName>programId</includeMdcKeyName>
+            <includeMdcKeyName>marketplace</includeMdcKeyName>
+            <includeMdcKeyName>customerId</includeMdcKeyName>
+            <includeMdcKeyName>batchId</includeMdcKeyName>
+            <includeMdcKeyName>eventType</includeMdcKeyName>
+            
+            <!-- Custom fields -->
+            <customFields>{"service":"${SERVICE_NAME}","environment":"${ENVIRONMENT}"}</customFields>
+            
+            <!-- Field names -->
+            <fieldNames>
+                <timestamp>timestamp</timestamp>
+                <version>version</version>
+                <message>message</message>
+                <logger>logger</logger>
+                <thread>thread</thread>
+                <level>level</level>
+                <levelValue>levelValue</levelValue>
+            </fieldNames>
+            
+            <!-- Include stack traces -->
+            <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                <maxDepthPerThrowable>30</maxDepthPerThrowable>
+                <maxLength>2048</maxLength>
+                <shortenedClassNameLength>20</shortenedClassNameLength>
+                <exclude>^sun\.reflect\..*</exclude>
+                <exclude>^net\.sf\.cglib\..*</exclude>
+                <rootCauseFirst>true</rootCauseFirst>
+            </throwableConverter>
+        </encoder>
+    </appender>
+
+    <!-- Plain text console appender for local development -->
+    <appender name="CONSOLE_PLAIN" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [%X{correlationId}] - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Async appender for better performance -->
+    <appender name="ASYNC_CONSOLE" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>512</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <appender-ref ref="CONSOLE_JSON" />
+    </appender>
+
+    <!-- Root logger configuration -->
+    <root level="${LOG_LEVEL}">
+        <appender-ref ref="ASYNC_CONSOLE" />
+    </root>
+
+    <!-- Application-specific loggers -->
+    <logger name="com.solicitation" level="${LOG_LEVEL}" additivity="false">
+        <appender-ref ref="ASYNC_CONSOLE" />
+    </logger>
+
+    <!-- AWS SDK logging (reduce verbosity) -->
+    <logger name="software.amazon.awssdk" level="WARN" />
+    <logger name="software.amazon.awssdk.request" level="DEBUG" />
+    
+    <!-- DynamoDB Enhanced Client logging -->
+    <logger name="software.amazon.awssdk.enhanced.dynamodb" level="INFO" />
+    
+    <!-- HTTP client logging (reduce verbosity) -->
+    <logger name="org.apache.http" level="WARN" />
+    <logger name="org.apache.http.wire" level="ERROR" />
+    
+    <!-- Jackson JSON processing -->
+    <logger name="com.fasterxml.jackson" level="WARN" />
+
+    <!-- Lambda runtime logging -->
+    <logger name="com.amazonaws.services.lambda.runtime" level="INFO" />
+
+    <!-- Development mode: use plain text logging -->
+    <if condition='property("ENVIRONMENT").equals("local")'>
+        <then>
+            <root level="DEBUG">
+                <appender-ref ref="CONSOLE_PLAIN" />
+            </root>
+        </then>
+    </if>
+
+    <!-- Production mode: minimal logging -->
+    <if condition='property("ENVIRONMENT").equals("prod")'>
+        <then>
+            <root level="INFO">
+                <appender-ref ref="ASYNC_CONSOLE" />
+            </root>
+            <!-- Disable debug logging in production -->
+            <logger name="com.solicitation" level="INFO" />
+        </then>
+    </if>
+
+</configuration>
