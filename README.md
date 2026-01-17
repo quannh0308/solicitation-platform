@@ -16,6 +16,7 @@ This is a cloud-native, event-driven system built on AWS using Kotlin with a **m
 
 - **Language**: Kotlin 1.9.21 (JVM Target 17)
 - **Build Tool**: Gradle 8.5 with Kotlin DSL (Multi-Module)
+- **Infrastructure**: AWS CDK 2.167.1 (Kotlin DSL)
 - **Architecture**: 13 independent modules (8 libraries + 5 deployable Lambdas)
 - **AWS Services**: Lambda, DynamoDB, Step Functions, EventBridge, CloudWatch
 - **Logging**: SLF4J + Logback + CloudWatch Logs + kotlin-logging
@@ -53,7 +54,23 @@ solicitation-platform/
 ├── gradlew                          # Gradle wrapper script
 ├── gradle/                          # Gradle wrapper files
 ├── */build.gradle.kts               # Module-specific build files
-├── infrastructure/                   # IaC definitions
+├── infrastructure/                   # AWS CDK infrastructure (Kotlin)
+│   ├── build.gradle.kts             # CDK dependencies
+│   ├── cdk.json                     # CDK configuration
+│   ├── deploy-cdk.sh                # CDK deployment script
+│   └── src/main/kotlin/
+│       └── com/solicitation/infrastructure/
+│           ├── SolicitationPlatformApp.kt    # CDK app entry point
+│           ├── constructs/
+│           │   └── SolicitationLambda.kt     # Reusable Lambda construct
+│           └── stacks/
+│               ├── DatabaseStack.kt          # DynamoDB tables
+│               ├── EtlWorkflowStack.kt       # ETL Lambda
+│               ├── FilterWorkflowStack.kt    # Filter Lambda
+│               ├── ScoreWorkflowStack.kt     # Score Lambda
+│               ├── StoreWorkflowStack.kt     # Store Lambda
+│               ├── ReactiveWorkflowStack.kt  # Reactive Lambda
+│               └── OrchestrationStack.kt     # Step Functions + EventBridge
 │   ├── dynamodb-tables.yaml         # DynamoDB table definitions
 │   ├── lambda-functions.yaml        # Lambda configurations
 │   ├── step-functions.yaml          # Workflow definitions
@@ -171,7 +188,52 @@ Each JAR is uploaded to S3 and deployed independently to its respective Lambda f
 
 ## AWS Infrastructure
 
-The platform uses the following AWS services:
+The platform uses AWS CDK (Kotlin) for type-safe infrastructure as code:
+
+### Infrastructure Stacks
+
+1. **DatabaseStack** - DynamoDB tables
+   - Candidates table with GSIs
+   - ProgramConfig table
+   - ScoreCache table with TTL
+
+2. **Workflow Stacks** (5 independent stacks)
+   - EtlWorkflowStack - ETL Lambda
+   - FilterWorkflowStack - Filter Lambda
+   - ScoreWorkflowStack - Score Lambda
+   - StoreWorkflowStack - Store Lambda
+   - ReactiveWorkflowStack - Reactive Lambda
+
+3. **OrchestrationStack** - Step Functions + EventBridge
+   - Batch ingestion workflow
+   - Scheduled rules
+
+### Deployment
+
+```bash
+# Deploy all infrastructure
+./infrastructure/deploy-cdk.sh -e dev
+
+# Deploy specific stack
+./infrastructure/deploy-cdk.sh -e dev -s EtlWorkflow
+```
+
+### Adding New Workflow (Plug-and-Play!)
+
+```kotlin
+// 1. Create stack (3 lines)
+val newLambda = SolicitationLambda(
+    this, "NewWorkflow",
+    handler = "Handler::handleRequest",
+    jarPath = "../new-workflow/build/libs/new.jar",
+    tables = listOf(candidatesTable)
+)
+
+// 2. Deploy
+./infrastructure/deploy-cdk.sh -e dev -s NewWorkflow
+```
+
+**Time: 5 minutes** ⚡
 
 ### DynamoDB Tables
 - **Candidates**: Stores solicitation candidates with GSIs for program and channel queries
