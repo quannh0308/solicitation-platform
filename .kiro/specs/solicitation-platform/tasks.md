@@ -1,6 +1,6 @@
 # Implementation Tasks - Current Cycle
 
-## Current Focus: Task 2 - Implement Core Data Models
+## Current Focus: Task 3 & 4 - DynamoDB Storage Layer
 
 This task list shows the current 2-task implementation cycle. After completing these tasks, the next cycle will be loaded from FOUNDATION.
 
@@ -30,67 +30,108 @@ This task list shows the current 2-task implementation cycle. After completing t
 - **Technology Stack**: Kotlin 1.9.21, Gradle 8.5, AWS CDK 2.167.1
 - **Architecture**: Multi-module with plug-and-play CDK infrastructure
 
+### Task 2: Implement core data models ✅
+- ✅ Created 7 Kotlin data classes for Candidate model (Task 2.1)
+  - Candidate, Context, Subject, Score, CandidateAttributes, CandidateMetadata, RejectionRecord
+  - Added Jackson annotations for JSON serialization
+  - Implemented Bean Validation (JSR 380) with @field: prefix
+  - Created unit tests (4 tests passing)
+- ✅ Created 6 configuration model classes (Task 2.4)
+  - ProgramConfig, FilterConfig, FilterChainConfig, ChannelConfig, DataConnectorConfig, ScoringModelConfig
+  - Added validation logic for all required fields
+  - Created unit tests (8 tests passing)
+- ✅ Implemented property-based tests using jqwik (Tasks 2.2, 2.3, 2.5)
+  - CandidatePropertyTest: 7 properties (700 test cases)
+  - ContextPropertyTest: 6 properties (600 test cases)
+  - ProgramConfigPropertyTest: 12 properties (1,200 test cases)
+- **Status**: COMPLETE
+- **Test Results**: All 37 tests passing (12 unit + 25 property tests)
+- **Validates**: Requirements 1.3, 2.1, 2.2, 2.3, 2.4, 2.5, 10.1, 10.2
+
 ---
 
 ## Current Task Cycle
 
-### Task 2: Implement core data models
+### Task 3: Implement DynamoDB storage layer
 
-Create the unified candidate model and configuration models that serve as the canonical representation throughout the platform.
+Implement the persistence layer for candidates using DynamoDB with support for CRUD operations, batch writes, queries, and optimistic locking.
 
 #### Subtasks:
 
-- [x] 2.1 Create Candidate model with all fields
-  - Implement Context, Subject, Score, CandidateAttributes, CandidateMetadata data classes
-  - Add JSON serialization/deserialization annotations
-  - Implement validation for required fields
-  - _Requirements: 2.1, 2.2, 2.3, 2.4_
+- [ ] 3.1 Create DynamoDB repository interface and implementation
+  - Implement CRUD operations (create, read, update, delete)
+  - Add batch write support with DynamoDB batch limits (25 items)
+  - Implement query operations using primary key and GSIs
+  - Add optimistic locking using version numbers
+  - _Requirements: 5.1, 5.2, 5.3, 5.5_
   - _Files to create_:
-    - `solicitation-models/src/main/kotlin/com/solicitation/model/Candidate.kt`
-    - `solicitation-models/src/main/kotlin/com/solicitation/model/Context.kt`
-    - `solicitation-models/src/main/kotlin/com/solicitation/model/Subject.kt`
-    - `solicitation-models/src/main/kotlin/com/solicitation/model/Score.kt`
-    - `solicitation-models/src/main/kotlin/com/solicitation/model/CandidateAttributes.kt`
-    - `solicitation-models/src/main/kotlin/com/solicitation/model/CandidateMetadata.kt`
-    - `solicitation-models/src/main/kotlin/com/solicitation/model/RejectionRecord.kt`
+    - `solicitation-storage/src/main/kotlin/com/solicitation/storage/CandidateRepository.kt`
+    - `solicitation-storage/src/main/kotlin/com/solicitation/storage/DynamoDBCandidateRepository.kt`
+    - `solicitation-storage/src/main/kotlin/com/solicitation/storage/DynamoDBConfig.kt`
 
-- [x]* 2.2 Write property test for candidate model completeness
-  - **Property 2: Candidate model completeness**
-  - **Validates: Requirements 2.1, 2.2**
-  - Verify all required fields are present in any candidate
-  - Verify validation catches missing fields
+- [ ]* 3.2 Write property test for storage round-trip consistency
+  - **Property 12: Storage round-trip consistency**
+  - **Validates: Requirements 5.2, 2.1**
+  - Verify any candidate can be stored and retrieved without data loss
+  - Verify all fields are preserved through storage round-trip
   - _Files to create_:
-    - `solicitation-models/src/test/kotlin/com/solicitation/model/CandidatePropertyTest.kt`
-    - `solicitation-models/src/test/kotlin/com/solicitation/model/arbitraries/CandidateArbitraries.kt`
+    - `solicitation-storage/src/test/kotlin/com/solicitation/storage/StorageRoundTripPropertyTest.kt`
 
-- [x]* 2.3 Write property test for context extensibility
-  - **Property 3: Context extensibility**
-  - **Validates: Requirements 1.3, 2.3**
-  - Verify any valid context type/id can be stored without data loss
-  - Verify JSON round-trip preserves context values
+- [ ]* 3.3 Write property test for query filtering correctness
+  - **Property 13: Query filtering correctness**
+  - **Validates: Requirements 5.3, 6.2**
+  - Verify query results match filter criteria
+  - Verify no false positives or false negatives
   - _Files to create_:
-    - `solicitation-models/src/test/kotlin/com/solicitation/model/ContextPropertyTest.kt`
+    - `solicitation-storage/src/test/kotlin/com/solicitation/storage/QueryFilteringPropertyTest.kt`
 
-- [x] 2.4 Create configuration models (ProgramConfig, FilterConfig, ChannelConfig)
-  - Implement program registry data structures
-  - Add validation logic for configuration fields
-  - _Requirements: 10.1, 10.2_
+- [ ]* 3.4 Write property test for optimistic locking
+  - **Property 14: Optimistic locking conflict detection**
+  - **Validates: Requirements 5.5**
+  - Verify concurrent updates are detected and rejected
+  - Verify version numbers prevent lost updates
   - _Files to create_:
-    - `solicitation-models/src/main/kotlin/com/solicitation/model/config/ProgramConfig.kt`
-    - `solicitation-models/src/main/kotlin/com/solicitation/model/config/FilterConfig.kt`
-    - `solicitation-models/src/main/kotlin/com/solicitation/model/config/ChannelConfig.kt`
-    - `solicitation-models/src/main/kotlin/com/solicitation/model/config/DataConnectorConfig.kt`
-    - `solicitation-models/src/main/kotlin/com/solicitation/model/config/ScoringModelConfig.kt`
-    - `solicitation-models/src/main/kotlin/com/solicitation/model/config/FilterChainConfig.kt`
+    - `solicitation-storage/src/test/kotlin/com/solicitation/storage/OptimisticLockingPropertyTest.kt`
 
-- [x]* 2.5 Write property test for program configuration validation
-  - **Property 30: Program configuration validation**
-  - **Validates: Requirements 10.1**
-  - Verify all required fields must be present
-  - Verify validation rejects invalid configurations
+- [ ]* 3.5 Write property test for batch write atomicity
+  - **Property 15: Batch write atomicity**
+  - **Validates: Requirements 5.2**
+  - Verify batch writes handle partial failures correctly
+  - Verify retry logic for failed items
   - _Files to create_:
-    - `solicitation-models/src/test/kotlin/com/solicitation/model/config/ProgramConfigPropertyTest.kt`
-    - `solicitation-models/src/test/kotlin/com/solicitation/model/arbitraries/ConfigArbitraries.kt`
+    - `solicitation-storage/src/test/kotlin/com/solicitation/storage/BatchWritePropertyTest.kt`
+
+- [ ] 3.6 Implement TTL configuration logic
+  - Add TTL calculation based on program configuration
+  - Set TTL attribute on candidate creation
+  - _Requirements: 17.1_
+  - _Files to create_:
+    - `solicitation-storage/src/main/kotlin/com/solicitation/storage/TTLCalculator.kt`
+
+- [ ]* 3.7 Write property test for TTL configuration
+  - **Property 51: TTL configuration**
+  - **Validates: Requirements 17.1**
+  - Verify TTL is calculated correctly based on program config
+  - Verify TTL attribute is set on all candidates
+  - _Files to create_:
+    - `solicitation-storage/src/test/kotlin/com/solicitation/storage/TTLConfigurationPropertyTest.kt`
+
+### Task 4: Checkpoint - Ensure storage layer tests pass
+
+Verify all storage layer tests pass and the implementation is ready for integration.
+
+#### Subtasks:
+
+- [ ] 4.1 Run all storage layer tests
+  - Execute unit tests
+  - Execute property-based tests
+  - Verify all tests pass
+  - _Success Criteria_: All tests passing, no compilation errors
+
+- [ ] 4.2 Review and address any issues
+  - Review test failures if any
+  - Fix implementation issues
+  - Re-run tests until all pass
 
 ---
 
@@ -107,32 +148,40 @@ Create the unified candidate model and configuration models that serve as the ca
 - Property tests in same location with `PropertyTest` suffix
 - Arbitrary generators in `arbitraries` subpackage for reuse
 
-### Validation Testing
-- Test valid object construction
-- Test validation failures for missing/invalid fields
-- Test JSON serialization/deserialization round-trip
-- Test data class copy functionality
+### Storage Testing
+- Test CRUD operations with valid and invalid data
+- Test batch operations with various batch sizes
+- Test query operations with different filter criteria
+- Test optimistic locking with concurrent updates
+- Test TTL calculation with various program configurations
 
 ---
 
 ## Success Criteria
 
-Task 2 is complete when:
-1. ✅ All model classes are implemented with proper annotations
-2. ✅ JSON serialization/deserialization works correctly
-3. ✅ Field validation catches missing/invalid data
-4. ✅ All property tests pass with 100+ iterations
-5. ✅ Unit tests cover edge cases and error conditions
-6. ✅ Code follows Java best practices and is well-documented
-7. ✅ Gradle build succeeds with no warnings (`./gradlew build`)
+Task 3 is complete when:
+1. ✅ Repository interface and implementation created
+2. ✅ CRUD operations working correctly
+3. ✅ Batch write operations handle DynamoDB limits
+4. ✅ Query operations return correct results
+5. ✅ Optimistic locking prevents lost updates
+6. ✅ TTL configuration works correctly
+7. ✅ All property tests pass with 100+ iterations
+8. ✅ Unit tests cover edge cases and error conditions
+9. ✅ Gradle build succeeds with no warnings
+
+Task 4 is complete when:
+1. ✅ All storage layer tests pass
+2. ✅ No compilation errors or warnings
+3. ✅ Implementation ready for integration with other layers
 
 ---
 
 ## Next Cycle Preview
 
-After Task 2 completion, the next cycle will focus on:
-- **Task 3**: Implement DynamoDB storage layer using these models
-- **Task 4**: Checkpoint - Ensure storage layer tests pass
+After Task 3 & 4 completion, the next cycle will focus on:
+- **Task 5**: Implement data connector framework
+- **Task 6**: Implement scoring engine layer
 
 ---
 
@@ -142,3 +191,4 @@ After Task 2 completion, the next cycle will focus on:
 - Each task references specific requirements for traceability
 - Use the design document for detailed implementation guidance
 - Refer to FOUNDATION/tasks.md for the complete task list
+- DynamoDB local can be used for testing without AWS credentials
