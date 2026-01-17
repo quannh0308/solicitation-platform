@@ -52,11 +52,16 @@ This task list shows the current 2-task implementation cycle. After completing t
 
 ## Current Task Cycle
 
-### Task 3: Implement DynamoDB storage layer
+- [ ] Task 3: Implement DynamoDB storage layer
+- [ ] Task 4: Complete cycle - Commit, push, and setup next tasks
+
+---
+
+## Task 3 Details: Implement DynamoDB storage layer
 
 Implement the persistence layer for candidates using DynamoDB with support for CRUD operations, batch writes, queries, and optimistic locking.
 
-**Subtasks:**
+### Subtasks:
 
 - [ ] 3.1 Create DynamoDB repository interface and implementation
   - Implement CRUD operations (create, read, update, delete)
@@ -116,11 +121,13 @@ Implement the persistence layer for candidates using DynamoDB with support for C
   - _Files to create_:
     - `solicitation-storage/src/test/kotlin/com/solicitation/storage/TTLConfigurationPropertyTest.kt`
 
-### Task 4: Complete cycle - Commit, push, and setup next tasks
+---
+
+## Task 4 Details: Complete cycle - Commit, push, and setup next tasks
 
 After Task 3 is complete, commit the changes, push to git, and prepare tasks.md for the next cycle.
 
-**Subtasks:**
+### Subtasks:
 
 - [ ] 4.1 Verify all storage layer tests pass
   - Run `./gradlew :solicitation-storage:test`
