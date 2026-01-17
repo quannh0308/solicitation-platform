@@ -48,102 +48,166 @@ This task list shows the current 2-task implementation cycle. After completing t
 - **Test Results**: All 37 tests passing (12 unit + 25 property tests)
 - **Validates**: Requirements 1.3, 2.1, 2.2, 2.3, 2.4, 2.5, 10.1, 10.2
 
+### Task 3: Implement DynamoDB storage layer ✅
+- ✅ Created DynamoDB repository interface and implementation (Task 3.1)
+  - Implemented CRUD operations (create, read, update, delete)
+  - Added batch write support with DynamoDB batch limits (25 items)
+  - Implemented query operations using primary key and GSIs
+  - Added optimistic locking using version numbers
+- ✅ Implemented property-based tests (Tasks 3.2-3.7)
+  - StorageRoundTripPropertyTest: Validates storage consistency (Property 12)
+  - QueryFilteringPropertyTest: Validates query correctness (Property 13)
+  - OptimisticLockingPropertyTest: Validates conflict detection (Property 14)
+  - BatchWritePropertyTest: Validates batch atomicity (Property 15)
+  - TTLConfigurationPropertyTest: Validates TTL calculation (Property 51)
+- ✅ Implemented TTL configuration logic (Task 3.6)
+  - TTLCalculator for computing expiration timestamps
+  - Integration with program configuration
+- **Status**: COMPLETE
+- **Test Results**: All 5 property tests passing (100+ iterations each)
+- **Validates**: Requirements 5.1, 5.2, 5.3, 5.5, 17.1
+
 ---
 
 ## Current Task Cycle
 
-- [x] Task 3: Implement DynamoDB storage layer
-- [-] Task 4: Complete cycle - Commit, push, and setup next tasks
+- [ ] Task 5: Implement data connector framework
+- [ ] Task 6: Implement scoring engine layer
 
 ---
 
-## Task 3 Details: Implement DynamoDB storage layer
+## Task 5 Details: Implement data connector framework
 
-Implement the persistence layer for candidates using DynamoDB with support for CRUD operations, batch writes, queries, and optimistic locking.
+Implement the framework for extracting data from various sources and transforming it into unified candidate models.
 
 ### Subtasks:
 
-- [ ] 3.1 Create DynamoDB repository interface and implementation
-  - Implement CRUD operations (create, read, update, delete)
-  - Add batch write support with DynamoDB batch limits (25 items)
-  - Implement query operations using primary key and GSIs
-  - Add optimistic locking using version numbers
-  - _Requirements: 5.1, 5.2, 5.3, 5.5_
+- [ ] 5.1 Create DataConnector interface
+  - Define interface methods (getName, validateConfig, extractData, transformToCandidate)
+  - Create base abstract class with common validation logic
+  - _Requirements: 1.1, 1.2_
   - _Files to create_:
-    - `solicitation-storage/src/main/kotlin/com/solicitation/storage/CandidateRepository.kt`
-    - `solicitation-storage/src/main/kotlin/com/solicitation/storage/DynamoDBCandidateRepository.kt`
-    - `solicitation-storage/src/main/kotlin/com/solicitation/storage/DynamoDBConfig.kt`
+    - `solicitation-connectors/src/main/kotlin/com/solicitation/connectors/DataConnector.kt`
+    - `solicitation-connectors/src/main/kotlin/com/solicitation/connectors/BaseDataConnector.kt`
 
-- [ ]* 3.2 Write property test for storage round-trip consistency
-  - **Property 12: Storage round-trip consistency**
-  - **Validates: Requirements 5.2, 2.1**
-  - Verify any candidate can be stored and retrieved without data loss
-  - Verify all fields are preserved through storage round-trip
+- [ ] 5.2 Implement data warehouse connector
+  - Implement Athena/Glue integration for data warehouse queries
+  - Add field mapping configuration support
+  - Implement transformation to unified candidate model
+  - _Requirements: 1.2, 1.3_
   - _Files to create_:
-    - `solicitation-storage/src/test/kotlin/com/solicitation/storage/StorageRoundTripPropertyTest.kt`
+    - `solicitation-connectors/src/main/kotlin/com/solicitation/connectors/DataWarehouseConnector.kt`
+    - `solicitation-connectors/src/main/kotlin/com/solicitation/connectors/FieldMapper.kt`
 
-- [ ]* 3.3 Write property test for query filtering correctness
-  - **Property 13: Query filtering correctness**
-  - **Validates: Requirements 5.3, 6.2**
-  - Verify query results match filter criteria
-  - Verify no false positives or false negatives
+- [ ]* 5.3 Write property test for transformation preserves semantics
+  - **Property 1: Data connector transformation preserves semantics**
+  - **Validates: Requirements 1.2**
+  - Verify source data is correctly transformed to candidate model
+  - Verify no data loss during transformation
   - _Files to create_:
-    - `solicitation-storage/src/test/kotlin/com/solicitation/storage/QueryFilteringPropertyTest.kt`
+    - `solicitation-connectors/src/test/kotlin/com/solicitation/connectors/TransformationPropertyTest.kt`
 
-- [ ]* 3.4 Write property test for optimistic locking
-  - **Property 14: Optimistic locking conflict detection**
-  - **Validates: Requirements 5.5**
-  - Verify concurrent updates are detected and rejected
-  - Verify version numbers prevent lost updates
+- [ ] 5.4 Add schema validation logic
+  - Implement JSON Schema validation for source data
+  - Add detailed error logging for validation failures
+  - _Requirements: 1.4, 16.1, 16.2, 16.3_
   - _Files to create_:
-    - `solicitation-storage/src/test/kotlin/com/solicitation/storage/OptimisticLockingPropertyTest.kt`
+    - `solicitation-connectors/src/main/kotlin/com/solicitation/connectors/SchemaValidator.kt`
 
-- [ ]* 3.5 Write property test for batch write atomicity
-  - **Property 15: Batch write atomicity**
-  - **Validates: Requirements 5.2**
-  - Verify batch writes handle partial failures correctly
-  - Verify retry logic for failed items
+- [ ]* 5.5 Write property test for required field validation
+  - **Property 49: Required field validation**
+  - **Validates: Requirements 16.1, 16.3**
+  - Verify missing required fields are detected
+  - Verify validation errors are descriptive
   - _Files to create_:
-    - `solicitation-storage/src/test/kotlin/com/solicitation/storage/BatchWritePropertyTest.kt`
+    - `solicitation-connectors/src/test/kotlin/com/solicitation/connectors/RequiredFieldPropertyTest.kt`
 
-- [ ] 3.6 Implement TTL configuration logic
-  - Add TTL calculation based on program configuration
-  - Set TTL attribute on candidate creation
-  - _Requirements: 17.1_
+- [ ]* 5.6 Write property test for date format validation
+  - **Property 50: Date format validation**
+  - **Validates: Requirements 16.2, 16.3**
+  - Verify date fields are validated correctly
+  - Verify invalid date formats are rejected
   - _Files to create_:
-    - `solicitation-storage/src/main/kotlin/com/solicitation/storage/TTLCalculator.kt`
-
-- [ ]* 3.7 Write property test for TTL configuration
-  - **Property 51: TTL configuration**
-  - **Validates: Requirements 17.1**
-  - Verify TTL is calculated correctly based on program config
-  - Verify TTL attribute is set on all candidates
-  - _Files to create_:
-    - `solicitation-storage/src/test/kotlin/com/solicitation/storage/TTLConfigurationPropertyTest.kt`
+    - `solicitation-connectors/src/test/kotlin/com/solicitation/connectors/DateFormatPropertyTest.kt`
 
 ---
 
-## Task 4 Details: Complete cycle - Commit, push, and setup next tasks
+## Task 6 Details: Implement scoring engine layer
 
-After Task 3 is complete, commit the changes, push to git, and prepare tasks.md for the next cycle.
+Implement the scoring engine that evaluates candidates using ML models and caches results.
 
 ### Subtasks:
 
-- [ ] 4.1 Verify all storage layer tests pass
-  - Run `./gradlew :solicitation-storage:test`
-  - Ensure all tests pass with no errors
-  - Verify build succeeds with no warnings
+- [ ] 6.1 Create ScoringProvider interface
+  - Define interface methods (getModelId, scoreCandidate, scoreBatch, healthCheck)
+  - Add fallback score support
+  - _Requirements: 3.1, 3.4_
+  - _Files to create_:
+    - `solicitation-scoring/src/main/kotlin/com/solicitation/scoring/ScoringProvider.kt`
+    - `solicitation-scoring/src/main/kotlin/com/solicitation/scoring/BaseScoringProvider.kt`
 
-- [ ] 4.2 Commit and push changes
-  - Stage all changes with `git add -A`
-  - Create descriptive commit message for Task 3 completion
-  - Push to origin/main
+- [ ] 6.2 Implement score caching in DynamoDB
+  - Create score cache table schema
+  - Implement cache read/write with TTL
+  - Add cache invalidation logic
+  - _Requirements: 3.5_
+  - _Files to create_:
+    - `solicitation-scoring/src/main/kotlin/com/solicitation/scoring/ScoreCache.kt`
+    - `solicitation-scoring/src/main/kotlin/com/solicitation/scoring/DynamoDBScoreCache.kt`
 
-- [ ] 4.3 Setup next task cycle in tasks.md
-  - Read FOUNDATION/tasks.md to identify next tasks (Tasks 5 & 6)
-  - Update tasks.md with Task 5 and new Task 6 (recurring cycle)
-  - Move completed Task 3 to completed tasks section
-  - Commit and push the updated tasks.md
+- [ ]* 6.3 Write property test for score caching consistency
+  - **Property 6: Score caching consistency**
+  - **Validates: Requirements 3.5**
+  - Verify cached scores match computed scores
+  - Verify cache TTL is respected
+  - _Files to create_:
+    - `solicitation-scoring/src/test/kotlin/com/solicitation/scoring/ScoreCachingPropertyTest.kt`
+
+- [ ] 6.4 Implement feature store integration
+  - Create feature retrieval client
+  - Add feature validation against required features
+  - _Requirements: 3.2_
+  - _Files to create_:
+    - `solicitation-scoring/src/main/kotlin/com/solicitation/scoring/FeatureStoreClient.kt`
+
+- [ ]* 6.5 Write property test for feature retrieval completeness
+  - **Property 8: Feature retrieval completeness**
+  - **Validates: Requirements 3.2**
+  - Verify all required features are retrieved
+  - Verify feature values are valid
+  - _Files to create_:
+    - `solicitation-scoring/src/test/kotlin/com/solicitation/scoring/FeatureRetrievalPropertyTest.kt`
+
+- [ ] 6.6 Implement multi-model scoring support
+  - Add logic to execute multiple scoring models per candidate
+  - Store scores with modelId, value, confidence, timestamp
+  - _Requirements: 3.3_
+  - _Files to create_:
+    - `solicitation-scoring/src/main/kotlin/com/solicitation/scoring/MultiModelScorer.kt`
+
+- [ ]* 6.7 Write property test for multi-model scoring independence
+  - **Property 5: Multi-model scoring independence**
+  - **Validates: Requirements 3.3**
+  - Verify models execute independently
+  - Verify one model failure doesn't affect others
+  - _Files to create_:
+    - `solicitation-scoring/src/test/kotlin/com/solicitation/scoring/MultiModelPropertyTest.kt`
+
+- [ ] 6.8 Add scoring fallback logic with circuit breaker
+  - Implement circuit breaker pattern for model endpoints
+  - Add fallback to cached scores or default values
+  - Add failure logging
+  - _Requirements: 3.4, 9.3_
+  - _Files to create_:
+    - `solicitation-scoring/src/main/kotlin/com/solicitation/scoring/ScoringCircuitBreaker.kt`
+
+- [ ]* 6.9 Write property test for scoring fallback correctness
+  - **Property 7: Scoring fallback correctness**
+  - **Validates: Requirements 3.4, 9.3**
+  - Verify fallback is triggered on failures
+  - Verify fallback scores are valid
+  - _Files to create_:
+    - `solicitation-scoring/src/test/kotlin/com/solicitation/scoring/ScoringFallbackPropertyTest.kt`
 
 ---
 
@@ -160,40 +224,50 @@ After Task 3 is complete, commit the changes, push to git, and prepare tasks.md 
 - Property tests in same location with `PropertyTest` suffix
 - Arbitrary generators in `arbitraries` subpackage for reuse
 
-### Storage Testing
-- Test CRUD operations with valid and invalid data
-- Test batch operations with various batch sizes
-- Test query operations with different filter criteria
-- Test optimistic locking with concurrent updates
-- Test TTL calculation with various program configurations
+### Data Connector Testing
+- Test data extraction from various sources
+- Test field mapping with different configurations
+- Test schema validation with valid and invalid data
+- Test transformation to candidate model
+- Test error handling and logging
+
+### Scoring Engine Testing
+- Test score computation with various models
+- Test score caching with TTL
+- Test feature retrieval from feature store
+- Test multi-model execution
+- Test circuit breaker and fallback logic
 
 ---
 
 ## Success Criteria
 
-Task 3 is complete when:
-1. ✅ Repository interface and implementation created
-2. ✅ CRUD operations working correctly
-3. ✅ Batch write operations handle DynamoDB limits
-4. ✅ Query operations return correct results
-5. ✅ Optimistic locking prevents lost updates
-6. ✅ TTL configuration works correctly
-7. ✅ All property tests pass with 100+ iterations
-8. ✅ Unit tests cover edge cases and error conditions
-9. ✅ Gradle build succeeds with no warnings
+Task 5 is complete when:
+1. ✅ DataConnector interface and base class created
+2. ✅ Data warehouse connector implemented
+3. ✅ Field mapping configuration working
+4. ✅ Schema validation logic implemented
+5. ✅ All property tests pass with 100+ iterations
+6. ✅ Unit tests cover edge cases and error conditions
+7. ✅ Gradle build succeeds with no warnings
 
-Task 4 is complete when:
-1. ✅ All storage layer tests pass
-2. ✅ No compilation errors or warnings
-3. ✅ Implementation ready for integration with other layers
+Task 6 is complete when:
+1. ✅ ScoringProvider interface created
+2. ✅ Score caching in DynamoDB working
+3. ✅ Feature store integration implemented
+4. ✅ Multi-model scoring support working
+5. ✅ Circuit breaker and fallback logic implemented
+6. ✅ All property tests pass with 100+ iterations
+7. ✅ Unit tests cover edge cases and error conditions
+8. ✅ Gradle build succeeds with no warnings
 
 ---
 
 ## Next Cycle Preview
 
-After Task 3 & 4 completion, the next cycle will focus on:
-- **Task 5**: Implement data connector framework
-- **Task 6**: Implement scoring engine layer
+After Task 5 & 6 completion, the next cycle will focus on:
+- **Task 7**: Implement filtering and eligibility pipeline
+- **Task 8**: Checkpoint - Ensure scoring and filtering tests pass
 
 ---
 
