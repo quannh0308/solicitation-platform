@@ -1,6 +1,6 @@
 # Implementation Tasks - Current Cycle
 
-## Current Focus: Task 9 - Implement serving API
+## Current Focus: Task 10 - Implement channel adapter framework
 
 This task list shows the current 2-task implementation cycle. After completing these tasks, the next cycle will be loaded from FOUNDATION.
 
@@ -16,84 +16,73 @@ This task list shows the current 2-task implementation cycle. After completing t
 
 ## Current Task Cycle
 
-- [x] Task 9: Implement serving API
-- [-] Complete cycle - Commit, push, and setup next tasks
+- [ ] Task 10: Implement channel adapter framework
+- [ ] Complete cycle - Commit, push, and setup next tasks
 
 ---
 
-## Task 9 Details: Implement serving API
+## Task 10 Details: Implement channel adapter framework
 
-Create the low-latency serving API for retrieving eligible candidates for customers.
+Create the channel adapter framework for delivering candidates through various channels.
 
 ### Subtasks:
 
-- [x] 9.1 Create ServingAPI interface and Lambda handler
-  - Implement GetCandidatesForCustomer endpoint
-  - Implement GetCandidatesForCustomers batch endpoint
-  - Add request validation
-  - _Validates: Requirements 6.1, 6.2, 6.6_
+- [ ] 10.1 Create ChannelAdapter interface
+  - Define interface methods (getChannelId, deliver, configure, healthCheck, isShadowMode)
+  - Create DeliveryResult and DeliveredCandidate models
+  - _Validates: Requirements 7.1, 7.2, 7.3_
 
-- [x] 9.2 Implement channel-specific ranking logic
-  - Create ranking algorithm framework
-  - Implement ranking strategies per channel
-  - _Validates: Requirements 6.3_
+- [ ]* 10.2 Write property test for channel adapter interface compliance
+  - **Property 21: Channel adapter interface compliance**
+  - **Validates: Requirements 7.1**
 
-- [x]* 9.3 Write property test for ranking consistency
-  - **Property 17: Channel-specific ranking consistency**
-  - **Validates: Requirements 6.3**
-  - **Status: ✅ PASSED** - All 4 ranking consistency tests passed
+- [ ]* 10.3 Write property test for delivery status tracking
+  - **Property 22: Delivery status tracking**
+  - **Validates: Requirements 7.3**
 
-- [x] 9.4 Add real-time eligibility refresh support
-  - Implement eligibility check with staleness detection
-  - Add refresh logic for stale candidates
-  - _Validates: Requirements 6.4_
+- [ ] 10.4 Implement shadow mode support
+  - Add shadow mode flag to adapter configuration
+  - Implement logging without actual delivery
+  - _Validates: Requirements 7.5, 14.5_
 
-- [x]* 9.5 Write property test for eligibility refresh correctness
-  - **Property 18: Eligibility refresh correctness**
-  - **Validates: Requirements 6.4**
-  - **Status: ✅ PASSED** - All 7 eligibility refresh tests passed
+- [ ]* 10.5 Write property test for shadow mode non-delivery
+  - **Property 23: Shadow mode non-delivery**
+  - **Validates: Requirements 7.5, 14.5**
 
-- [x] 9.6 Implement fallback and graceful degradation
-  - Add circuit breakers for dependencies
-  - Implement fallback to cached results
-  - Add degradation logging
-  - _Validates: Requirements 6.5_
+- [ ] 10.6 Implement rate limiting and queueing
+  - Add rate limit tracking per channel
+  - Implement queue for rate-limited candidates
+  - _Validates: Requirements 7.6_
 
-- [x]* 9.7 Write property test for serving API fallback behavior
-  - **Property 19: Serving API fallback behavior**
-  - **Validates: Requirements 6.5**
-  - **Status: ✅ PASSED** - All 7 fallback behavior tests passed
-
-- [x]* 9.8 Write property test for batch query correctness
-  - **Property 20: Batch query correctness**
-  - **Validates: Requirements 6.6**
-  - **Status: ✅ PASSED** - All 6 batch query tests passed
+- [ ]* 10.7 Write property test for rate limiting queue behavior
+  - **Property 24: Rate limiting queue behavior**
+  - **Validates: Requirements 7.6**
 
 ---
 
 ## Complete Cycle: Commit, Push, and Setup Next Tasks
 
-After Task 9 completion, commit any fixes, push to git, and prepare tasks.md for the next cycle.
+After Task 10 completion, commit any fixes, push to git, and prepare tasks.md for the next cycle.
 
 ### Subtasks:
 
-- [-] Commit and push any fixes
+- [ ] Commit and push any fixes
   - Stage all changes with `git add -A`
   - Create descriptive commit message if fixes were needed
   - Push to origin/main
 
 - [ ] Setup next task cycle in tasks.md
-  - Read FOUNDATION/tasks.md to identify next tasks (Task 10 from FOUNDATION)
-  - Update tasks.md with Task 10 and new cycle completion task
-  - Move completed Task 9 to completed-tasks.md
+  - Read FOUNDATION/tasks.md to identify next tasks (Task 11 from FOUNDATION)
+  - Update tasks.md with Task 11 and new cycle completion task
+  - Move completed Task 10 to completed-tasks.md
   - Commit and push the updated files
 
 ---
 
 ## Next Cycle Preview
 
-After Task 9 & cycle completion, the next cycle will focus on:
-- **Task 10**: Implement channel adapter framework (from FOUNDATION)
+After Task 10 & cycle completion, the next cycle will focus on:
+- **Task 11**: Implement email channel adapter (from FOUNDATION)
 - **Complete cycle**: Commit, push, and setup next tasks
 
 ---
@@ -106,4 +95,3 @@ After Task 9 & cycle completion, the next cycle will focus on:
 - Refer to FOUNDATION/tasks.md for the complete task list
 - Refer to completed-tasks.md for history of completed work
 - DynamoDB local can be used for testing without AWS credentials
-
