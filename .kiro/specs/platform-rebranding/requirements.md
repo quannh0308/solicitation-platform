@@ -50,18 +50,32 @@ Rebrand the "General Solicitation Platform" to "Customer Engagement & Action Pla
 
 ---
 
-### 4. Backward Compatibility
+### 4. Spec Directory Renaming
+
+**As a** developer working on the platform spec
+**I want** the spec directory to reflect the new platform name
+**So that** the spec structure is consistent with the rebranding
+
+**Acceptance Criteria**:
+4.1. Spec directory renamed from `solicitation-platform` to `customer-engagement-platform`
+4.2. FOUNDATION files updated to reference CEAP instead of solicitation
+4.3. All internal references within spec files updated
+4.4. Git history preserved through proper rename operation
+4.5. No broken references after rename
+
+---
+
+### 5. Backward Compatibility
 
 **As a** developer working on the existing codebase
-**I want** the rebranding to not affect my current work
+**I want** the rebranding to not affect the implementation code
 **So that** I can continue implementing features without disruption
 
 **Acceptance Criteria**:
-4.1. Package names remain unchanged (`com.solicitation.*`)
-4.2. Module names remain unchanged (`solicitation-channels`, etc.)
-4.3. Existing spec files in `.kiro/specs/solicitation-platform/` remain unchanged
-4.4. No code changes required for rebranding
-4.5. All existing tests continue to pass
+5.1. Package names remain unchanged (`com.solicitation.*`)
+5.2. Module names remain unchanged (`solicitation-channels`, etc.)
+5.3. No code changes required for rebranding
+5.4. All existing tests continue to pass
 
 ---
 
@@ -91,7 +105,8 @@ The following are explicitly OUT OF SCOPE for this rebranding effort:
 4. ❌ Database schema changes
 5. ❌ API endpoint changes
 6. ❌ Infrastructure changes
-7. ❌ Changes to `.kiro/specs/solicitation-platform/` spec files
+
+**Note**: The spec directory WILL be renamed from `solicitation-platform` to `customer-engagement-platform`, but this is a file system operation only and doesn't affect code.
 
 ---
 
@@ -102,10 +117,11 @@ The rebranding is successful when:
 1. ✅ All documentation uses CEAP branding consistently
 2. ✅ GitHub repository clearly communicates platform capabilities
 3. ✅ Migration notes explain the evolution from solicitation
-4. ✅ No code changes were required
-5. ✅ Existing solicitation-platform spec remains intact
-6. ✅ All existing tests still pass
-7. ✅ External stakeholders understand the platform's expanded capabilities
+4. ✅ Spec directory renamed to `customer-engagement-platform`
+5. ✅ FOUNDATION files updated with CEAP references
+6. ✅ No code changes were required (package names unchanged)
+7. ✅ All existing tests still pass
+8. ✅ External stakeholders understand the platform's expanded capabilities
 
 ---
 

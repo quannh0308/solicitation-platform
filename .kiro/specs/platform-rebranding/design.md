@@ -18,20 +18,21 @@ This design document outlines the approach for rebranding the platform from "Gen
 
 ## Architecture Impact
 
-### What Changes: Documentation & Branding
+### What Changes: Documentation, Branding & Spec Directory
 - README.md header and description
 - Architecture document titles
 - GitHub repository metadata
 - Marketing materials
+- Spec directory name: `solicitation-platform` → `customer-engagement-platform`
+- FOUNDATION files: Update references from "solicitation" to "CEAP"
 
-### What Stays the Same: Code & Structure
+### What Stays the Same: Code & Implementation
 - Package names: `com.solicitation.*`
 - Module names: `solicitation-channels`, `solicitation-filters`, etc.
 - Class names: `ChannelAdapter`, `Filter`, `ScoringProvider`, etc.
 - Database schemas
 - API endpoints
 - Infrastructure code
-- Existing spec files in `.kiro/specs/solicitation-platform/`
 
 ---
 
@@ -183,7 +184,76 @@ real-time, batch-processing, customer-experience, fintech, ecommerce
 
 ---
 
-### 4. Branding Assets
+### 4. Spec Directory Renaming
+
+#### 4.1 Rename Spec Directory
+**Location**: `.kiro/specs/solicitation-platform/`
+
+**Changes**:
+- Rename directory to: `.kiro/specs/customer-engagement-platform/`
+- Use `git mv` to preserve history
+- Update any references to the old path
+
+**Implementation**:
+```bash
+git mv .kiro/specs/solicitation-platform .kiro/specs/customer-engagement-platform
+```
+
+---
+
+#### 4.2 Update FOUNDATION Files
+**Location**: `.kiro/specs/customer-engagement-platform/FOUNDATION/`
+
+**Files to Update**:
+- `requirements.md`
+- `design.md`
+- `tasks.md`
+
+**Changes**:
+- Replace "General Solicitation Platform" with "Customer Engagement & Action Platform (CEAP)"
+- Replace "solicitation" references with "customer engagement" or "CEAP" where appropriate
+- Keep technical content and task details unchanged
+- Add migration note at top of each file
+
+**Implementation**:
+```markdown
+# Requirements: Customer Engagement & Action Platform (CEAP)
+> Formerly: General Solicitation Platform
+
+## Migration Note
+This platform has been rebranded from "General Solicitation Platform" to 
+"Customer Engagement & Action Platform (CEAP)" to reflect its capabilities 
+beyond solicitation. This is a documentation update only—package names and 
+code remain unchanged.
+
+[Rest of document...]
+```
+
+---
+
+#### 4.3 Update Active Spec Files
+**Location**: `.kiro/specs/customer-engagement-platform/`
+
+**Files to Update**:
+- `requirements.md`
+- `design.md`
+- `tasks.md`
+- `completed-tasks.md`
+
+**Changes**:
+- Add migration note at top
+- Update title references to CEAP
+- Keep all task details and technical content unchanged
+- Ensure task tracking continues seamlessly
+
+**Implementation**:
+- Add migration note to each file
+- Update headers to reference CEAP
+- Preserve all task status and details
+
+---
+
+### 5. Branding Assets
 
 #### 4.1 Tagline
 **Selected**: "Intelligent customer engagement at scale"
