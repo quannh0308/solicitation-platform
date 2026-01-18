@@ -17,7 +17,7 @@ Located in `docs/usecases/`
 4. **Service Experience Surveys** - Reactive, 35% completion
 5. **Event Participation Requests** - Batch, 8.5% registration
 
-### Expansion Use Cases (8)
+### Expansion Use Cases (12)
 Located in `docs/usecases/expansion/`
 
 #### 🛡️ Proactive Customer Support
@@ -31,10 +31,16 @@ Located in `docs/usecases/expansion/`
 #### 🔒 Fraud Prevention & Security
 10. **Suspicious Activity Alerts** - Reactive, 95% fraud prevention, $500K saved
 11. **Account Takeover Prevention** - Reactive, 98% prevention, $800K saved
+12. **Credit Card Fraud Detection** - Reactive, 97% detection, $5M saved
 
 #### 💎 Loyalty & Retention
-12. **Churn Prevention** - Batch, 21.2% retention, $2.1M saved
-13. **Win-Back Campaigns** - Batch, 17.2% win-back, $12.4M revenue
+13. **Churn Prevention** - Batch, 21.2% retention, $2.1M saved
+14. **Win-Back Campaigns** - Batch, 17.2% win-back, $12.4M revenue
+
+#### 🏦 Banking & Financial Services
+15. **Loan Offer Targeting** - Batch, 7.9% funding rate, $8.1B loan volume
+16. **Investment Recommendations** - Batch, 17.3% investment rate, $50.9B AUM growth
+17. **Low Balance & Overdraft Prevention** - Reactive, 60% overdraft reduction, $3.5M saved
 
 ---
 
@@ -44,10 +50,10 @@ Located in `docs/usecases/expansion/`
 
 | Category | Use Cases | Annual Impact | Type |
 |----------|-----------|---------------|------|
-| **Revenue Generation** | Cart Recovery, Product Recs, Win-Back | **$19.1M** | Revenue |
-| **Cost Savings** | Issue Resolution, Refunds, Churn Prevention | **$5.0M** | Savings |
-| **Fraud Prevention** | Suspicious Activity, Account Takeover | **$1.3M** | Savings |
-| **TOTAL IMPACT** | 8 expansion use cases | **$25.4M** | Combined |
+| **Revenue Generation** | Cart Recovery, Product Recs, Win-Back, Loan Origination, Investment Mgmt | **$262.3M** | Revenue |
+| **Cost Savings** | Issue Resolution, Refunds, Churn Prevention, Overdraft Prevention | **$11.9M** | Savings |
+| **Fraud Prevention** | Suspicious Activity, Account Takeover, Credit Card Fraud | **$6.3M** | Savings |
+| **TOTAL IMPACT** | 12 expansion use cases | **$280.5M** | Combined |
 
 ### ROI Analysis
 
@@ -61,8 +67,12 @@ Located in `docs/usecases/expansion/`
 | Account Takeover Prevention | $18K | $800K saved | 4,444% |
 | Churn Prevention | $900K | $2.1M saved | 233% |
 | Win-Back Campaigns | $540K | $12.4M revenue | 2,296% |
+| Credit Card Fraud Detection | $60K | $5M saved | 8,333% |
+| Loan Offer Targeting | $7.8M | $242.8M revenue | 3,113% |
+| Investment Recommendations | $7M | $254.5M revenue | 3,636% |
+| Low Balance Alerts | $200K | $3.5M saved | 1,750% |
 
-**Average ROI: 5,826%**
+**Average ROI: 5,286%**
 
 ---
 

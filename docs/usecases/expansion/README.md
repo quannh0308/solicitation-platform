@@ -61,6 +61,27 @@ These expansion use cases demonstrate the platform's versatility across differen
    - Personalized win-back offers
    - 17.2% win-back rate, $12.4M annual revenue
 
+### 🏦 Banking & Financial Services
+9. **[Credit Card Fraud Detection](CREDIT-CARD-FRAUD-DETECTION.md)** ⭐ COMPLETE
+   - Reactive processing (<50ms)
+   - Real-time transaction blocking
+   - 97% fraud detection, $5M saved annually
+
+10. **[Loan Offer Targeting](LOAN-OFFER-TARGETING.md)** ⭐ COMPLETE
+    - Batch processing (weekly)
+    - Pre-approved loan offers
+    - 7.9% funding rate, $8.1B annual loan volume
+
+11. **[Investment Recommendations](INVESTMENT-RECOMMENDATIONS.md)** ⭐ COMPLETE
+    - Batch processing (daily)
+    - ML-powered portfolio optimization
+    - 17.3% investment rate, $50.9B AUM growth
+
+12. **[Low Balance & Overdraft Prevention](LOW-BALANCE-OVERDRAFT-PREVENTION.md)** ⭐ COMPLETE
+    - Reactive processing (<100ms)
+    - Proactive balance alerts
+    - 60% overdraft reduction, $3.5M fees prevented
+
 ---
 
 ## Quick Reference
@@ -75,6 +96,10 @@ These expansion use cases demonstrate the platform's versatility across differen
 | Account Takeover Prevention | Reactive | <200ms | Account Protection | 98% prevention, $800K saved |
 | Churn Prevention | Batch | 2 hours | Retention Offer | 21.2% retention, $2.1M saved |
 | Win-Back Campaigns | Batch | 1h 30m | Win-Back Offer | 17.2% win-back, $12.4M revenue |
+| Credit Card Fraud Detection | Reactive | <50ms | Transaction Block | 97% detection, $5M saved |
+| Loan Offer Targeting | Batch | 1h 55m | Pre-Approved Loan | 7.9% funding, $8.1B volume |
+| Investment Recommendations | Batch | 1h 35m | Investment Advice | 17.3% investment, $50.9B AUM |
+| Low Balance Alerts | Reactive | <100ms | Overdraft Prevention | 60% reduction, $3.5M saved |
 
 ---
 
