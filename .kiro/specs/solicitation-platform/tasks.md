@@ -16,8 +16,8 @@ This task list shows the current 2-task implementation cycle. After completing t
 
 ## Current Task Cycle
 
-- [ ] Task 9: Implement serving API
-- [ ] Complete cycle - Commit, push, and setup next tasks
+- [x] Task 9: Implement serving API
+- [-] Complete cycle - Commit, push, and setup next tasks
 
 ---
 
@@ -27,43 +27,47 @@ Create the low-latency serving API for retrieving eligible candidates for custom
 
 ### Subtasks:
 
-- [ ] 9.1 Create ServingAPI interface and Lambda handler
+- [x] 9.1 Create ServingAPI interface and Lambda handler
   - Implement GetCandidatesForCustomer endpoint
   - Implement GetCandidatesForCustomers batch endpoint
   - Add request validation
   - _Validates: Requirements 6.1, 6.2, 6.6_
 
-- [ ] 9.2 Implement channel-specific ranking logic
+- [x] 9.2 Implement channel-specific ranking logic
   - Create ranking algorithm framework
   - Implement ranking strategies per channel
   - _Validates: Requirements 6.3_
 
-- [ ]* 9.3 Write property test for ranking consistency
+- [x]* 9.3 Write property test for ranking consistency
   - **Property 17: Channel-specific ranking consistency**
   - **Validates: Requirements 6.3**
+  - **Status: ✅ PASSED** - All 4 ranking consistency tests passed
 
-- [ ] 9.4 Add real-time eligibility refresh support
+- [x] 9.4 Add real-time eligibility refresh support
   - Implement eligibility check with staleness detection
   - Add refresh logic for stale candidates
   - _Validates: Requirements 6.4_
 
-- [ ]* 9.5 Write property test for eligibility refresh correctness
+- [x]* 9.5 Write property test for eligibility refresh correctness
   - **Property 18: Eligibility refresh correctness**
   - **Validates: Requirements 6.4**
+  - **Status: ✅ PASSED** - All 7 eligibility refresh tests passed
 
-- [ ] 9.6 Implement fallback and graceful degradation
+- [x] 9.6 Implement fallback and graceful degradation
   - Add circuit breakers for dependencies
   - Implement fallback to cached results
   - Add degradation logging
   - _Validates: Requirements 6.5_
 
-- [ ]* 9.7 Write property test for serving API fallback behavior
+- [x]* 9.7 Write property test for serving API fallback behavior
   - **Property 19: Serving API fallback behavior**
   - **Validates: Requirements 6.5**
+  - **Status: ✅ PASSED** - All 7 fallback behavior tests passed
 
-- [ ]* 9.8 Write property test for batch query correctness
+- [x]* 9.8 Write property test for batch query correctness
   - **Property 20: Batch query correctness**
   - **Validates: Requirements 6.6**
+  - **Status: ✅ PASSED** - All 6 batch query tests passed
 
 ---
 
@@ -73,7 +77,7 @@ After Task 9 completion, commit any fixes, push to git, and prepare tasks.md for
 
 ### Subtasks:
 
-- [ ] Commit and push any fixes
+- [-] Commit and push any fixes
   - Stage all changes with `git add -A`
   - Create descriptive commit message if fixes were needed
   - Push to origin/main
