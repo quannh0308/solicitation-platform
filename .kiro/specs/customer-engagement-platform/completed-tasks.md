@@ -752,3 +752,53 @@ This file tracks all completed tasks from the implementation cycles.
 - `solicitation-workflow-reactive/src/test/kotlin/com/solicitation/workflow/reactive/MockDependencies.kt` - Enhanced test support
 
 ---
+## Task 21: Implement candidate lifecycle management ✅
+
+**Completed**: Cycle 18
+**Status**: COMPLETE
+
+### Accomplishments:
+- ✅ Added manual candidate deletion API (Task 21.1)
+  - Implemented delete endpoint in ServingAPI
+  - Verifies deletion removes candidate from storage
+  - Provides confirmation of successful deletion
+  - Enables manual cleanup of candidates when needed
+- ✅ Implemented consumed marking (Task 21.3)
+  - Marks candidates as consumed after delivery
+  - Records delivery timestamp in candidate attributes
+  - Prevents re-delivery of already consumed candidates
+  - Tracks candidate lifecycle state accurately
+- ✅ Added candidate refresh functionality (Task 21.5)
+  - Implemented re-scoring for active candidates
+  - Implemented eligibility refresh to update stale data
+  - Updates candidate with current values
+  - Ensures candidates remain accurate over time
+- ✅ Implemented data warehouse export (Task 21.7)
+  - Created daily export Lambda function
+  - Exports candidates to S3 in Parquet format
+  - Triggers Glue job to load into data warehouse
+  - Enables analytics and reporting on candidate data
+- ✅ Implemented property-based tests (Tasks 21.2, 21.4, 21.6, 21.8)
+  - ManualDeletionPropertyTest: Validates manual deletion (Property 52) - ✅ PASSED
+  - ConsumedMarkingPropertyTest: Validates consumed marking (Property 53) - ✅ PASSED
+  - CandidateRefreshPropertyTest: Validates candidate refresh (Property 54) - ✅ PASSED
+  - DataWarehouseExportPropertyTest: Validates export completeness (Property 16) - ✅ PASSED
+
+**Test Results**: All property-based tests passing (1,000+ test cases)
+**Validates**: Requirements 17.3, 17.4, 17.5, 5.6
+
+**Files Created**:
+- `solicitation-serving/src/test/kotlin/com/solicitation/serving/ManualDeletionPropertyTest.kt`
+- `solicitation-serving/src/test/kotlin/com/solicitation/serving/ConsumedMarkingPropertyTest.kt`
+- `solicitation-serving/src/test/kotlin/com/solicitation/serving/CandidateRefreshPropertyTest.kt`
+- `solicitation-serving/src/test/kotlin/com/solicitation/serving/TestHelpers.kt`
+- `solicitation-workflow-store/src/main/kotlin/com/solicitation/workflow/export/DataWarehouseExportHandler.kt`
+- `solicitation-workflow-store/src/test/kotlin/com/solicitation/workflow/export/DataWarehouseExportPropertyTest.kt`
+
+**Files Modified**:
+- `solicitation-serving/src/main/kotlin/com/solicitation/serving/ServingAPI.kt` - Added delete and refresh methods
+- `solicitation-serving/src/main/kotlin/com/solicitation/serving/ServingAPIImpl.kt` - Implemented lifecycle methods
+- `solicitation-models/src/main/kotlin/com/solicitation/model/CandidateAttributes.kt` - Added consumed tracking
+- `solicitation-workflow-store/build.gradle.kts` - Added Parquet dependencies
+
+---

@@ -574,42 +574,42 @@ The implementation follows a phased approach:
 
 
 
-- [ ] 21. Implement candidate lifecycle management
-  - [ ] 21.1 Add manual candidate deletion API
+- [x] 21. Implement candidate lifecycle management
+  - [x] 21.1 Add manual candidate deletion API
     - Implement delete endpoint
     - Verify deletion removes candidate from storage
     - _Requirements: 17.3_
   
-  - [ ]* 21.2 Write property test for manual deletion
+  - [x]* 21.2 Write property test for manual deletion
     - **Property 52: Manual deletion**
     - **Validates: Requirements 17.3**
   
-  - [ ] 21.3 Implement consumed marking
+  - [x] 21.3 Implement consumed marking
     - Mark candidates as consumed after delivery
     - Record delivery timestamp
     - _Requirements: 17.4_
   
-  - [ ]* 21.4 Write property test for consumed marking
+  - [x]* 21.4 Write property test for consumed marking
     - **Property 53: Consumed marking**
     - **Validates: Requirements 17.4**
   
-  - [ ] 21.5 Add candidate refresh functionality
+  - [x] 21.5 Add candidate refresh functionality
     - Implement re-scoring for active candidates
     - Implement eligibility refresh
     - Update candidate with current values
     - _Requirements: 17.5_
   
-  - [ ]* 21.6 Write property test for candidate refresh
+  - [x]* 21.6 Write property test for candidate refresh
     - **Property 54: Candidate refresh**
     - **Validates: Requirements 17.5**
   
-  - [ ] 21.7 Implement data warehouse export
+  - [x] 21.7 Implement data warehouse export
     - Create daily export Lambda function
     - Export candidates to S3 in Parquet format
     - Trigger Glue job to load into data warehouse
     - _Requirements: 5.6_
   
-  - [ ]* 21.8 Write property test for data warehouse export completeness
+  - [x]* 21.8 Write property test for data warehouse export completeness
     - **Property 16: Data warehouse export completeness**
     - **Validates: Requirements 5.6**
 

@@ -2,7 +2,7 @@
 
 > **Platform Rebranding Note**: This platform was formerly known as the "General Solicitation Platform". We've rebranded to "Customer Engagement & Action Platform (CEAP)" to better reflect its capabilities beyond solicitation. This is a documentation update only—package names and code remain unchanged.
 
-## Current Focus: Task 21 - Implement candidate lifecycle management
+## Current Focus: Task 22 - Checkpoint - Ensure lifecycle and security tests pass
 
 This task list shows the current 2-task implementation cycle. After completing these tasks, the next cycle will be loaded from FOUNDATION.
 
@@ -18,60 +18,33 @@ This task list shows the current 2-task implementation cycle. After completing t
 
 ## Current Task Cycle
 
-- [x] Task 21: Implement candidate lifecycle management
-- [-] Complete cycle - Commit, push, and setup next tasks
+- [ ] Task 22: Checkpoint - Ensure lifecycle and security tests pass
+- [ ] Complete cycle - Commit, push, and setup next tasks
 
 ---
 
-## Task 21 Details: Implement candidate lifecycle management
+## Task 22 Details: Checkpoint - Ensure lifecycle and security tests pass
 
-Implement manual deletion, consumed marking, candidate refresh, and data warehouse export.
+Ensure all tests pass, ask the user if questions arise.
 
 ### Subtasks:
 
-- [ ] 21.1 Add manual candidate deletion API
-  - Implement delete endpoint
-  - Verify deletion removes candidate from storage
-  - _Requirements: 17.3_
+- [ ] 22.1 Run all tests to verify lifecycle and security features
+  - Run full test suite with `./gradlew test`
+  - Verify all property-based tests pass
+  - Verify all unit tests pass
+  - Check for any test failures or warnings
 
-- [ ]* 21.2 Write property test for manual deletion
-  - **Property 52: Manual deletion**
-  - **Validates: Requirements 17.3**
-
-- [ ] 21.3 Implement consumed marking
-  - Mark candidates as consumed after delivery
-  - Record delivery timestamp
-  - _Requirements: 17.4_
-
-- [ ]* 21.4 Write property test for consumed marking
-  - **Property 53: Consumed marking**
-  - **Validates: Requirements 17.4**
-
-- [ ] 21.5 Add candidate refresh functionality
-  - Implement re-scoring for active candidates
-  - Implement eligibility refresh
-  - Update candidate with current values
-  - _Requirements: 17.5_
-
-- [ ]* 21.6 Write property test for candidate refresh
-  - **Property 54: Candidate refresh**
-  - **Validates: Requirements 17.5**
-
-- [ ] 21.7 Implement data warehouse export
-  - Create daily export Lambda function
-  - Export candidates to S3 in Parquet format
-  - Trigger Glue job to load into data warehouse
-  - _Requirements: 5.6_
-
-- [ ]* 21.8 Write property test for data warehouse export completeness
-  - **Property 16: Data warehouse export completeness**
-  - **Validates: Requirements 5.6**
+- [ ] 22.2 Review test results and address any issues
+  - If tests fail, investigate root cause
+  - Ask user for guidance if issues are unclear
+  - Document any known issues or limitations
 
 ---
 
 ## Complete Cycle: Commit, Push, and Setup Next Tasks
 
-After Task 21 completion, commit any fixes, push to git, and prepare tasks.md for the next cycle.
+After Task 22 completion, commit any fixes, push to git, and prepare tasks.md for the next cycle.
 
 **IMPORTANT**: When setting up the next cycle, ALL tasks in the new tasks.md must be marked as `[ ]` not started. This is a fresh cycle start.
 
@@ -83,20 +56,20 @@ After Task 21 completion, commit any fixes, push to git, and prepare tasks.md fo
   - Push to origin/main
 
 - [ ] Setup next task cycle in tasks.md
-  - Read FOUNDATION/tasks.md to identify next tasks (Task 22 from FOUNDATION)
-  - Move completed Task 21 to completed-tasks.md with full details
-  - Update tasks.md with Task 22 as the new main task
-  - **CRITICAL**: Ensure ALL tasks in tasks.md are marked as `[ ]` not started (including Task 22 AND "Complete cycle" task)
+  - Read FOUNDATION/tasks.md to identify next tasks (Task 23 from FOUNDATION)
+  - Move completed Task 22 to completed-tasks.md with full details
+  - Update tasks.md with Task 23 as the new main task
+  - **CRITICAL**: Ensure ALL tasks in tasks.md are marked as `[ ]` not started (including Task 23 AND "Complete cycle" task)
   - **CRITICAL**: Ensure tasks in FOUNDATION/tasks.md are updated correctly (mark only the current finished task as done)
-  - Update the "Complete cycle" subtask to reference Task 23 for the next iteration
+  - Update the "Complete cycle" subtask to reference Task 24 for the next iteration
   - Commit and push the updated files
 
 ---
 
 ## Next Cycle Preview
 
-After Task 21 & cycle completion, the next cycle will focus on:
-- **Task 22**: Checkpoint - Ensure lifecycle and security tests pass (from FOUNDATION)
+After Task 22 & cycle completion, the next cycle will focus on:
+- **Task 23**: Implement real-time channel features (from FOUNDATION)
 - **Complete cycle**: Commit, push, and setup next tasks
 
 ---
