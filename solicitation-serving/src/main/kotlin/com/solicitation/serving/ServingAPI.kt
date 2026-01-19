@@ -6,7 +6,7 @@ import com.solicitation.model.Candidate
  * Low-latency serving API for retrieving eligible candidates for customers.
  * 
  * Provides endpoints for single and batch customer queries with channel-specific
- * filtering and ranking.
+ * filtering and ranking, as well as lifecycle management operations.
  */
 interface ServingAPI {
     
@@ -25,6 +25,30 @@ interface ServingAPI {
      * @return Response containing candidates per customer
      */
     fun getCandidatesForCustomers(request: BatchGetCandidatesRequest): BatchGetCandidatesResponse
+    
+    /**
+     * Manually deletes a candidate from storage.
+     * 
+     * @param request Request parameters for candidate deletion
+     * @return Response indicating success or failure
+     */
+    fun deleteCandidate(request: DeleteCandidateRequest): DeleteCandidateResponse
+    
+    /**
+     * Marks a candidate as consumed after delivery.
+     * 
+     * @param request Request parameters for marking consumed
+     * @return Response with updated candidate
+     */
+    fun markCandidateConsumed(request: MarkConsumedRequest): MarkConsumedResponse
+    
+    /**
+     * Refreshes a candidate's score and eligibility.
+     * 
+     * @param request Request parameters for candidate refresh
+     * @return Response with refreshed candidate
+     */
+    fun refreshCandidate(request: RefreshCandidateRequest): RefreshCandidateResponse
 }
 
 /**
@@ -114,3 +138,99 @@ data class ResponseMetadata(
  * Exception thrown when serving operations fail.
  */
 class ServingException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)
+
+/**
+ * Request for deleting a candidate.
+ * 
+ * @property customerId Customer identifier
+ * @property programId Program identifier
+ * @property marketplaceId Marketplace identifier
+ * @property subjectType Subject type
+ * @property subjectId Subject identifier
+ */
+data class DeleteCandidateRequest(
+    val customerId: String,
+    val programId: String,
+    val marketplaceId: String,
+    val subjectType: String,
+    val subjectId: String
+)
+
+/**
+ * Response for candidate deletion.
+ * 
+ * @property success Whether the deletion was successful
+ * @property message Optional message
+ */
+data class DeleteCandidateResponse(
+    val success: Boolean,
+    val message: String? = null
+)
+
+/**
+ * Request for marking a candidate as consumed.
+ * 
+ * @property customerId Customer identifier
+ * @property programId Program identifier
+ * @property marketplaceId Marketplace identifier
+ * @property subjectType Subject type
+ * @property subjectId Subject identifier
+ * @property deliveryTimestamp When the candidate was delivered
+ * @property channelId Channel through which it was delivered
+ */
+data class MarkConsumedRequest(
+    val customerId: String,
+    val programId: String,
+    val marketplaceId: String,
+    val subjectType: String,
+    val subjectId: String,
+    val deliveryTimestamp: java.time.Instant,
+    val channelId: String
+)
+
+/**
+ * Response for marking consumed.
+ * 
+ * @property candidate Updated candidate with consumed status
+ * @property success Whether the operation was successful
+ */
+data class MarkConsumedResponse(
+    val candidate: Candidate?,
+    val success: Boolean
+)
+
+/**
+ * Request for refreshing a candidate.
+ * 
+ * @property customerId Customer identifier
+ * @property programId Program identifier
+ * @property marketplaceId Marketplace identifier
+ * @property subjectType Subject type
+ * @property subjectId Subject identifier
+ * @property refreshScores Whether to refresh scores
+ * @property refreshEligibility Whether to refresh eligibility
+ */
+data class RefreshCandidateRequest(
+    val customerId: String,
+    val programId: String,
+    val marketplaceId: String,
+    val subjectType: String,
+    val subjectId: String,
+    val refreshScores: Boolean = true,
+    val refreshEligibility: Boolean = true
+)
+
+/**
+ * Response for candidate refresh.
+ * 
+ * @property candidate Refreshed candidate
+ * @property success Whether the refresh was successful
+ * @property scoresUpdated Whether scores were updated
+ * @property eligibilityUpdated Whether eligibility was updated
+ */
+data class RefreshCandidateResponse(
+    val candidate: Candidate?,
+    val success: Boolean,
+    val scoresUpdated: Boolean = false,
+    val eligibilityUpdated: Boolean = false
+)

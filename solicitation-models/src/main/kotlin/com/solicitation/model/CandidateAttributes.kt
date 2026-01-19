@@ -13,6 +13,9 @@ import java.time.Instant
  * @property orderValue Order value if applicable (optional)
  * @property mediaEligible Whether media (images/video) is eligible
  * @property channelEligibility Channel eligibility flags
+ * @property consumed Whether the candidate has been consumed (delivered)
+ * @property consumedAt When the candidate was consumed (optional)
+ * @property consumedChannel Channel through which it was consumed (optional)
  */
 data class CandidateAttributes(
     @field:NotNull
@@ -33,5 +36,14 @@ data class CandidateAttributes(
     
     @field:NotNull
     @JsonProperty("channelEligibility")
-    val channelEligibility: Map<String, Boolean>
+    val channelEligibility: Map<String, Boolean>,
+    
+    @JsonProperty("consumed")
+    val consumed: Boolean = false,
+    
+    @JsonProperty("consumedAt")
+    val consumedAt: Instant? = null,
+    
+    @JsonProperty("consumedChannel")
+    val consumedChannel: String? = null
 )

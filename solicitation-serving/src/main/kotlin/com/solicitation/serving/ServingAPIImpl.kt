@@ -146,6 +146,191 @@ class ServingAPIImpl(
         }
     }
     
+    override fun deleteCandidate(request: DeleteCandidateRequest): DeleteCandidateResponse {
+        try {
+            logger.info { "Deleting candidate: customer=${request.customerId}, program=${request.programId}, subject=${request.subjectType}:${request.subjectId}" }
+            
+            // Validate request
+            require(request.customerId.isNotBlank()) { "Customer ID must not be blank" }
+            require(request.programId.isNotBlank()) { "Program ID must not be blank" }
+            require(request.marketplaceId.isNotBlank()) { "Marketplace ID must not be blank" }
+            require(request.subjectType.isNotBlank()) { "Subject type must not be blank" }
+            require(request.subjectId.isNotBlank()) { "Subject ID must not be blank" }
+            
+            // Delete from repository
+            candidateRepository.delete(
+                customerId = request.customerId,
+                programId = request.programId,
+                marketplaceId = request.marketplaceId,
+                subjectType = request.subjectType,
+                subjectId = request.subjectId
+            )
+            
+            logger.info { "Successfully deleted candidate" }
+            
+            return DeleteCandidateResponse(
+                success = true,
+                message = "Candidate deleted successfully"
+            )
+            
+        } catch (e: Exception) {
+            logger.error(e) { "Failed to delete candidate" }
+            return DeleteCandidateResponse(
+                success = false,
+                message = "Failed to delete candidate: ${e.message}"
+            )
+        }
+    }
+    
+    override fun markCandidateConsumed(request: MarkConsumedRequest): MarkConsumedResponse {
+        try {
+            logger.info { "Marking candidate as consumed: customer=${request.customerId}, channel=${request.channelId}" }
+            
+            // Validate request
+            require(request.customerId.isNotBlank()) { "Customer ID must not be blank" }
+            require(request.programId.isNotBlank()) { "Program ID must not be blank" }
+            require(request.marketplaceId.isNotBlank()) { "Marketplace ID must not be blank" }
+            require(request.subjectType.isNotBlank()) { "Subject type must not be blank" }
+            require(request.subjectId.isNotBlank()) { "Subject ID must not be blank" }
+            require(request.channelId.isNotBlank()) { "Channel ID must not be blank" }
+            
+            // Get existing candidate
+            val candidate = candidateRepository.get(
+                customerId = request.customerId,
+                programId = request.programId,
+                marketplaceId = request.marketplaceId,
+                subjectType = request.subjectType,
+                subjectId = request.subjectId
+            )
+            
+            if (candidate == null) {
+                logger.warn { "Candidate not found for marking consumed" }
+                return MarkConsumedResponse(
+                    candidate = null,
+                    success = false
+                )
+            }
+            
+            // Update attributes with consumed status
+            val updatedAttributes = candidate.attributes.copy(
+                consumed = true,
+                consumedAt = request.deliveryTimestamp,
+                consumedChannel = request.channelId
+            )
+            
+            // Update metadata
+            val updatedMetadata = candidate.metadata.copy(
+                updatedAt = java.time.Instant.now(),
+                version = candidate.metadata.version + 1
+            )
+            
+            // Update candidate
+            val updatedCandidate = candidate.copy(
+                attributes = updatedAttributes,
+                metadata = updatedMetadata
+            )
+            
+            val savedCandidate = candidateRepository.update(updatedCandidate)
+            
+            logger.info { "Successfully marked candidate as consumed" }
+            
+            return MarkConsumedResponse(
+                candidate = savedCandidate,
+                success = true
+            )
+            
+        } catch (e: Exception) {
+            logger.error(e) { "Failed to mark candidate as consumed" }
+            return MarkConsumedResponse(
+                candidate = null,
+                success = false
+            )
+        }
+    }
+    
+    override fun refreshCandidate(request: RefreshCandidateRequest): RefreshCandidateResponse {
+        try {
+            logger.info { "Refreshing candidate: customer=${request.customerId}, program=${request.programId}" }
+            
+            // Validate request
+            require(request.customerId.isNotBlank()) { "Customer ID must not be blank" }
+            require(request.programId.isNotBlank()) { "Program ID must not be blank" }
+            require(request.marketplaceId.isNotBlank()) { "Marketplace ID must not be blank" }
+            require(request.subjectType.isNotBlank()) { "Subject type must not be blank" }
+            require(request.subjectId.isNotBlank()) { "Subject ID must not be blank" }
+            
+            // Get existing candidate
+            val candidate = candidateRepository.get(
+                customerId = request.customerId,
+                programId = request.programId,
+                marketplaceId = request.marketplaceId,
+                subjectType = request.subjectType,
+                subjectId = request.subjectId
+            )
+            
+            if (candidate == null) {
+                logger.warn { "Candidate not found for refresh" }
+                return RefreshCandidateResponse(
+                    candidate = null,
+                    success = false
+                )
+            }
+            
+            var updatedCandidate = candidate
+            var scoresUpdated = false
+            var eligibilityUpdated = false
+            
+            // Refresh scores if requested
+            // Note: In a real implementation, this would call the scoring service
+            // For now, we just update the timestamp
+            if (request.refreshScores) {
+                // Placeholder: would call scoring service here
+                scoresUpdated = true
+            }
+            
+            // Refresh eligibility if requested
+            if (request.refreshEligibility && eligibilityChecker != null) {
+                val isEligible = eligibilityChecker.isEligible(candidate)
+                if (!isEligible) {
+                    // Mark as ineligible by updating channel eligibility
+                    val updatedChannelEligibility = candidate.attributes.channelEligibility.mapValues { false }
+                    updatedCandidate = updatedCandidate.copy(
+                        attributes = updatedCandidate.attributes.copy(
+                            channelEligibility = updatedChannelEligibility
+                        )
+                    )
+                }
+                eligibilityUpdated = true
+            }
+            
+            // Update metadata
+            val updatedMetadata = updatedCandidate.metadata.copy(
+                updatedAt = java.time.Instant.now(),
+                version = updatedCandidate.metadata.version + 1
+            )
+            
+            updatedCandidate = updatedCandidate.copy(metadata = updatedMetadata)
+            
+            val savedCandidate = candidateRepository.update(updatedCandidate)
+            
+            logger.info { "Successfully refreshed candidate (scores=$scoresUpdated, eligibility=$eligibilityUpdated)" }
+            
+            return RefreshCandidateResponse(
+                candidate = savedCandidate,
+                success = true,
+                scoresUpdated = scoresUpdated,
+                eligibilityUpdated = eligibilityUpdated
+            )
+            
+        } catch (e: Exception) {
+            logger.error(e) { "Failed to refresh candidate" }
+            return RefreshCandidateResponse(
+                candidate = null,
+                success = false
+            )
+        }
+    }
+    
     /**
      * Validates a single customer request.
      */

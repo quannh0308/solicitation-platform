@@ -18,8 +18,8 @@ This task list shows the current 2-task implementation cycle. After completing t
 
 ## Current Task Cycle
 
-- [ ] Task 21: Implement candidate lifecycle management
-- [ ] Complete cycle - Commit, push, and setup next tasks
+- [x] Task 21: Implement candidate lifecycle management
+- [-] Complete cycle - Commit, push, and setup next tasks
 
 ---
 

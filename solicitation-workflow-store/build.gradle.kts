@@ -16,6 +16,8 @@ dependencies {
     // AWS SDK v2
     implementation("software.amazon.awssdk:cloudwatch:2.20.26")
     implementation("software.amazon.awssdk:eventbridge:2.20.26")
+    implementation("software.amazon.awssdk:s3:2.20.26")
+    implementation("software.amazon.awssdk:glue:2.20.26")
     
     // Jackson for JSON processing
     implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
