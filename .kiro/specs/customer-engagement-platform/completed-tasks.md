@@ -939,3 +939,30 @@ This file tracks all completed tasks from the implementation cycles.
 - `.kiro/specs/customer-engagement-platform/tasks.md` - Updated task status
 
 ---
+
+---
+
+## Task 25: Implement version monotonicity tracking ✅
+
+**Completed**: Cycle 13
+**Status**: COMPLETE
+
+### Accomplishments:
+- ✅ Added version increment logic to candidate updates (Task 25.1)
+  - Version number increases on each update
+  - updatedAt timestamp is current on updates
+  - Implemented in DynamoDBCandidateRepository
+- ✅ Implemented property-based test (Task 25.2)
+  - VersionMonotonicityPropertyTest: Validates Property 4
+  - Tests version monotonicity across updates
+  - Tests timestamp currency on updates
+  - All property tests passing (100 iterations)
+
+**Test Results**: All tests passing (100+ property-based test cases)
+**Validates**: Requirements 2.5
+
+**Files Created**:
+- `solicitation-storage/src/test/kotlin/com/solicitation/storage/VersionMonotonicityPropertyTest.kt`
+
+**Files Modified**:
+- `solicitation-storage/src/main/kotlin/com/solicitation/storage/DynamoDBCandidateRepository.kt` (version increment logic)
