@@ -1,6 +1,8 @@
 # Lambda Function Configurations
 
-This document describes the Lambda function configurations for the General Solicitation Platform.
+> **Platform Rebranding Note**: This platform was formerly known as the "General Solicitation Platform". We've rebranded to "Customer Engagement & Action Platform (CEAP)" to better reflect its capabilities beyond solicitation. Package names (`com.solicitation.*`) and handler paths remain unchanged for backward compatibility.
+
+This document describes the Lambda function configurations for the Customer Engagement & Action Platform (CEAP).
 
 ## Overview
 
@@ -180,6 +182,8 @@ Each Lambda function has a dedicated CloudWatch Log Group:
 - Structured JSON logging with correlation IDs
 - PII redaction enabled
 
+**Note**: ProjectName is typically `ceap-platform` or `customer-engagement-platform`
+
 ## Deployment
 
 ### Prerequisites
@@ -194,7 +198,7 @@ Each Lambda function has a dedicated CloudWatch Log Group:
 ```bash
 # Set environment variables
 export ENVIRONMENT=dev
-export PROJECT_NAME=solicitation-platform
+export PROJECT_NAME=ceap-platform
 export AWS_REGION=us-east-1
 
 # Deploy the stack
@@ -207,15 +211,20 @@ cd infrastructure
 After deploying the configurations, upload and update function code:
 
 ```bash
-# Build the Lambda JARs
-mvn clean package
+# Build the Lambda JARs using Gradle
+./gradlew shadowJar
 
 # Upload to S3
-aws s3 cp target/etl-lambda.jar s3://${PROJECT_NAME}-lambda-artifacts-${ENVIRONMENT}/
-aws s3 cp target/filter-lambda.jar s3://${PROJECT_NAME}-lambda-artifacts-${ENVIRONMENT}/
-aws s3 cp target/score-lambda.jar s3://${PROJECT_NAME}-lambda-artifacts-${ENVIRONMENT}/
-aws s3 cp target/store-lambda.jar s3://${PROJECT_NAME}-lambda-artifacts-${ENVIRONMENT}/
-aws s3 cp target/serve-lambda.jar s3://${PROJECT_NAME}-lambda-artifacts-${ENVIRONMENT}/
+aws s3 cp ceap-workflow-etl/build/libs/ceap-workflow-etl-1.0.0-SNAPSHOT.jar \
+  s3://${PROJECT_NAME}-lambda-artifacts-${ENVIRONMENT}/etl-lambda.jar
+aws s3 cp ceap-workflow-filter/build/libs/ceap-workflow-filter-1.0.0-SNAPSHOT.jar \
+  s3://${PROJECT_NAME}-lambda-artifacts-${ENVIRONMENT}/filter-lambda.jar
+aws s3 cp ceap-workflow-score/build/libs/ceap-workflow-score-1.0.0-SNAPSHOT.jar \
+  s3://${PROJECT_NAME}-lambda-artifacts-${ENVIRONMENT}/score-lambda.jar
+aws s3 cp ceap-workflow-store/build/libs/ceap-workflow-store-1.0.0-SNAPSHOT.jar \
+  s3://${PROJECT_NAME}-lambda-artifacts-${ENVIRONMENT}/store-lambda.jar
+aws s3 cp ceap-serving/build/libs/ceap-serving-1.0.0-SNAPSHOT.jar \
+  s3://${PROJECT_NAME}-lambda-artifacts-${ENVIRONMENT}/serve-lambda.jar
 
 # Update Lambda functions
 aws lambda update-function-code \
@@ -260,10 +269,10 @@ All logs follow structured JSON format:
 
 ```json
 {
-  "timestamp": "2026-01-16T10:30:00.000Z",
+  "timestamp": "2026-01-20T10:30:00.000Z",
   "level": "INFO",
   "correlationId": "uuid-1234-5678",
-  "service": "solicitation-platform",
+  "service": "ceap-platform",
   "component": "ETLLambda",
   "message": "Processing batch",
   "context": {

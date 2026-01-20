@@ -1,5 +1,7 @@
 # Lambda Functions Quick Reference
 
+> **Platform Rebranding Note**: This platform was formerly known as the "General Solicitation Platform". We've rebranded to "Customer Engagement & Action Platform (CEAP)" to better reflect its capabilities beyond solicitation. Package names (`com.solicitation.*`) remain unchanged for backward compatibility.
+
 ## Function Overview
 
 | Function | Memory | Timeout | Purpose |
@@ -85,7 +87,7 @@ cd infrastructure
 ### Deploy Stack
 ```bash
 export ENVIRONMENT=dev
-export PROJECT_NAME=solicitation-platform
+export PROJECT_NAME=ceap-platform
 export AWS_REGION=us-east-1
 cd infrastructure
 ./deploy-lambda.sh
@@ -93,12 +95,12 @@ cd infrastructure
 
 ### Update Function Code
 ```bash
-# Build JAR
-mvn clean package
+# Build JAR using Gradle
+./gradlew :ceap-workflow-etl:shadowJar
 
 # Upload to S3
-aws s3 cp target/etl-lambda.jar \
-  s3://${PROJECT_NAME}-lambda-artifacts-${ENVIRONMENT}/
+aws s3 cp ceap-workflow-etl/build/libs/ceap-workflow-etl-1.0.0-SNAPSHOT.jar \
+  s3://${PROJECT_NAME}-lambda-artifacts-${ENVIRONMENT}/etl-lambda.jar
 
 # Update function
 aws lambda update-function-code \
@@ -128,12 +130,14 @@ aws lambda invoke \
 ## CloudWatch Log Groups
 
 ```
-/aws/lambda/solicitation-platform-etl-dev
-/aws/lambda/solicitation-platform-filter-dev
-/aws/lambda/solicitation-platform-score-dev
-/aws/lambda/solicitation-platform-store-dev
-/aws/lambda/solicitation-platform-serve-dev
+/aws/lambda/ceap-platform-etl-dev
+/aws/lambda/ceap-platform-filter-dev
+/aws/lambda/ceap-platform-score-dev
+/aws/lambda/ceap-platform-store-dev
+/aws/lambda/ceap-platform-serve-dev
 ```
+
+**Note**: Log group names use `ceap-platform` or `customer-engagement-platform` as the project name.
 
 ## Stack Outputs
 
@@ -144,7 +148,7 @@ After deployment, the stack exports:
 Access outputs:
 ```bash
 aws cloudformation describe-stacks \
-  --stack-name solicitation-platform-lambda-functions \
+  --stack-name ceap-platform-lambda-functions \
   --query 'Stacks[0].Outputs'
 ```
 

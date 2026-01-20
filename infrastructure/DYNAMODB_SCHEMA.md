@@ -1,8 +1,10 @@
 # DynamoDB Schema Documentation
 
+> **Platform Rebranding Note**: This platform was formerly known as the "General Solicitation Platform". We've rebranded to "Customer Engagement & Action Platform (CEAP)" to better reflect its capabilities beyond solicitation. Package names (`com.solicitation.*`) and table structures remain unchanged for backward compatibility.
+
 ## Overview
 
-This document describes the DynamoDB table schemas for the General Solicitation Platform. All tables use on-demand capacity mode for automatic scaling.
+This document describes the DynamoDB table schemas for the Customer Engagement & Action Platform (CEAP). All tables use on-demand capacity mode for automatic scaling.
 
 ## Table Schemas
 
@@ -200,13 +202,13 @@ All tables include:
 # Deploy to dev environment
 aws cloudformation deploy \
   --template-file dynamodb-tables.yaml \
-  --stack-name solicitation-platform-dynamodb-dev \
+  --stack-name ceap-platform-dynamodb-dev \
   --parameter-overrides Environment=dev
 
 # Deploy to production
 aws cloudformation deploy \
   --template-file dynamodb-tables.yaml \
-  --stack-name solicitation-platform-dynamodb-prod \
+  --stack-name ceap-platform-dynamodb-prod \
   --parameter-overrides Environment=prod
 ```
 
