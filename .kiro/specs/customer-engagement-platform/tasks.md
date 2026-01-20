@@ -2,7 +2,7 @@
 
 > **Platform Rebranding Note**: This platform was formerly known as the "General Solicitation Platform". We've rebranded to "Customer Engagement & Action Platform (CEAP)" to better reflect its capabilities beyond solicitation. This is a documentation update only—package names and code remain unchanged.
 
-## Current Focus: Task 28 - Rename code modules and packages to CEAP
+## Current Focus: Task 29 - Documentation audit and cleanup
 
 This task list shows the current 2-task implementation cycle. After completing these tasks, the next cycle will be loaded from FOUNDATION.
 
@@ -18,81 +18,78 @@ This task list shows the current 2-task implementation cycle. After completing t
 
 ## Current Task Cycle
 
-- [x] Task 28: Rename code modules and packages to CEAP
-- [-] Complete cycle - Commit, push, and setup next tasks
+- [ ] Task 29: Documentation audit and cleanup
+- [ ] Complete cycle - Commit, push, and setup next tasks
 
 ---
 
-## Task 28 Details: Rename code modules and packages to CEAP
+## Task 29 Details: Documentation audit and cleanup
 
-Rename all module directories from `solicitation-*` to `ceap-*` and all package names from `com.solicitation.*` to `com.ceap.*`. This aligns the codebase with the platform rebranding to "Customer Engagement & Action Platform (CEAP)".
+Review all markdown files in the project for accuracy, consistency, and completeness. Update outdated information and fix any inconsistencies. Ensure all documentation reflects current architecture and branding.
 
-**Requirements**: All (code consistency with branding)
+**Requirements**: All (documentation quality)
 
 ### Subtasks:
 
-- [ ] 28.1 Rename module directories
-  - Rename: `solicitation-channels` → `ceap-channels`
-  - Rename: `solicitation-common` → `ceap-common`
-  - Rename: `solicitation-connectors` → `ceap-connectors`
-  - Rename: `solicitation-filters` → `ceap-filters`
-  - Rename: `solicitation-models` → `ceap-models`
-  - Rename: `solicitation-scoring` → `ceap-scoring`
-  - Rename: `solicitation-serving` → `ceap-serving`
-  - Rename: `solicitation-storage` → `ceap-storage`
-  - Rename: `solicitation-workflow-etl` → `ceap-workflow-etl`
-  - Rename: `solicitation-workflow-filter` → `ceap-workflow-filter`
-  - Rename: `solicitation-workflow-reactive` → `ceap-workflow-reactive`
-  - Rename: `solicitation-workflow-score` → `ceap-workflow-score`
-  - Rename: `solicitation-workflow-store` → `ceap-workflow-store`
-  - Use `git mv` to preserve history
+- [ ] 29.1 Audit root-level documentation
+  - Review and update `README.md`
+  - Review and update `TECH-STACK.md`
+  - Verify accuracy of project structure descriptions
+  - Ensure all links work correctly
 
-- [ ] 28.2 Update settings.gradle.kts
-  - Update all module references from `solicitation-*` to `ceap-*`
-  - Example: `include("solicitation-channels")` → `include("ceap-channels")`
+- [ ] 29.2 Audit docs/ directory
+  - Review `docs/VISUAL-ARCHITECTURE.md`
+  - Review `docs/USE-CASES.md`
+  - Review `docs/PLATFORM-EXPANSION-VISION.md`
+  - Review `docs/EXPANSION-SUMMARY.md`
+  - Review `docs/REBRANDING-STRATEGY.md`
+  - Review `docs/BRANDING.md`
+  - Verify consistency across all documents
 
-- [ ] 28.3 Update all build.gradle.kts files
-  - Update project dependencies from `:solicitation-*` to `:ceap-*`
-  - Example: `implementation(project(":solicitation-models"))` → `implementation(project(":ceap-models"))`
-  - Update in all 13 module build files
+- [ ] 29.3 Audit use case documentation
+  - Review all files in `docs/usecases/`
+  - Review all files in `docs/usecases/expansion/`
+  - Verify metrics and success criteria are accurate
+  - Ensure all use cases reflect current capabilities
 
-- [ ] 28.4 Rename package directories
-  - Rename: `com/solicitation` → `com/ceap` in all modules
-  - Use `git mv` to preserve history
-  - Affects all `src/main/kotlin` and `src/main/java` directories
+- [ ] 29.4 Audit infrastructure documentation
+  - Review `infrastructure/DYNAMODB_SCHEMA.md`
+  - Review `infrastructure/LAMBDA_CONFIGURATION.md`
+  - Review `infrastructure/LAMBDA_QUICK_REFERENCE.md`
+  - Verify accuracy of infrastructure descriptions
 
-- [ ] 28.5 Update package declarations
-  - Replace: `package com.solicitation.*` → `package com.ceap.*`
-  - Affects all Kotlin and Java source files (~150+ files)
-  - Use find and replace across all files
+- [ ] 29.5 Audit archived documentation
+  - Review files in `docs/archive/`
+  - Determine if any should be updated or removed
+  - Ensure archive is organized and relevant
 
-- [ ] 28.6 Update import statements
-  - Replace: `import com.solicitation.*` → `import com.ceap.*`
-  - Affects all Kotlin and Java source files (~150+ files)
-  - Use find and replace across all files
+- [ ] 29.6 Check for documentation gaps
+  - Identify missing documentation for implemented features
+  - Create list of documentation that needs to be written
+  - Prioritize documentation gaps by importance
 
-- [ ] 28.7 Update infrastructure CDK code
-  - Update package references in `infrastructure/src/main/kotlin`
-  - Update Lambda handler references in CDK stacks
-  - Example: `com.solicitation.workflow.etl.ETLHandler` → `com.ceap.workflow.etl.ETLHandler`
+- [ ] 29.7 Verify cross-references and links
+  - Check all internal links between documents
+  - Verify all file paths are correct after rebranding
+  - Fix any broken links or references
 
-- [ ] 28.8 Update configuration files
-  - Update `logback.xml` logger names
-  - Update any configuration files referencing package names
+- [ ] 29.8 Update version information
+  - Ensure version numbers are consistent
+  - Update "last updated" dates where applicable
+  - Document current state of implementation
 
-- [ ] 28.9 Build and test after renaming
-  - Run: `./gradlew clean build`
-  - Verify all modules compile successfully
-  - Verify all tests pass
-  - Fix any issues found
+- [ ] 29.9 Review code examples in documentation
+  - Verify code examples compile and run
+  - Update examples to use CEAP naming if Task 28 completed
+  - Ensure examples follow current best practices
 
-- [ ] 28.10 Update documentation references
-  - Update any documentation that references module names
-  - Update any documentation that references package names
-  - Keep migration notes explaining the history
+- [ ] 29.10 Create documentation improvement plan
+  - Document findings from audit
+  - Create prioritized list of improvements
+  - Estimate effort for each improvement
 
-- [ ] 28.11 Commit code renaming changes
-  - Stage all changes: `git add .`
+- [ ] 29.11 Commit documentation updates
+  - Stage all changes: `git add docs/ *.md`
   - Create descriptive commit message
   - Commit changes
 
@@ -100,32 +97,32 @@ Rename all module directories from `solicitation-*` to `ceap-*` and all package 
 
 ## Complete Cycle: Commit, Push, and Setup Next Tasks
 
-After Task 28 completion, commit any fixes, push to git, and prepare tasks.md for the next cycle.
+After Task 29 completion, commit any fixes, push to git, and prepare tasks.md for the next cycle.
 
 **IMPORTANT**: When setting up the next cycle, ALL tasks in the new tasks.md must be marked as `[ ]` not started. This is a fresh cycle start.
 
 ### Subtasks:
 
-- [-] Commit and push any fixes
+- [ ] Commit and push any fixes
   - Stage all changes with `git add -A`
   - Create descriptive commit message if fixes were needed
   - Push to origin/main
 
 - [ ] Setup next task cycle in tasks.md
-  - Read FOUNDATION/tasks.md to identify next tasks (Task 29 from FOUNDATION)
-  - Move completed Task 28 to completed-tasks.md with full details
-  - Update tasks.md with Task 29 as the new main task
-  - **CRITICAL**: Ensure ALL tasks in tasks.md are marked as `[ ]` not started (including Task 29 AND "Complete cycle" task)
+  - Read FOUNDATION/tasks.md to identify next tasks (Task 30 from FOUNDATION)
+  - Move completed Task 29 to completed-tasks.md with full details
+  - Update tasks.md with Task 30 as the new main task
+  - **CRITICAL**: Ensure ALL tasks in tasks.md are marked as `[ ]` not started (including Task 30 AND "Complete cycle" task)
   - **CRITICAL**: Ensure tasks in FOUNDATION/tasks.md are updated correctly (mark only the current finished task as done)
-  - Update the "Complete cycle" subtask to reference Task 30 for the next iteration
+  - Update the "Complete cycle" subtask to reference Task 31 for the next iteration
   - Commit and push the updated files
 
 ---
 
 ## Next Cycle Preview
 
-After Task 28 & cycle completion, the next cycle will focus on:
-- **Task 29**: Documentation audit and cleanup (from FOUNDATION)
+After Task 29 & cycle completion, the next cycle will focus on:
+- **Task 30**: TBD (from FOUNDATION)
 - **Complete cycle**: Commit, push, and setup next tasks
 
 ---
