@@ -6,6 +6,14 @@ import software.amazon.awssdk.services.dynamodb.model.*
 import java.time.Instant
 
 /**
+ * Interface for event deduplication tracking
+ */
+interface IEventDeduplicationTracker {
+    fun isDuplicate(event: CustomerEvent): Boolean
+    fun track(event: CustomerEvent)
+}
+
+/**
  * Tracks recent events for deduplication.
  * 
  * Uses DynamoDB to track events within a configurable time window.
@@ -16,7 +24,7 @@ import java.time.Instant
 open class EventDeduplicationTracker(
     private val deduplicationWindowSeconds: Long = 300, // 5 minutes default
     private val tableName: String = System.getenv("DEDUPLICATION_TABLE") ?: "solicitation-event-deduplication"
-) {
+) : IEventDeduplicationTracker {
     
     private val logger = LoggerFactory.getLogger(EventDeduplicationTracker::class.java)
     private val dynamoDb: DynamoDbClient = DynamoDbClient.builder().build()
@@ -24,7 +32,7 @@ open class EventDeduplicationTracker(
     /**
      * Check if an event is a duplicate within the deduplication window
      */
-    open fun isDuplicate(event: CustomerEvent): Boolean {
+    override fun isDuplicate(event: CustomerEvent): Boolean {
         val key = getDeduplicationKey(event)
         val now = Instant.now()
         val windowStart = now.minusSeconds(deduplicationWindowSeconds)
@@ -68,7 +76,7 @@ open class EventDeduplicationTracker(
     /**
      * Track an event for deduplication
      */
-    open fun track(event: CustomerEvent) {
+    override fun track(event: CustomerEvent) {
         val key = getDeduplicationKey(event)
         val now = Instant.now()
         val ttl = now.plusSeconds(deduplicationWindowSeconds * 2).epochSecond // TTL = 2x window

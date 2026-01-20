@@ -18,8 +18,8 @@ This task list shows the current 2-task implementation cycle. After completing t
 
 ## Current Task Cycle
 
-- [ ] Task 23: Implement real-time channel features
-- [ ] Complete cycle - Commit, push, and setup next tasks
+- [x] Task 23: Implement real-time channel features
+- [-] Complete cycle - Commit, push, and setup next tasks
 
 ---
 
@@ -72,7 +72,7 @@ After Task 23 completion, commit any fixes, push to git, and prepare tasks.md fo
 
 ### Subtasks:
 
-- [ ] Commit and push any fixes
+- [-] Commit and push any fixes
   - Stage all changes with `git add -A`
   - Create descriptive commit message if fixes were needed
   - Push to origin/main

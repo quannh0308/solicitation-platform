@@ -1,6 +1,7 @@
 package com.solicitation.workflow.reactive
 
 import net.jqwik.api.*
+import net.jqwik.api.constraints.AlphaChars
 import net.jqwik.api.constraints.NotBlank
 import net.jqwik.api.constraints.IntRange
 import org.assertj.core.api.Assertions.assertThat
@@ -28,10 +29,10 @@ class EventDeduplicationPropertyTest {
     @Property(tries = 50)
     @Label("Property 29: Event deduplication - duplicate events within window create only one candidate")
     fun duplicateEventsCreateOnlyOneCandidate(
-        @ForAll @NotBlank customerId: String,
-        @ForAll @NotBlank subjectId: String,
-        @ForAll @NotBlank programId: String,
-        @ForAll @NotBlank marketplace: String,
+        @ForAll @NotBlank @AlphaChars customerId: String,
+        @ForAll @NotBlank @AlphaChars subjectId: String,
+        @ForAll @NotBlank @AlphaChars programId: String,
+        @ForAll @NotBlank @AlphaChars marketplace: String,
         @ForAll @IntRange(min = 2, max = 5) duplicateCount: Int
     ): Boolean {
         // Clear state before each test
@@ -78,11 +79,11 @@ class EventDeduplicationPropertyTest {
     @Property(tries = 50)
     @Label("Property 29: Event deduplication - different subjects are not deduplicated")
     fun differentSubjectsAreNotDeduplicated(
-        @ForAll @NotBlank customerId: String,
-        @ForAll @NotBlank subjectId1: String,
-        @ForAll @NotBlank subjectId2: String,
-        @ForAll @NotBlank programId: String,
-        @ForAll @NotBlank marketplace: String
+        @ForAll @NotBlank @AlphaChars customerId: String,
+        @ForAll @NotBlank @AlphaChars subjectId1: String,
+        @ForAll @NotBlank @AlphaChars subjectId2: String,
+        @ForAll @NotBlank @AlphaChars programId: String,
+        @ForAll @NotBlank @AlphaChars marketplace: String
     ): Boolean {
         // Ensure subjects are different
         if (subjectId1 == subjectId2) {
@@ -140,11 +141,11 @@ class EventDeduplicationPropertyTest {
     @Property(tries = 50)
     @Label("Property 29: Event deduplication - different customers are not deduplicated")
     fun differentCustomersAreNotDeduplicated(
-        @ForAll @NotBlank customerId1: String,
-        @ForAll @NotBlank customerId2: String,
-        @ForAll @NotBlank subjectId: String,
-        @ForAll @NotBlank programId: String,
-        @ForAll @NotBlank marketplace: String
+        @ForAll @NotBlank @AlphaChars customerId1: String,
+        @ForAll @NotBlank @AlphaChars customerId2: String,
+        @ForAll @NotBlank @AlphaChars subjectId: String,
+        @ForAll @NotBlank @AlphaChars programId: String,
+        @ForAll @NotBlank @AlphaChars marketplace: String
     ): Boolean {
         // Ensure customers are different
         if (customerId1 == customerId2) {

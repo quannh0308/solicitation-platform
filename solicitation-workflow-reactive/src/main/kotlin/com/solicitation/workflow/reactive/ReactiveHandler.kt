@@ -65,7 +65,7 @@ class DefaultScoringProvider : BaseScoringProvider() {
  */
 class ReactiveHandler(
     private val candidateRepository: CandidateRepository? = null,
-    private val deduplicationTracker: EventDeduplicationTracker? = null,
+    private val deduplicationTracker: IEventDeduplicationTracker? = null,
     private val filterChainExecutor: FilterChainExecutor? = null,
     private val multiModelScorer: MultiModelScorer? = null
 ) : RequestHandler<Map<String, Any>, ReactiveResponse> {

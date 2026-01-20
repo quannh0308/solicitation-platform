@@ -158,11 +158,9 @@ class MockCandidateRepository : CandidateRepository {
 /**
  * Mock event deduplication tracker for testing
  */
-class MockEventDeduplicationTracker : EventDeduplicationTracker(
-    deduplicationWindowSeconds = 300,
-    tableName = "mock-deduplication-table"
-) {
+class MockEventDeduplicationTracker : IEventDeduplicationTracker {
     private val trackedEvents = ConcurrentHashMap<String, Long>()
+    private val deduplicationWindowSeconds = 300L // 5 minutes
     
     override fun isDuplicate(event: CustomerEvent): Boolean {
         val key = getDeduplicationKey(event)
@@ -170,7 +168,7 @@ class MockEventDeduplicationTracker : EventDeduplicationTracker(
         val lastEventTime = trackedEvents[key]
         
         return if (lastEventTime != null) {
-            val windowMs = 300 * 1000 // 5 minutes
+            val windowMs = deduplicationWindowSeconds * 1000
             (now - lastEventTime) < windowMs
         } else {
             false

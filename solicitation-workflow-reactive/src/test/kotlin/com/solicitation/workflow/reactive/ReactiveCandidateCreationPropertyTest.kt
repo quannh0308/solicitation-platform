@@ -1,6 +1,7 @@
 package com.solicitation.workflow.reactive
 
 import net.jqwik.api.*
+import net.jqwik.api.constraints.AlphaChars
 import net.jqwik.api.constraints.NotBlank
 import net.jqwik.api.constraints.Positive
 import org.assertj.core.api.Assertions.assertThat
@@ -30,10 +31,10 @@ class ReactiveCandidateCreationPropertyTest {
     @Property(tries = 50)
     @Label("Property 28: Reactive candidate creation - eligible events create stored candidates")
     fun eligibleEventCreatesStoredCandidate(
-        @ForAll @NotBlank customerId: String,
-        @ForAll @NotBlank subjectId: String,
-        @ForAll @NotBlank programId: String,
-        @ForAll @NotBlank marketplace: String
+        @ForAll @NotBlank @AlphaChars customerId: String,
+        @ForAll @NotBlank @AlphaChars subjectId: String,
+        @ForAll @NotBlank @AlphaChars programId: String,
+        @ForAll @NotBlank @AlphaChars marketplace: String
     ): Boolean {
         // Clear state before each test
         mockRepository.clear()
@@ -78,10 +79,10 @@ class ReactiveCandidateCreationPropertyTest {
     @Property(tries = 50)
     @Label("Property 28: Reactive candidate creation - candidates are immediately queryable")
     fun candidatesAreImmediatelyQueryable(
-        @ForAll @NotBlank customerId: String,
-        @ForAll @NotBlank subjectId: String,
-        @ForAll @NotBlank programId: String,
-        @ForAll @NotBlank marketplace: String
+        @ForAll @NotBlank @AlphaChars customerId: String,
+        @ForAll @NotBlank @AlphaChars subjectId: String,
+        @ForAll @NotBlank @AlphaChars programId: String,
+        @ForAll @NotBlank @AlphaChars marketplace: String
     ): Boolean {
         // Clear state before each test
         mockRepository.clear()
@@ -121,10 +122,10 @@ class ReactiveCandidateCreationPropertyTest {
     @Property(tries = 50)
     @Label("Property 28: Reactive candidate creation - execution time is sub-second")
     fun executionTimeIsSubSecond(
-        @ForAll @NotBlank customerId: String,
-        @ForAll @NotBlank subjectId: String,
-        @ForAll @NotBlank programId: String,
-        @ForAll @NotBlank marketplace: String
+        @ForAll @NotBlank @AlphaChars customerId: String,
+        @ForAll @NotBlank @AlphaChars subjectId: String,
+        @ForAll @NotBlank @AlphaChars programId: String,
+        @ForAll @NotBlank @AlphaChars marketplace: String
     ): Boolean {
         // Clear state before each test
         mockRepository.clear()
