@@ -39,39 +39,41 @@ This is a cloud-native, event-driven system built on AWS using Kotlin with a **m
 The project uses a multi-module Gradle structure for better modularity and independent deployment:
 
 ### Library Modules (Reusable Components)
-- **solicitation-common**: Shared utilities, logging, PII redaction
-- **solicitation-models**: Data models (Candidate, Context, Subject, Score)
-- **solicitation-storage**: DynamoDB repository layer
-- **solicitation-connectors**: Data source connectors (Athena, S3)
-- **solicitation-scoring**: Scoring engine with ML integration
-- **solicitation-filters**: Filter pipeline for eligibility rules
-- **solicitation-serving**: Low-latency serving API logic
-- **solicitation-channels**: Channel adapters (email, push, in-app, voice)
+- **ceap-common**: Shared utilities, logging, PII redaction
+- **ceap-models**: Data models (Candidate, Context, Subject, Score)
+- **ceap-storage**: DynamoDB repository layer
+- **ceap-connectors**: Data source connectors (Athena, S3)
+- **ceap-scoring**: Scoring engine with ML integration
+- **ceap-filters**: Filter pipeline for eligibility rules
+- **ceap-serving**: Low-latency serving API logic
+- **ceap-channels**: Channel adapters (email, push, in-app, voice)
 
 ### Deployable Modules (Lambda Functions)
-- **solicitation-workflow-etl**: ETL Lambda for data extraction
-- **solicitation-workflow-filter**: Filter Lambda for eligibility checks
-- **solicitation-workflow-score**: Score Lambda for ML model execution
-- **solicitation-workflow-store**: Store Lambda for DynamoDB writes
-- **solicitation-workflow-reactive**: Reactive Lambda for real-time events
+- **ceap-workflow-etl**: ETL Lambda for data extraction
+- **ceap-workflow-filter**: Filter Lambda for eligibility checks
+- **ceap-workflow-score**: Score Lambda for ML model execution
+- **ceap-workflow-store**: Store Lambda for DynamoDB writes
+- **ceap-workflow-reactive**: Reactive Lambda for real-time events
 
-**See [MULTI-MODULE-ARCHITECTURE.md](MULTI-MODULE-ARCHITECTURE.md) for detailed architecture documentation.**
+> **Note**: Module directories use `ceap-*` naming (CEAP branding), but package names remain `com.solicitation.*` for backward compatibility.
+
+**See [docs/archive/MULTI-MODULE-ARCHITECTURE.md](docs/archive/MULTI-MODULE-ARCHITECTURE.md) for detailed architecture documentation.**
 
 ## Project Structure
 
 ```
-solicitation-platform/
+customer-engagement-platform/
 ├── build.gradle.kts                 # Root Gradle build configuration
 ├── settings.gradle.kts              # Gradle settings (module definitions)
 ├── gradlew                          # Gradle wrapper script
 ├── gradle/                          # Gradle wrapper files
-├── */build.gradle.kts               # Module-specific build files
+├── ceap-*/build.gradle.kts          # Module-specific build files
 ├── infrastructure/                   # AWS CDK infrastructure (Kotlin)
 │   ├── build.gradle.kts             # CDK dependencies
 │   ├── cdk.json                     # CDK configuration
 │   ├── deploy-cdk.sh                # CDK deployment script
 │   └── src/main/kotlin/
-│       └── com/solicitation/infrastructure/
+│       └── com/ceap/infrastructure/
 │           ├── SolicitationPlatformApp.kt    # CDK app entry point
 │           ├── constructs/
 │           │   └── SolicitationLambda.kt     # Reusable Lambda construct
@@ -83,28 +85,34 @@ solicitation-platform/
 │               ├── StoreWorkflowStack.kt     # Store Lambda
 │               ├── ReactiveWorkflowStack.kt  # Reactive Lambda
 │               └── OrchestrationStack.kt     # Step Functions + EventBridge
+│   ├── DYNAMODB_SCHEMA.md           # DynamoDB schema documentation
+│   ├── LAMBDA_CONFIGURATION.md      # Lambda configuration guide
+│   ├── LAMBDA_QUICK_REFERENCE.md    # Lambda quick reference
 │   ├── dynamodb-tables.yaml         # DynamoDB table definitions
 │   ├── lambda-functions.yaml        # Lambda configurations
 │   ├── step-functions.yaml          # Workflow definitions
 │   └── eventbridge-rules.yaml       # Event rules
-├── src/
-│   ├── main/
-│   │   ├── java/com/solicitation/
-│   │   │   ├── model/               # Data models
-│   │   │   ├── storage/             # DynamoDB repositories
-│   │   │   ├── connector/           # Data connectors
-│   │   │   ├── scoring/             # Scoring engine
-│   │   │   ├── filter/              # Filter pipeline
-│   │   │   ├── serving/             # Serving API
-│   │   │   ├── channel/             # Channel adapters
-│   │   │   ├── workflow/            # Workflow handlers
-│   │   │   ├── config/              # Configuration
-│   │   │   └── util/                # Utilities
-│   │   └── resources/
-│   │       ├── logback.xml          # Logging configuration
-│   │       └── application.properties
-│   └── test/
-│       └── java/com/solicitation/   # Test files
+├── ceap-common/                     # Shared utilities module
+├── ceap-models/                     # Data models module
+├── ceap-storage/                    # DynamoDB repository module
+├── ceap-connectors/                 # Data connectors module
+├── ceap-scoring/                    # Scoring engine module
+├── ceap-filters/                    # Filter pipeline module
+├── ceap-serving/                    # Serving API module
+├── ceap-channels/                   # Channel adapters module
+├── ceap-workflow-etl/               # ETL Lambda module
+├── ceap-workflow-filter/            # Filter Lambda module
+├── ceap-workflow-score/             # Score Lambda module
+├── ceap-workflow-store/             # Store Lambda module
+├── ceap-workflow-reactive/          # Reactive Lambda module
+├── docs/                            # Documentation
+│   ├── VISUAL-ARCHITECTURE.md       # Architecture diagrams
+│   ├── USE-CASES.md                 # Use case catalog
+│   ├── PLATFORM-EXPANSION-VISION.md # Expansion plans
+│   ├── REBRANDING-STRATEGY.md       # Rebranding documentation
+│   ├── BRANDING.md                  # Branding guidelines
+│   ├── usecases/                    # Use case documentation
+│   └── archive/                     # Archived documentation
 ├── scripts/
 │   ├── build.sh                     # Build script
 │   └── deploy.sh                    # Deployment script
@@ -112,6 +120,8 @@ solicitation-platform/
     └── workflows/
         └── build.yml                # CI/CD pipeline
 ```
+
+> **Note**: Package names within modules use `com.solicitation.*` for backward compatibility, while module directories use `ceap-*` naming.
 
 ## Building the Project
 
@@ -122,12 +132,12 @@ solicitation-platform/
 
 ### Build Specific Module
 ```bash
-./gradlew :solicitation-workflow-etl:build
+./gradlew :ceap-workflow-etl:build
 ```
 
 ### Build Only Deployable Lambdas
 ```bash
-./gradlew :solicitation-workflow-etl:shadowJar :solicitation-workflow-filter:shadowJar :solicitation-workflow-score:shadowJar :solicitation-workflow-store:shadowJar :solicitation-workflow-reactive:shadowJar
+./gradlew :ceap-workflow-etl:shadowJar :ceap-workflow-filter:shadowJar :ceap-workflow-score:shadowJar :ceap-workflow-store:shadowJar :ceap-workflow-reactive:shadowJar
 ```
 
 ### Run Tests
@@ -137,7 +147,7 @@ solicitation-platform/
 
 ### Run Tests for Specific Module
 ```bash
-./gradlew :solicitation-models:test
+./gradlew :ceap-models:test
 ```
 
 ### Clean Build
@@ -190,11 +200,11 @@ solicitation-platform/
 
 After building, 5 independent Lambda JARs are created:
 
-1. `solicitation-workflow-etl/build/libs/solicitation-workflow-etl-1.0.0-SNAPSHOT.jar`
-2. `solicitation-workflow-filter/build/libs/solicitation-workflow-filter-1.0.0-SNAPSHOT.jar`
-3. `solicitation-workflow-score/build/libs/solicitation-workflow-score-1.0.0-SNAPSHOT.jar`
-4. `solicitation-workflow-store/build/libs/solicitation-workflow-store-1.0.0-SNAPSHOT.jar`
-5. `solicitation-workflow-reactive/build/libs/solicitation-workflow-reactive-1.0.0-SNAPSHOT.jar`
+1. `ceap-workflow-etl/build/libs/ceap-workflow-etl-1.0.0-SNAPSHOT.jar`
+2. `ceap-workflow-filter/build/libs/ceap-workflow-filter-1.0.0-SNAPSHOT.jar`
+3. `ceap-workflow-score/build/libs/ceap-workflow-score-1.0.0-SNAPSHOT.jar`
+4. `ceap-workflow-store/build/libs/ceap-workflow-store-1.0.0-SNAPSHOT.jar`
+5. `ceap-workflow-reactive/build/libs/ceap-workflow-reactive-1.0.0-SNAPSHOT.jar`
 
 Each JAR is uploaded to S3 and deployed independently to its respective Lambda function.
 
@@ -288,26 +298,26 @@ The platform uses structured JSON logging with:
 ## Adding New Components
 
 ### Adding a New Connector
-1. Create new module: `solicitation-connectors-kinesis/`
+1. Create new module: `ceap-connectors-kinesis/`
 2. Add `build.gradle.kts` with dependencies
 3. Implement `DataConnector` interface
 4. Add module to `settings.gradle.kts`
 5. Build: `./gradlew build`
 
 ### Adding a New Filter
-1. Add filter class to `solicitation-filters` module
+1. Add filter class to `ceap-filters` module
 2. Implement `Filter` interface
 3. Register in `FilterChainExecutor`
 4. Add tests
-5. Build: `./gradlew :solicitation-filters:build`
+5. Build: `./gradlew :ceap-filters:build`
 
 ### Adding a New Lambda
-1. Create new module: `solicitation-workflow-<name>/`
+1. Create new module: `ceap-workflow-<name>/`
 2. Add `build.gradle.kts` with dependencies and shadow plugin
 3. Implement Lambda handler
 4. Add module to `settings.gradle.kts`
 5. Update CloudFormation template
-6. Build: `./gradlew :solicitation-workflow-<name>:shadowJar`
+6. Build: `./gradlew :ceap-workflow-<name>:shadowJar`
 
 See [MULTI-MODULE-ARCHITECTURE.md](docs/archive/MULTI-MODULE-ARCHITECTURE.md) for detailed instructions.
 
@@ -322,12 +332,12 @@ The project includes GitHub Actions workflow for:
 
 ## Next Steps
 
-After project setup (Task 1), the following tasks will be implemented:
-- Task 2: Core data models (Candidate, Context, Subject) in `solicitation-models`
-- Task 3: DynamoDB storage layer in `solicitation-storage`
-- Task 4: Data connectors in `solicitation-connectors`
-- Task 5: Scoring engine in `solicitation-scoring`
-- And more...
+After project setup (Task 1), the following tasks have been implemented:
+- ✅ Task 2: Core data models (Candidate, Context, Subject) in `ceap-models`
+- ✅ Task 3: DynamoDB storage layer in `ceap-storage`
+- ✅ Task 4-29: All implementation tasks complete
+
+**The platform is now production-ready!** See [.kiro/specs/customer-engagement-platform/tasks.md](.kiro/specs/customer-engagement-platform/tasks.md) for implementation status.
 
 ## Benefits of Multi-Module Gradle + Kotlin Architecture
 

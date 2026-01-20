@@ -114,21 +114,23 @@
 ### Module List
 
 #### Libraries
-1. `solicitation-common` - Utilities, logging, PII redaction
-2. `solicitation-models` - Data models (Candidate, Context, Subject)
-3. `solicitation-storage` - DynamoDB repository layer
-4. `solicitation-connectors` - Data source connectors
-5. `solicitation-scoring` - Scoring engine with ML
-6. `solicitation-filters` - Filter pipeline
-7. `solicitation-serving` - Serving API logic
-8. `solicitation-channels` - Channel adapters
+1. `ceap-common` - Utilities, logging, PII redaction
+2. `ceap-models` - Data models (Candidate, Context, Subject)
+3. `ceap-storage` - DynamoDB repository layer
+4. `ceap-connectors` - Data source connectors
+5. `ceap-scoring` - Scoring engine with ML
+6. `ceap-filters` - Filter pipeline
+7. `ceap-serving` - Serving API logic
+8. `ceap-channels` - Channel adapters
 
 #### Lambdas
-1. `solicitation-workflow-etl` - ETL workflow
-2. `solicitation-workflow-filter` - Filter workflow
-3. `solicitation-workflow-score` - Score workflow
-4. `solicitation-workflow-store` - Store workflow
-5. `solicitation-workflow-reactive` - Reactive workflow
+1. `ceap-workflow-etl` - ETL workflow
+2. `ceap-workflow-filter` - Filter workflow
+3. `ceap-workflow-score` - Score workflow
+4. `ceap-workflow-store` - Store workflow
+5. `ceap-workflow-reactive` - Reactive workflow
+
+> **Note**: Module directories use `ceap-*` naming (CEAP branding), but package names remain `com.solicitation.*` for backward compatibility.
 
 ### Infrastructure (AWS CDK)
 
@@ -245,8 +247,8 @@ Technology stack is documented in:
 ## Status
 
 **Last Migration:** AWS CDK (January 17, 2026)
-**Current State:** ✅ All migrations complete, pushed to origin/main
-**Next Step:** Implement Task 2 (data models in Kotlin)
+**Current State:** ✅ All migrations complete, all 29 tasks implemented
+**Implementation Status:** ✅ Production-ready
 
 **Technology Maturity:** 🎯 Production-ready, modern, best-practice
 
