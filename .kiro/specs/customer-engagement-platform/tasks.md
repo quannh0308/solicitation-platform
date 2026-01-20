@@ -2,7 +2,7 @@
 
 > **Platform Rebranding Note**: This platform was formerly known as the "General Solicitation Platform". We've rebranded to "Customer Engagement & Action Platform (CEAP)" to better reflect its capabilities beyond solicitation. This is a documentation update only—package names and code remain unchanged.
 
-## Current Focus: Task 26 - Final integration and end-to-end testing
+## Current Focus: Task 27 - Final checkpoint - Ensure all tests pass
 
 This task list shows the current 2-task implementation cycle. After completing these tasks, the next cycle will be loaded from FOUNDATION.
 
@@ -18,68 +18,72 @@ This task list shows the current 2-task implementation cycle. After completing t
 
 ## Current Task Cycle
 
-- [x] Task 26: Final integration and end-to-end testing
-- [-] Complete cycle - Commit, push, and setup next tasks
+- [ ] Task 27: Final checkpoint - Ensure all tests pass
+- [ ] Complete cycle - Commit, push, and setup next tasks
 
 ---
 
-## Task 26 Details: Final integration and end-to-end testing
+## Task 27 Details: Final checkpoint - Ensure all tests pass
 
-Run comprehensive end-to-end tests to validate the complete platform functionality across all workflows.
+Run all tests across all modules to ensure the platform is fully functional and all correctness properties are validated.
 
 ### Subtasks:
 
-- [ ]* 26.1 Run end-to-end batch workflow test
-  - Test complete flow from data warehouse to storage
-  - Verify all stages execute correctly
-  - Verify metrics are published
+- [ ] 27.1 Run all unit tests
+  - Execute: `./gradlew test`
+  - Verify all unit tests pass
+  - Fix any failing tests
 
-- [ ]* 26.2 Run end-to-end reactive workflow test
-  - Test event-driven candidate creation
-  - Verify sub-second latency
-  - Verify candidate availability
+- [ ] 27.2 Run all property-based tests
+  - Execute: `./gradlew test --tests "*PropertyTest"`
+  - Verify all property tests pass (100+ iterations each)
+  - Fix any failing property tests
 
-- [ ]* 26.3 Run end-to-end serving API test
-  - Test API with real DynamoDB backend
-  - Test various query patterns
-  - Verify latency targets
+- [ ] 27.3 Run all integration tests
+  - Execute: `./gradlew test --tests "*IntegrationTest"`
+  - Verify all integration tests pass
+  - Fix any failing integration tests
 
-- [ ]* 26.4 Run end-to-end channel delivery test
-  - Test email campaign creation
-  - Test in-app serving
-  - Test shadow mode
-  - Verify delivery tracking
+- [ ] 27.4 Run end-to-end tests
+  - Execute: `./gradlew test --tests "*EndToEndPropertyTest"`
+  - Verify all end-to-end tests pass
+  - Fix any failing end-to-end tests
+
+- [ ] 27.5 Verify build succeeds
+  - Execute: `./gradlew clean build`
+  - Verify all modules compile successfully
+  - Verify no warnings or errors
 
 ---
 
 ## Complete Cycle: Commit, Push, and Setup Next Tasks
 
-After Task 26 completion, commit any fixes, push to git, and prepare tasks.md for the next cycle.
+After Task 27 completion, commit any fixes, push to git, and prepare tasks.md for the next cycle.
 
 **IMPORTANT**: When setting up the next cycle, ALL tasks in the new tasks.md must be marked as `[ ]` not started. This is a fresh cycle start.
 
 ### Subtasks:
 
-- [-] Commit and push any fixes
+- [ ] Commit and push any fixes
   - Stage all changes with `git add -A`
   - Create descriptive commit message if fixes were needed
   - Push to origin/main
 
 - [ ] Setup next task cycle in tasks.md
-  - Read FOUNDATION/tasks.md to identify next tasks (Task 27 from FOUNDATION)
-  - Move completed Task 26 to completed-tasks.md with full details
-  - Update tasks.md with Task 27 as the new main task
-  - **CRITICAL**: Ensure ALL tasks in tasks.md are marked as `[ ]` not started (including Task 27 AND "Complete cycle" task)
+  - Read FOUNDATION/tasks.md to identify next tasks (Task 28 from FOUNDATION)
+  - Move completed Task 27 to completed-tasks.md with full details
+  - Update tasks.md with Task 28 as the new main task
+  - **CRITICAL**: Ensure ALL tasks in tasks.md are marked as `[ ]` not started (including Task 28 AND "Complete cycle" task)
   - **CRITICAL**: Ensure tasks in FOUNDATION/tasks.md are updated correctly (mark only the current finished task as done)
-  - Update the "Complete cycle" subtask to reference Task 28 for the next iteration
+  - Update the "Complete cycle" subtask to reference Task 29 for the next iteration
   - Commit and push the updated files
 
 ---
 
 ## Next Cycle Preview
 
-After Task 26 & cycle completion, the next cycle will focus on:
-- **Task 27**: Final checkpoint - Ensure all tests pass (from FOUNDATION)
+After Task 27 & cycle completion, the next cycle will focus on:
+- **Task 28**: Rename code modules and packages to CEAP (from FOUNDATION)
 - **Complete cycle**: Commit, push, and setup next tasks
 
 ---
