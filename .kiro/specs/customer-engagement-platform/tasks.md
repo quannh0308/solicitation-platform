@@ -18,8 +18,8 @@ This task list shows the current 2-task implementation cycle. After completing t
 
 ## Current Task Cycle
 
-- [ ] Task 25: Implement version monotonicity tracking
-- [ ] Complete cycle - Commit, push, and setup next tasks
+- [x] Task 25: Implement version monotonicity tracking
+- [-] Complete cycle - Commit, push, and setup next tasks
 
 ---
 
@@ -34,9 +34,10 @@ Add version increment logic to candidate updates to ensure version numbers incre
   - Ensure updatedAt timestamp is current
   - _Requirements: 2.5_
 
-- [ ]* 25.2 Write property test for version monotonicity
+- [x]* 25.2 Write property test for version monotonicity
   - **Property 4: Version monotonicity**
   - **Validates: Requirements 2.5**
+  - **Status**: PASSED ✅
 
 ---
 
@@ -48,7 +49,7 @@ After Task 25 completion, commit any fixes, push to git, and prepare tasks.md fo
 
 ### Subtasks:
 
-- [ ] Commit and push any fixes
+- [-] Commit and push any fixes
   - Stage all changes with `git add -A`
   - Create descriptive commit message if fixes were needed
   - Push to origin/main
