@@ -6,7 +6,7 @@
 
 **Processing Mode**: Reactive (Real-time event-driven, ultra-low latency)
 
-**Action Type**: Account Protection (not solicitation)
+**Action Type**: Account Protection
 
 **Actors**:
 - Customer (account owner)
@@ -596,4 +596,4 @@ This use case demonstrates:
 - ✅ **Customer trust** (4.9/5.0 trust score)
 - ✅ **Scalability** (5,000 events/second)
 
-**Key Insight**: This is NOT solicitation—it's proactive account protection. The platform detects takeover attempts and takes immediate protective action to secure customer accounts!
+**Key Insight**: This is proactive account protection. The platform detects takeover attempts and takes immediate protective action to secure customer accounts!

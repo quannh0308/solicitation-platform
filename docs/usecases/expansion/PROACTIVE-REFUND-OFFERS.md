@@ -6,7 +6,7 @@
 
 **Processing Mode**: Batch (Daily scheduled job)
 
-**Action Type**: Goodwill Gesture (not solicitation)
+**Action Type**: Goodwill Gesture
 
 **Actors**:
 - Customer (affected)
@@ -583,4 +583,4 @@ This use case demonstrates:
 - ✅ **Revenue saved** ($2.8M annually)
 - ✅ **Proactive goodwill** (reach out before complaints)
 
-**Key Insight**: This is NOT solicitation—it's proactive customer care through automated compensation. The platform detects negative experiences and delivers goodwill gestures before customers complain!
+**Key Insight**: This is proactive customer care through automated compensation. The platform detects negative experiences and delivers goodwill gestures before customers complain!

@@ -130,13 +130,13 @@
 4. `ceap-workflow-store` - Store workflow
 5. `ceap-workflow-reactive` - Reactive workflow
 
-> **Note**: Module directories use `ceap-*` naming (CEAP branding), but package names remain `com.solicitation.*` for backward compatibility.
+> **Note**: Module directories use `ceap-*` naming (CEAP branding), and package names use `com.ceap.*` following the CEAP branding.
 
 ### Infrastructure (AWS CDK)
 
 **8 CDK Files:**
-1. `SolicitationPlatformApp.kt` - Main CDK app
-2. `SolicitationLambda.kt` - Reusable Lambda construct
+1. `CeapPlatformApp.kt` - Main CDK app
+2. `CeapLambda.kt` - Reusable Lambda construct
 3. `DatabaseStack.kt` - DynamoDB tables
 4. `EtlWorkflowStack.kt` - ETL Lambda stack
 5. `FilterWorkflowStack.kt` - Filter Lambda stack

@@ -6,7 +6,7 @@
 
 **Processing Mode**: Reactive (Real-time event-driven, ultra-low latency)
 
-**Action Type**: Transaction Protection (not solicitation)
+**Action Type**: Transaction Protection
 
 **Actors**:
 - Cardholder (customer)
@@ -562,4 +562,4 @@ This use case demonstrates:
 - ✅ **Customer satisfaction** (4.7/5.0 despite blocks)
 - ✅ **Extreme scalability** (50,000 transactions/second)
 
-**Key Insight**: This is NOT solicitation—it's real-time financial protection. The platform detects fraudulent transactions and takes immediate action to protect cardholders!
+**Key Insight**: This is real-time financial protection. The platform detects fraudulent transactions and takes immediate action to protect cardholders!

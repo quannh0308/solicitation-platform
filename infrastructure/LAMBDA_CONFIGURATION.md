@@ -1,6 +1,6 @@
 # Lambda Function Configurations
 
-> **Platform Rebranding Note**: This platform was formerly known as the "General Solicitation Platform". We've rebranded to "Customer Engagement & Action Platform (CEAP)" to better reflect its capabilities beyond customer engagement. Package names now use `com.ceap.*` and handler paths use `com.ceap.workflow.*` following the CEAP branding.
+> **Platform Rebranding Note**: This platform was formerly known as the "General Engagement Platform". We've rebranded to "Customer Engagement & Action Platform (CEAP)" to better reflect its capabilities. Package names now use `com.ceap.*` and handler paths use `com.ceap.workflow.*` following the CEAP branding.
 
 This document describes the Lambda function configurations for the Customer Engagement & Action Platform (CEAP).
 

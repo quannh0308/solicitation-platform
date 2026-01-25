@@ -1,6 +1,6 @@
 # Use Cases - Customer Engagement & Action Platform (CEAP)
 
-> **Platform Rebranding Note**: This platform was formerly known as the "General Solicitation Platform". We've rebranded to "Customer Engagement & Action Platform (CEAP)" to better reflect its capabilities beyond solicitation. Package names (`com.solicitation.*`) remain unchanged for backward compatibility.
+> **Platform Rebranding Note**: This platform was formerly known as the "General Engagement Platform". We've rebranded to "Customer Engagement & Action Platform (CEAP)" to better reflect its capabilities. Package names (`com.ceap.*`) follow the CEAP branding.
 
 ## Overview
 
@@ -22,7 +22,7 @@ The Customer Engagement & Action Platform (CEAP) enables businesses to deliver i
 
 ### Use Case 1: E-Commerce Product Reviews
 
-**Business Goal**: Increase product review volume by 30% by soliciting reviews from verified purchasers at optimal times.
+**Business Goal**: Increase product review volume by 30% by requesting reviews from verified purchasers at optimal times.
 
 **Actors**: 
 - Customer (purchaser)
@@ -34,7 +34,7 @@ The Customer Engagement & Action Platform (CEAP) enables businesses to deliver i
 2. System waits for delivery confirmation (reactive trigger)
 3. System checks eligibility:
    - Customer has received the product
-   - Customer hasn't been solicited for this product before
+   - Customer hasn't been contacted for this product before
    - Customer hasn't opted out of review requests
    - Product is eligible for reviews (not restricted category)
 4. ML model scores the likelihood of review submission
@@ -50,7 +50,7 @@ The Customer Engagement & Action Platform (CEAP) enables businesses to deliver i
 **Success Metrics**:
 - 25% review submission rate
 - P99 latency < 30ms for candidate retrieval
-- 0% solicitations to opted-out customers
+- 0% requests to opted-out customers
 
 ---
 
@@ -533,7 +533,7 @@ Week 1, Sunday 10:00 AM - Event Day
 **Goal**: Ingest real-time events from Kinesis stream.
 
 **Steps**:
-1. Create module: `solicitation-connectors-kinesis/`
+1. Create module: `ceap-connectors-kinesis/`
 2. Implement `DataConnector` interface:
    ```kotlin
    class KinesisConnector : DataConnector {
@@ -549,7 +549,7 @@ Week 1, Sunday 10:00 AM - Event Day
    }
    ```
 3. Add to `settings.gradle.kts`
-4. Build: `./gradlew :solicitation-connectors-kinesis:build`
+4. Build: `./gradlew :ceap-connectors-kinesis:build`
 5. Update ETL Lambda dependency
 6. Deploy: `./infrastructure/deploy-cdk.sh -e dev -s EtlWorkflow`
 
@@ -562,7 +562,7 @@ Week 1, Sunday 10:00 AM - Event Day
 **Goal**: Filter candidates by customer location.
 
 **Steps**:
-1. Add class to `solicitation-filters` module:
+1. Add class to `ceap-filters` module:
    ```kotlin
    class GeographicFilter : Filter {
        override fun getFilterId() = "geographic"
@@ -579,7 +579,7 @@ Week 1, Sunday 10:00 AM - Event Day
        }
    }
    ```
-2. Build: `./gradlew :solicitation-filters:build`
+2. Build: `./gradlew :ceap-filters:build`
 3. Update program config to include geographic filter
 4. Deploy: `./infrastructure/deploy-cdk.sh -e dev -s FilterWorkflow`
 
@@ -592,7 +592,7 @@ Week 1, Sunday 10:00 AM - Event Day
 **Goal**: Use AWS Bedrock for candidate scoring.
 
 **Steps**:
-1. Add class to `solicitation-scoring` module:
+1. Add class to `ceap-scoring` module:
    ```kotlin
    class BedrockScoringProvider : ScoringProvider {
        override fun getModelId() = "bedrock-claude"
@@ -606,7 +606,7 @@ Week 1, Sunday 10:00 AM - Event Day
        }
    }
    ```
-2. Build: `./gradlew :solicitation-scoring:build`
+2. Build: `./gradlew :ceap-scoring:build`
 3. Update program config with new model
 4. Deploy: `./infrastructure/deploy-cdk.sh -e dev -s ScoreWorkflow`
 
@@ -616,10 +616,10 @@ Week 1, Sunday 10:00 AM - Event Day
 
 ### Use Case 17: Adding WhatsApp Channel (5 minutes)
 
-**Goal**: Deliver solicitations via WhatsApp.
+**Goal**: Deliver engagements via WhatsApp.
 
 **Steps**:
-1. Add class to `solicitation-channels` module:
+1. Add class to `ceap-channels` module:
    ```kotlin
    class WhatsAppChannelAdapter : ChannelAdapter {
        override fun getChannelId() = "whatsapp"
@@ -633,7 +633,7 @@ Week 1, Sunday 10:00 AM - Event Day
        }
    }
    ```
-2. Build: `./gradlew :solicitation-channels:build`
+2. Build: `./gradlew :ceap-channels:build`
 3. Update program config to include WhatsApp channel
 4. Deploy: `./infrastructure/deploy-cdk.sh -e dev -s ServeWorkflow`
 

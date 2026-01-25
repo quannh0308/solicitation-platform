@@ -6,7 +6,7 @@
 
 **Processing Mode**: Reactive (Real-time event-driven, ultra-low latency)
 
-**Action Type**: Security Alert & Protection (not solicitation)
+**Action Type**: Security Alert & Protection
 
 **Actors**:
 - Customer (account owner)
@@ -579,4 +579,4 @@ This use case demonstrates:
 - ✅ **Account protection** (98% takeover prevention)
 - ✅ **Scalability** (10,000 events/second)
 
-**Key Insight**: This is NOT solicitation—it's proactive security protection. The platform detects threats and takes immediate action to protect customer accounts!
+**Key Insight**: This is proactive security protection. The platform detects threats and takes immediate action to protect customer accounts!

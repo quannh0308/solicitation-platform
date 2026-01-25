@@ -6,7 +6,7 @@
 
 **Processing Mode**: Batch (Daily scheduled job)
 
-**Action Type**: Personalized Recommendation (not solicitation)
+**Action Type**: Personalized Recommendation
 
 **Actors**:
 - Customer (shopper)
@@ -501,4 +501,4 @@ This use case demonstrates:
 - ✅ **Cost efficiency** ($0.19 per conversion)
 - ✅ **Real-time serving** (12ms P99 latency)
 
-**Key Insight**: This is NOT solicitation—it's revenue generation through intelligent recommendations. The platform identifies purchase intent and delivers personalized product suggestions!
+**Key Insight**: This is revenue generation through intelligent recommendations. The platform identifies purchase intent and delivers personalized product suggestions!

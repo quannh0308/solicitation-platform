@@ -6,7 +6,7 @@
 
 **Processing Mode**: Reactive (Real-time event-driven)
 
-**Action Type**: Proactive Support (not solicitation)
+**Action Type**: Proactive Support
 
 **Actors**:
 - Customer (experiencing issue)
@@ -575,4 +575,4 @@ This use case demonstrates:
 - ✅ **Customer satisfaction** (4.7/5.0 vs 3.2 without)
 - ✅ **Scalability** (10,000 events/second)
 
-**Key Insight**: This is NOT solicitation—it's proactive value delivery. The platform identifies problems and delivers solutions before customers even complain!
+**Key Insight**: This is proactive value delivery. The platform identifies problems and delivers solutions before customers even complain!

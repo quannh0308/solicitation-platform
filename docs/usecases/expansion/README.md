@@ -1,8 +1,8 @@
 # Platform Expansion Use Cases
 
-> **Platform Rebranding Note**: This platform was formerly known as the "General Solicitation Platform". We've rebranded to "Customer Engagement & Action Platform (CEAP)" to better reflect its capabilities beyond solicitation. Package names (`com.solicitation.*`) remain unchanged for backward compatibility.
+> **Platform Rebranding Note**: This platform was formerly known as the "General Engagement Platform". We've rebranded to "Customer Engagement & Action Platform (CEAP)" to better reflect its expanded capabilities. Package names (`com.ceap.*`) and module names (`ceap-*`) have been updated to match the new branding.
 
-This directory contains detailed use case documentation for the **Customer Engagement & Action Platform (CEAP)** beyond traditional solicitation scenarios.
+This directory contains detailed use case documentation for the **Customer Engagement & Action Platform (CEAP)** beyond traditional customer engagement scenarios.
 
 ---
 
@@ -105,9 +105,9 @@ These expansion use cases demonstrate the platform's versatility across differen
 
 ---
 
-## Key Differences from Solicitation Use Cases
+## Key Differences from Traditional Engagement Use Cases
 
-### Traditional Solicitation
+### Traditional Customer Engagement
 - **Action**: Request customer input (review, rating, survey)
 - **Value**: Collect feedback to improve products/services
 - **Timing**: After customer action (purchase, watch, service)
@@ -181,7 +181,7 @@ Data Ingestion → Filtering → Scoring → Storage → Multi-Channel Delivery
 - **Platform Vision**: See `docs/PLATFORM-EXPANSION-VISION.md`
 - **Core Architecture**: See `docs/VISUAL-ARCHITECTURE.md`
 - **Traditional Use Cases**: See `docs/usecases/`
-- **Requirements**: See `.kiro/specs/solicitation-platform/requirements.md`
+- **Requirements**: See `.kiro/specs/customer-engagement-platform/requirements.md`
 
 ---
 

@@ -4,7 +4,7 @@
 
 **Customer Engagement & Action Platform (CEAP)**
 
-Formerly: General Solicitation Platform
+Formerly: General Engagement Platform
 
 ---
 
@@ -33,7 +33,7 @@ Built on AWS with a plug-and-play architecture, CEAP processes millions of custo
 ### E-Commerce
 - **Abandoned Cart Recovery**: Recover 30% of abandoned carts with intelligent timing and personalized incentives
 - **Product Recommendations**: Drive $5.5M+ in incremental revenue with ML-powered recommendations
-- **Review Collection**: Increase review volume by 30% with optimized solicitation timing
+- **Review Collection**: Increase review volume by 30% with optimized engagement timing
 - **Win-Back Campaigns**: Re-engage churned customers with 17% win-back rate
 
 **ROI**: 5,286% average return on investment
@@ -136,7 +136,7 @@ Built on AWS with a plug-and-play architecture, CEAP processes millions of custo
 - Investment recommendations
 - Low balance & overdraft prevention
 
-**Traditional Solicitation**:
+**Traditional Engagement**:
 - Product reviews
 - Video ratings
 - Music feedback
@@ -203,17 +203,17 @@ CEAP provides a unified platform for intelligent customer engagement across any 
 
 ## FAQ
 
-### Q: Why rebrand from "General Solicitation Platform"?
-**A**: The original name focused on one use case (solicitation), but the platform powers 17+ use cases including fraud prevention, recommendations, and proactive support. CEAP better reflects this versatility.
+### Q: Why rebrand from "General Engagement Platform"?
+**A**: The original name focused on one use case (customer engagement), but the platform powers 17+ use cases including fraud prevention, recommendations, and proactive support. CEAP better reflects this versatility.
 
 ### Q: Will the code change?
-**A**: No. Package names (`com.solicitation.*`) remain unchanged for backward compatibility. Only documentation and branding are updated.
+**A**: No. Package names (`com.ceap.*`) follow the CEAP branding. Only documentation and branding are being updated.
 
 ### Q: What's the migration timeline?
 **A**: Documentation updates are complete. GitHub repository metadata will be updated next. No code changes are required.
 
 ### Q: How do I refer to the platform?
-**A**: Use "CEAP" or "Customer Engagement & Action Platform (CEAP)" in all new materials. You can mention "formerly General Solicitation Platform" for context if needed.
+**A**: Use "CEAP" or "Customer Engagement & Action Platform (CEAP)" in all new materials. You can mention "formerly General Engagement Platform" for context if needed.
 
 ---
 

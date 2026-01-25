@@ -6,7 +6,7 @@
 
 **Processing Mode**: Batch (Monthly scheduled job)
 
-**Action Type**: Win-Back Offer (not solicitation)
+**Action Type**: Win-Back Offer
 
 **Actors**:
 - Churned customer
@@ -591,4 +591,4 @@ This use case demonstrates:
 - ✅ **Personalized offers** (50% discount for high-likelihood)
 - ✅ **Human touch** (personal calls for high-value customers)
 
-**Key Insight**: This is NOT solicitation—it's revenue recovery through personalized win-back offers. The platform identifies churned customers and delivers targeted incentives to bring them back!
+**Key Insight**: This is revenue recovery through personalized win-back offers. The platform identifies churned customers and delivers targeted incentives to bring them back!

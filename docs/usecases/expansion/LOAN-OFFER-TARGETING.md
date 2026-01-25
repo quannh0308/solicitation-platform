@@ -6,7 +6,7 @@
 
 **Processing Mode**: Batch (Weekly scheduled job)
 
-**Action Type**: Pre-Approved Loan Offer (not solicitation)
+**Action Type**: Pre-Approved Loan Offer
 
 **Actors**:
 - Customer (potential borrower)
@@ -599,4 +599,4 @@ This use case demonstrates:
 - ✅ **Excellent revenue** ($242.8M annually)
 - ✅ **Regulatory compliance** (Truth in Lending, Fair Lending)
 
-**Key Insight**: This is NOT solicitation—it's personalized financial product delivery. The platform identifies qualified borrowers and delivers pre-approved loan offers with transparent terms!
+**Key Insight**: This is personalized financial product delivery. The platform identifies qualified borrowers and delivers pre-approved loan offers with transparent terms!

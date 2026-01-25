@@ -6,7 +6,7 @@
 
 **Processing Mode**: Batch (Weekly scheduled job)
 
-**Action Type**: Retention Offer (not solicitation)
+**Action Type**: Retention Offer
 
 **Actors**:
 - Customer (at-risk)
@@ -605,4 +605,4 @@ This use case demonstrates:
 - ✅ **Personalized offers** (50% discount for critical risk)
 - ✅ **Human touch** (personal calls for high-value customers)
 
-**Key Insight**: This is NOT solicitation—it's proactive retention through personalized value delivery. The platform predicts churn and delivers targeted offers to keep customers engaged!
+**Key Insight**: This is proactive retention through personalized value delivery. The platform predicts churn and delivers targeted offers to keep customers engaged!

@@ -1,10 +1,10 @@
 # Customer Engagement & Action Platform (CEAP)
-### Formerly: General Solicitation Platform
+### Formerly: General Engagement Platform
 
 > Intelligent customer engagement at scale
 
 ## Evolution Note
-This platform started as a "solicitation system" for collecting customer feedback. We realized the architecture is far more powerful—it can deliver ANY customer action across ANY channel with ML-powered intelligence.
+This platform started as an engagement system for collecting customer feedback. We realized the architecture is far more powerful—it can deliver ANY customer action across ANY channel with ML-powered intelligence.
 
 **Current capabilities**: 17 use cases, $280M+ annual impact, 5,286% average ROI
 
@@ -12,7 +12,7 @@ For more details on the rebranding, see [docs/REBRANDING-STRATEGY.md](docs/REBRA
 
 ## What is CEAP?
 
-A flexible, extensible system that decouples data sources, scoring systems, filtering mechanisms, and notification channels to solicit customer responses across multiple product verticals.
+A flexible, extensible system that decouples data sources, scoring systems, filtering mechanisms, and notification channels to engage customers and deliver actions across multiple product verticals.
 
 ## Project Overview
 
@@ -74,9 +74,9 @@ customer-engagement-platform/
 │   ├── deploy-cdk.sh                # CDK deployment script
 │   └── src/main/kotlin/
 │       └── com/ceap/infrastructure/
-│           ├── SolicitationPlatformApp.kt    # CDK app entry point
+│           ├── CeapPlatformApp.kt            # CDK app entry point
 │           ├── constructs/
-│           │   └── SolicitationLambda.kt     # Reusable Lambda construct
+│           │   └── CeapLambda.kt             # Reusable Lambda construct
 │           └── stacks/
 │               ├── DatabaseStack.kt          # DynamoDB tables
 │               ├── EtlWorkflowStack.kt       # ETL Lambda
@@ -244,7 +244,7 @@ The platform uses AWS CDK (Kotlin) for type-safe infrastructure as code:
 
 ```kotlin
 // 1. Create stack (3 lines)
-val newLambda = SolicitationLambda(
+val newLambda = CeapLambda(
     this, "NewWorkflow",
     handler = "Handler::handleRequest",
     jarPath = "../new-workflow/build/libs/new.jar",
@@ -258,7 +258,7 @@ val newLambda = SolicitationLambda(
 **Time: 5 minutes** ⚡
 
 ### DynamoDB Tables
-- **Candidates**: Stores solicitation candidates with GSIs for program and channel queries
+- **Candidates**: Stores engagement candidates with GSIs for program and channel queries
 - **ProgramConfig**: Stores program configurations
 - **ScoreCache**: Caches scoring results with TTL
 
@@ -271,7 +271,7 @@ val newLambda = SolicitationLambda(
 
 ### Step Functions
 - **Batch Ingestion Workflow**: Orchestrates ETL → Filter → Score → Store
-- **Reactive Solicitation Workflow**: Handles real-time event processing
+- **Reactive Engagement Workflow**: Handles real-time event processing
 
 ### EventBridge
 - Scheduled rules for batch processing

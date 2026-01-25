@@ -8,11 +8,11 @@
 
 ## Overview
 
-This task implements unit tests to verify that the file rename from task 1.1 (renaming `SolicitationLambda.kt` to `CeapLambda.kt`) was successful. The tests verify:
+This task implements unit tests to verify that the file rename from task 1.1 (renaming the Lambda construct file to `CeapLambda.kt`) was successful. The tests verify:
 
 1. The `CeapLambda.kt` file exists in the correct location
 2. The `CeapLambda` class is defined with the correct constructor signature
-3. The old `SolicitationLambda.kt` file does not exist
+3. The old Lambda construct file does not exist
 
 ## Implementation
 
@@ -34,7 +34,7 @@ The tests verify the following aspects:
 
 #### 1. File Existence Tests
 - ✅ `CeapLambda.kt` file exists at the correct path
-- ✅ Old `SolicitationLambda.kt` file does not exist
+- ✅ Old Lambda construct file does not exist
 
 #### 2. Class Definition Tests
 - ✅ `CeapLambda` class is defined
@@ -68,8 +68,8 @@ Running CeapLambda existence tests...
 Test 1: CeapLambda.kt file should exist
   ✓ PASS: CeapLambda.kt file exists
 
-Test 2: Old SolicitationLambda.kt file should not exist
-  ✓ PASS: SolicitationLambda.kt file does not exist (correctly renamed)
+Test 2: Old Lambda construct file should not exist
+  ✓ PASS: Old Lambda construct file does not exist (correctly renamed)
 
 Test 3: CeapLambda class should be defined
   ✓ PASS: CeapLambda class is defined
@@ -120,7 +120,7 @@ This option will work once task 2.1 (updating workflow stack imports) is complet
 
 The infrastructure module currently has compilation errors because:
 - Task 2.1 (updating imports in workflow stacks) is not yet complete
-- Workflow stacks still import `SolicitationLambda` instead of `CeapLambda`
+- Workflow stacks still import the old Lambda construct instead of `CeapLambda`
 
 The tests were designed to be file-based and independent of compilation to allow verification of task 1.1 completion without blocking on task 2.1.
 
@@ -133,11 +133,11 @@ The `settings.gradle.kts` file was updated to include the `infrastructure` modul
 **Validates: Requirements 3.1**
 
 From the requirements document:
-> THE System SHALL rename the class `SolicitationLambda` to `CeapLambda`
+> THE System SHALL rename the Lambda construct class to `CeapLambda`
 
 The tests verify that:
 1. The new `CeapLambda` class exists with the correct structure
-2. The old `SolicitationLambda` class/file no longer exists
+2. The old Lambda construct class/file no longer exists
 3. The class maintains its CDK construct interface (extends Construct)
 4. All constructor parameters are preserved with correct types and defaults
 

@@ -6,7 +6,7 @@
 
 **Processing Mode**: Reactive (Real-time event-driven with delayed delivery)
 
-**Action Type**: Purchase Incentive (not solicitation)
+**Action Type**: Purchase Incentive
 
 **Actors**:
 - Customer (shopper)
@@ -573,4 +573,4 @@ This use case demonstrates:
 - ✅ **Cost efficiency** ($1.50 per recovery)
 - ✅ **Scalability** (5,000 events/second)
 
-**Key Insight**: This is NOT solicitation—it's revenue recovery through personalized incentives. The platform identifies abandoned carts and delivers targeted offers to complete purchases!
+**Key Insight**: This is revenue recovery through personalized incentives. The platform identifies abandoned carts and delivers targeted offers to complete purchases!

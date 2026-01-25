@@ -1,6 +1,6 @@
 # Use Case Diagrams
 
-> **Platform Rebranding Note**: This platform was formerly known as the "General Solicitation Platform". We've rebranded to "Customer Engagement & Action Platform (CEAP)" to better reflect its capabilities beyond solicitation. Package names (`com.solicitation.*`) remain unchanged for backward compatibility.
+> **Platform Rebranding Note**: This platform was formerly known as the "General Engagement Platform". We've rebranded to "Customer Engagement & Action Platform (CEAP)" to better reflect its expanded capabilities. Package names (`com.ceap.*`) and module names (`ceap-*`) have been updated to match the new branding.
 
 This directory contains detailed flow diagrams for each use case, showing:
 - Actor interactions
@@ -64,7 +64,7 @@ Detailed step-by-step flow showing:
 - Storage operations
 
 ### 3. Data Contribution Flow
-Shows how customers interact with solicitations:
+Shows how customers interact with engagements:
 - Delivery channel (email, in-app, push, etc.)
 - Customer engagement (open, click, submit)
 - Response collection
@@ -156,8 +156,8 @@ Minute-by-minute breakdown showing:
 
 - **Architecture**: See `docs/VISUAL-ARCHITECTURE.md`
 - **Use Case Descriptions**: See `docs/USE-CASES.md`
-- **Requirements**: See `.kiro/specs/solicitation-platform/requirements.md`
-- **Design**: See `.kiro/specs/solicitation-platform/design.md`
+- **Requirements**: See `.kiro/specs/customer-engagement-platform/requirements.md`
+- **Design**: See `.kiro/specs/customer-engagement-platform/design.md`
 
 ---
 

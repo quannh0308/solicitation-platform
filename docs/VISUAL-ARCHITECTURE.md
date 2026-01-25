@@ -1,6 +1,6 @@
 # Visual Architecture - Customer Engagement & Action Platform (CEAP)
 
-> **Platform Rebranding Note**: This platform was formerly known as the "General Solicitation Platform". We've rebranded to "Customer Engagement & Action Platform (CEAP)" to better reflect its capabilities beyond solicitation. Package names (`com.solicitation.*`) remain unchanged for backward compatibility.
+> **Platform Rebranding Note**: This platform was formerly known as the "General Engagement Platform". We've rebranded to "Customer Engagement & Action Platform (CEAP)" to better reflect its expanded capabilities. Package names (`com.ceap.*`) and module names (`ceap-*`) have been updated to match the new branding.
 
 ## System Overview
 
@@ -149,7 +149,7 @@ The Customer Engagement & Action Platform (CEAP) enables businesses to deliver i
 └─────────────────────────────────────────────────────────────────────────────┘
 
                             ┌──────────────────┐
-                            │ solicitation-    │
+                            │ ceap-            │
                             │    common        │  ← Base utilities
                             │ (logging, PII)   │
                             └────────┬─────────┘
@@ -157,7 +157,7 @@ The Customer Engagement & Action Platform (CEAP) enables businesses to deliver i
                     ┌────────────────┼────────────────┐
                     │                │                │
          ┌──────────▼─────────┐     │     ┌─────────▼──────────┐
-         │ solicitation-      │     │     │ solicitation-      │
+         │ ceap-              │     │     │ ceap-              │
          │    models          │◄────┘     │   storage          │
          │ (POJOs, configs)   │           │ (DynamoDB repos)   │
          └──────────┬─────────┘           └─────────┬──────────┘
@@ -165,13 +165,13 @@ The Customer Engagement & Action Platform (CEAP) enables businesses to deliver i
          ┌──────────┼──────────┬────────────────────┤
          │          │          │                    │
 ┌────────▼────┐ ┌──▼──────┐ ┌─▼────────┐ ┌────────▼────────┐
-│solicitation-│ │solicita-│ │solicita- │ │ solicitation-   │
-│ connectors  │ │tion-    │ │tion-     │ │   serving       │
-│(data sources│ │filters  │ │scoring   │ │ (API logic)     │
+│ceap-        │ │ceap-    │ │ceap-     │ │ ceap-           │
+│ connectors  │ │filters  │ │scoring   │ │   serving       │
+│(data sources│ │(rules)  │ │(ML)      │ │ (API logic)     │
 └─────────────┘ └─────────┘ └──────────┘ └─────────────────┘
                                                    │
                                           ┌────────▼────────┐
-                                          │ solicitation-   │
+                                          │ ceap-           │
                                           │   channels      │
                                           │ (adapters)      │
                                           └─────────────────┘
@@ -208,10 +208,10 @@ The Customer Engagement & Action Platform (CEAP) enables businesses to deliver i
 
 ```kotlin
 // Step 1: Create new module
-// solicitation-connectors-kinesis/build.gradle.kts
+// ceap-connectors-kinesis/build.gradle.kts
 dependencies {
-    implementation(project(":solicitation-models"))
-    implementation(project(":solicitation-common"))
+    implementation(project(":ceap-models"))
+    implementation(project(":ceap-common"))
     implementation("software.amazon.awssdk:kinesis:2.20.0")
 }
 
@@ -224,15 +224,15 @@ class KinesisConnector : DataConnector {
 }
 
 // Step 3: Register in settings.gradle.kts
-include("solicitation-connectors-kinesis")
+include("ceap-connectors-kinesis")
 
 // Step 4: Build
-./gradlew :solicitation-connectors-kinesis:build
+./gradlew :ceap-connectors-kinesis:build
 
 // Step 5: Use in ETL Lambda
 // Add dependency to workflow-etl/build.gradle.kts
 dependencies {
-    implementation(project(":solicitation-connectors-kinesis"))
+    implementation(project(":ceap-connectors-kinesis"))
 }
 
 // Done! ✅
@@ -241,7 +241,7 @@ dependencies {
 ### 2. Adding a New Filter (3 minutes)
 
 ```kotlin
-// Step 1: Add class to solicitation-filters module
+// Step 1: Add class to ceap-filters module
 class GeographicFilter : Filter {
     override fun getFilterId() = "geographic"
     override fun getFilterType() = "eligibility"
@@ -258,7 +258,7 @@ class GeographicFilter : Filter {
 // Already done automatically via interface!
 
 // Step 3: Build
-./gradlew :solicitation-filters:build
+./gradlew :ceap-filters:build
 
 // Done! ✅
 ```
@@ -286,7 +286,7 @@ class BedrockScoringProvider : ScoringProvider {
 }
 
 // Step 2: Build
-./gradlew :solicitation-scoring:build
+./gradlew :ceap-scoring:build
 
 // Done! ✅
 ```
@@ -309,7 +309,7 @@ class SMSChannelAdapter : ChannelAdapter {
 }
 
 // Step 2: Build
-./gradlew :solicitation-channels:build
+./gradlew :ceap-channels:build
 
 // Done! ✅
 ```
@@ -318,16 +318,16 @@ class SMSChannelAdapter : ChannelAdapter {
 
 ```kotlin
 // Step 1: Create module
-// solicitation-workflow-notify/build.gradle.kts
+// ceap-workflow-notify/build.gradle.kts
 plugins {
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 dependencies {
-    implementation(project(":solicitation-channels"))
-    implementation(project(":solicitation-storage"))
-    implementation(project(":solicitation-models"))
-    implementation(project(":solicitation-common"))
+    implementation(project(":ceap-channels"))
+    implementation(project(":ceap-storage"))
+    implementation(project(":ceap-models"))
+    implementation(project(":ceap-common"))
     implementation("com.amazonaws:aws-lambda-java-core:1.2.3")
 }
 
@@ -339,17 +339,17 @@ class NotifyHandler : RequestHandler<Map<String, Any>, String> {
 }
 
 // Step 3: Add to settings.gradle.kts
-include("solicitation-workflow-notify")
+include("ceap-workflow-notify")
 
 // Step 4: Create CDK stack (3 lines!)
-val notifyLambda = SolicitationLambda(
+val notifyLambda = CeapLambda(
     this, "NotifyWorkflow",
     handler = "NotifyHandler::handleRequest",
     jarPath = "../workflow-notify/build/libs/notify.jar"
 )
 
 // Step 5: Deploy
-./gradlew :solicitation-workflow-notify:shadowJar
+./gradlew :ceap-workflow-notify:shadowJar
 ./infrastructure/deploy-cdk.sh -e dev -s NotifyWorkflow
 
 // Done! ✅

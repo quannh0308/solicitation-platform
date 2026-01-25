@@ -6,7 +6,7 @@
 
 **Processing Mode**: Batch (Daily scheduled job) + Reactive (Market events)
 
-**Action Type**: Investment Recommendation (not solicitation)
+**Action Type**: Investment Recommendation
 
 **Actors**:
 - Investor (customer)
@@ -539,4 +539,4 @@ This use case demonstrates:
 - ✅ **Regulatory compliance** (suitability, risk disclosure, KYC)
 - ✅ **Real-time serving** (10ms P99 latency)
 
-**Key Insight**: This is NOT solicitation—it's personalized wealth management. The platform identifies investment opportunities and delivers tailored recommendations based on customer financial profiles!
+**Key Insight**: This is personalized wealth management. The platform identifies investment opportunities and delivers tailored recommendations based on customer financial profiles!

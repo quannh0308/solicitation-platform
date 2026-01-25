@@ -1,6 +1,6 @@
 # DynamoDB Schema Documentation
 
-> **Platform Rebranding Note**: This platform was formerly known as the "General Solicitation Platform". We've rebranded to "Customer Engagement & Action Platform (CEAP)" to better reflect its capabilities beyond customer engagement. Package names now use `com.ceap.*` following the CEAP branding, and table structures remain unchanged for backward compatibility.
+> **Platform Rebranding Note**: This platform was formerly known as the "General Engagement Platform". We've rebranded to "Customer Engagement & Action Platform (CEAP)" to better reflect its capabilities. Package names now use `com.ceap.*` following the CEAP branding, and table structures remain unchanged for backward compatibility.
 
 ## Overview
 

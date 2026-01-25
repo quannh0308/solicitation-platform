@@ -6,7 +6,7 @@
 
 **Processing Mode**: Reactive (Real-time event-driven)
 
-**Action Type**: Proactive Alert + Protection Offer (not solicitation)
+**Action Type**: Proactive Alert + Protection Offer
 
 **Actors**:
 - Account holder (customer)
@@ -536,4 +536,4 @@ This use case demonstrates:
 - ✅ **Customer satisfaction** (4.8/5.0 vs 3.5 without alerts)
 - ✅ **Excellent ROI** (1,750% return on investment)
 
-**Key Insight**: This is NOT solicitation—it's proactive financial protection. The platform monitors account balances and alerts customers before overdrafts occur, offering immediate solutions!
+**Key Insight**: This is proactive financial protection. The platform monitors account balances and alerts customers before overdrafts occur, offering immediate solutions!
