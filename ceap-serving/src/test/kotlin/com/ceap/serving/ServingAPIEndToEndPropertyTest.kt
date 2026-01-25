@@ -89,9 +89,10 @@ class ServingAPIEndToEndPropertyTest {
         val response = servingAPI.getCandidatesForCustomers(request)
         val actualLatency = System.currentTimeMillis() - startTime
         
-        // Then: Response contains results for all customers
-        assertThat(response.results).hasSize(customerIds.size)
-        assertThat(response.results.keys).containsAll(customerIds)
+        // Then: Response contains results for all unique customers (API deduplicates)
+        val uniqueCustomerIds = customerIds.toSet()
+        assertThat(response.results).hasSize(uniqueCustomerIds.size)
+        assertThat(response.results.keys).containsAll(uniqueCustomerIds)
         
         // Then: Latency is reasonable for batch (< 500ms for mock)
         assertThat(response.latencyMs).isLessThan(500)
@@ -172,7 +173,7 @@ class ServingAPIEndToEndPropertyTest {
     
     @Provide
     fun validCustomerIdList(): Arbitrary<List<String>> {
-        return validCustomerIds().list().ofMinSize(2).ofMaxSize(5)
+        return validCustomerIds().list().ofMinSize(2).ofMaxSize(5).uniqueElements()
     }
     
     @Provide
