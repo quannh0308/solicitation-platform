@@ -20,7 +20,7 @@ import software.constructs.Construct
  * 
  * Example usage:
  * ```kotlin
- * val etlLambda = SolicitationLambda(
+ * val etlLambda = CeapLambda(
  *     this, "ETLLambda",
  *     handler = "com.ceap.workflow.ETLHandler::handleRequest",
  *     jarPath = "../ceap-workflow-etl/build/libs/etl-lambda.jar",
@@ -30,7 +30,7 @@ import software.constructs.Construct
  * )
  * ```
  */
-class SolicitationLambda(
+class CeapLambda(
     scope: Construct,
     id: String,
     handler: String,
@@ -52,8 +52,10 @@ class SolicitationLambda(
         .logRetention(logRetention)
         .build()
     
-    // Automatically grant DynamoDB permissions
-    tables.forEach { table ->
-        table.grantReadWriteData(function)
+    init {
+        // Automatically grant DynamoDB permissions
+        tables.forEach { table ->
+            table.grantReadWriteData(function)
+        }
     }
 }

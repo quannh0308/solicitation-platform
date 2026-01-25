@@ -14,5 +14,6 @@ include(
     "ceap-workflow-filter",
     "ceap-workflow-score",
     "ceap-workflow-store",
-    "ceap-workflow-reactive"
+    "ceap-workflow-reactive",
+    "infrastructure"
 )

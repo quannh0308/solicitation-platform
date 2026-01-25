@@ -4,7 +4,7 @@ import software.amazon.awscdk.Duration
 import software.amazon.awscdk.Stack
 import software.amazon.awscdk.StackProps
 import software.constructs.Construct
-import com.ceap.infrastructure.constructs.SolicitationLambda
+import com.ceap.infrastructure.constructs.CeapLambda
 
 /**
  * Store Workflow Stack - Batch writes candidates to DynamoDB.
@@ -19,7 +19,7 @@ class StoreWorkflowStack(
     val databaseStack: DatabaseStack
 ) : Stack(scope, id, props) {
     
-    val storeLambda = SolicitationLambda(
+    val storeLambda = CeapLambda(
         this,
         "StoreLambda",
         handler = "com.ceap.workflow.StoreHandler::handleRequest",

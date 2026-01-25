@@ -4,7 +4,7 @@ import software.amazon.awscdk.Duration
 import software.amazon.awscdk.Stack
 import software.amazon.awscdk.StackProps
 import software.constructs.Construct
-import com.ceap.infrastructure.constructs.SolicitationLambda
+import com.ceap.infrastructure.constructs.CeapLambda
 
 /**
  * Score Workflow Stack - Executes scoring models on candidates.
@@ -19,7 +19,7 @@ class ScoreWorkflowStack(
     val databaseStack: DatabaseStack
 ) : Stack(scope, id, props) {
     
-    val scoreLambda = SolicitationLambda(
+    val scoreLambda = CeapLambda(
         this,
         "ScoreLambda",
         handler = "com.ceap.workflow.ScoreHandler::handleRequest",

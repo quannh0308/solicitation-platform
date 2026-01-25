@@ -4,7 +4,7 @@ import software.amazon.awscdk.Duration
 import software.amazon.awscdk.Stack
 import software.amazon.awscdk.StackProps
 import software.constructs.Construct
-import com.ceap.infrastructure.constructs.SolicitationLambda
+import com.ceap.infrastructure.constructs.CeapLambda
 
 /**
  * ETL Workflow Stack - Extracts and transforms candidate data from sources.
@@ -24,7 +24,7 @@ class EtlWorkflowStack(
     val databaseStack: DatabaseStack
 ) : Stack(scope, id, props) {
     
-    val etlLambda = SolicitationLambda(
+    val etlLambda = CeapLambda(
         this,
         "ETLLambda",
         handler = "com.ceap.workflow.ETLHandler::handleRequest",

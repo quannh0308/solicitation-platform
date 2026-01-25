@@ -11,7 +11,7 @@ import software.amazon.awscdk.services.dynamodb.Attribute
 import software.amazon.awscdk.services.dynamodb.AttributeType
 import software.amazon.awscdk.services.dynamodb.BillingMode
 import software.constructs.Construct
-import com.ceap.infrastructure.constructs.SolicitationLambda
+import com.ceap.infrastructure.constructs.CeapLambda
 
 /**
  * Reactive Workflow Stack - Handles real-time events.
@@ -35,7 +35,7 @@ class ReactiveWorkflowStack(
     
     // Create deduplication table for tracking recent events
     val deduplicationTable = Table.Builder.create(this, "DeduplicationTable")
-        .tableName("solicitation-event-deduplication-$envName")
+        .tableName("ceap-event-deduplication-$envName")
         .partitionKey(
             Attribute.builder()
                 .name("deduplicationKey")
@@ -47,7 +47,7 @@ class ReactiveWorkflowStack(
         .build()
     
     // Create reactive Lambda
-    val reactiveLambda = SolicitationLambda(
+    val reactiveLambda = CeapLambda(
         this,
         "ReactiveLambda",
         handler = "com.ceap.workflow.reactive.ReactiveHandler::handleRequest",
@@ -72,11 +72,11 @@ class ReactiveWorkflowStack(
     
     // Create EventBridge rule for customer events
     val customerEventRule = Rule.Builder.create(this, "CustomerEventRule")
-        .ruleName("solicitation-customer-events-$envName")
+        .ruleName("ceap-customer-events-$envName")
         .description("Routes customer events to reactive solicitation workflow")
         .eventPattern(
             EventPattern.builder()
-                .source(listOf("solicitation.customer-events"))
+                .source(listOf("ceap.customer-events"))
                 .detailType(listOf(
                     "OrderDelivered",
                     "ProductPurchased",

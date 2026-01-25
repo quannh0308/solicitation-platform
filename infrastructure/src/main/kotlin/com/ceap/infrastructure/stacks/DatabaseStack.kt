@@ -24,7 +24,7 @@ class DatabaseStack(
     /**
      * Candidates table with GSIs for program+channel and program+date queries
      */
-    val candidatesTable: ITable = Table.Builder.create(this, "CandidatesTable")
+    val candidatesTable: Table = Table.Builder.create(this, "CandidatesTable")
         .tableName("Candidates-$envName")
         .partitionKey(Attribute.builder()
             .name("PK")
@@ -41,38 +41,40 @@ class DatabaseStack(
         .removalPolicy(if (envName == "prod") RemovalPolicy.RETAIN else RemovalPolicy.DESTROY)
         .build()
     
-    // GSI-1: Query by program and channel, sorted by score
-    candidatesTable.addGlobalSecondaryIndex(GlobalSecondaryIndexProps.builder()
-        .indexName("ProgramChannelIndex")
-        .partitionKey(Attribute.builder()
-            .name("GSI1PK")
-            .type(AttributeType.STRING)
+    init {
+        // GSI-1: Query by program and channel, sorted by score
+        candidatesTable.addGlobalSecondaryIndex(GlobalSecondaryIndexProps.builder()
+            .indexName("ProgramChannelIndex")
+            .partitionKey(Attribute.builder()
+                .name("GSI1PK")
+                .type(AttributeType.STRING)
+                .build())
+            .sortKey(Attribute.builder()
+                .name("GSI1SK")
+                .type(AttributeType.STRING)
+                .build())
+            .projectionType(ProjectionType.ALL)
             .build())
-        .sortKey(Attribute.builder()
-            .name("GSI1SK")
-            .type(AttributeType.STRING)
+        
+        // GSI-2: Query by program and date, sorted by creation time
+        candidatesTable.addGlobalSecondaryIndex(GlobalSecondaryIndexProps.builder()
+            .indexName("ProgramDateIndex")
+            .partitionKey(Attribute.builder()
+                .name("GSI2PK")
+                .type(AttributeType.STRING)
+                .build())
+            .sortKey(Attribute.builder()
+                .name("GSI2SK")
+                .type(AttributeType.STRING)
+                .build())
+            .projectionType(ProjectionType.ALL)
             .build())
-        .projectionType(ProjectionType.ALL)
-        .build())
-    
-    // GSI-2: Query by program and date, sorted by creation time
-    candidatesTable.addGlobalSecondaryIndex(GlobalSecondaryIndexProps.builder()
-        .indexName("ProgramDateIndex")
-        .partitionKey(Attribute.builder()
-            .name("GSI2PK")
-            .type(AttributeType.STRING)
-            .build())
-        .sortKey(Attribute.builder()
-            .name("GSI2SK")
-            .type(AttributeType.STRING)
-            .build())
-        .projectionType(ProjectionType.ALL)
-        .build())
+    }
     
     /**
      * Program configuration table
      */
-    val programConfigTable: ITable = Table.Builder.create(this, "ProgramConfigTable")
+    val programConfigTable: Table = Table.Builder.create(this, "ProgramConfigTable")
         .tableName("ProgramConfig-$envName")
         .partitionKey(Attribute.builder()
             .name("PK")
@@ -91,7 +93,7 @@ class DatabaseStack(
     /**
      * Score cache table with TTL
      */
-    val scoreCacheTable: ITable = Table.Builder.create(this, "ScoreCacheTable")
+    val scoreCacheTable: Table = Table.Builder.create(this, "ScoreCacheTable")
         .tableName("ScoreCache-$envName")
         .partitionKey(Attribute.builder()
             .name("PK")

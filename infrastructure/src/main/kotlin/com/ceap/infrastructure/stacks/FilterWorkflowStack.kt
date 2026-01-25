@@ -4,7 +4,7 @@ import software.amazon.awscdk.Duration
 import software.amazon.awscdk.Stack
 import software.amazon.awscdk.StackProps
 import software.constructs.Construct
-import com.ceap.infrastructure.constructs.SolicitationLambda
+import com.ceap.infrastructure.constructs.CeapLambda
 
 /**
  * Filter Workflow Stack - Applies filtering rules to candidates.
@@ -19,7 +19,7 @@ class FilterWorkflowStack(
     val databaseStack: DatabaseStack
 ) : Stack(scope, id, props) {
     
-    val filterLambda = SolicitationLambda(
+    val filterLambda = CeapLambda(
         this,
         "FilterLambda",
         handler = "com.ceap.workflow.FilterHandler::handleRequest",

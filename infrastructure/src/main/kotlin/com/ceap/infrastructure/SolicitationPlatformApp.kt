@@ -32,19 +32,19 @@ fun main() {
         .build()
     
     // Create database stack (shared across all workflows)
-    val databaseStack = DatabaseStack(app, "SolicitationDatabase-$envName", stackProps, envName)
+    val databaseStack = DatabaseStack(app, "CeapDatabase-$envName", stackProps, envName)
     
     // Create workflow stacks (each is independent and plug-and-play!)
-    val etlStack = EtlWorkflowStack(app, "SolicitationEtlWorkflow-$envName", stackProps, envName, databaseStack)
-    val filterStack = FilterWorkflowStack(app, "SolicitationFilterWorkflow-$envName", stackProps, envName, databaseStack)
-    val scoreStack = ScoreWorkflowStack(app, "SolicitationScoreWorkflow-$envName", stackProps, envName, databaseStack)
-    val storeStack = StoreWorkflowStack(app, "SolicitationStoreWorkflow-$envName", stackProps, envName, databaseStack)
-    val reactiveStack = ReactiveWorkflowStack(app, "SolicitationReactiveWorkflow-$envName", stackProps, envName, databaseStack)
+    val etlStack = EtlWorkflowStack(app, "CeapEtlWorkflow-$envName", stackProps, envName, databaseStack)
+    val filterStack = FilterWorkflowStack(app, "CeapFilterWorkflow-$envName", stackProps, envName, databaseStack)
+    val scoreStack = ScoreWorkflowStack(app, "CeapScoreWorkflow-$envName", stackProps, envName, databaseStack)
+    val storeStack = StoreWorkflowStack(app, "CeapStoreWorkflow-$envName", stackProps, envName, databaseStack)
+    val reactiveStack = ReactiveWorkflowStack(app, "CeapReactiveWorkflow-$envName", stackProps, envName, databaseStack)
     
     // Create orchestration stack (Step Functions + EventBridge)
     OrchestrationStack(
         app, 
-        "SolicitationOrchestration-$envName", 
+        "CeapOrchestration-$envName", 
         stackProps, 
         envName,
         etlStack,

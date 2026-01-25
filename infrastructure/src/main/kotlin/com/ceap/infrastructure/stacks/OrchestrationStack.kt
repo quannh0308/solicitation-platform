@@ -153,14 +153,14 @@ class OrchestrationStack(
         
         // Create State Machine
         batchIngestionWorkflow = StateMachine.Builder.create(this, "BatchIngestionWorkflow")
-            .stateMachineName("SolicitationBatchIngestion-$envName")
+            .stateMachineName("CeapBatchIngestion-$envName")
             .definitionBody(DefinitionBody.fromChainable(definition))
             .timeout(software.amazon.awscdk.Duration.hours(4)) // Allow up to 4 hours for large batches
             .build()
         
         // Schedule batch ingestion (daily at 2 AM UTC)
         Rule.Builder.create(this, "BatchIngestionSchedule")
-            .ruleName("SolicitationBatchIngestion-$envName")
+            .ruleName("CeapBatchIngestion-$envName")
             .schedule(Schedule.cron(
                 software.amazon.awscdk.services.events.CronOptions.builder()
                     .minute("0")
