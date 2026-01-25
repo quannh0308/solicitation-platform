@@ -20,9 +20,9 @@ Parameters:
     Type: String
     Description: ARN of the Batch Ingestion Step Functions State Machine
 
-  ReactiveSolicitationStateMachineArn:
+  ReactiveCeapStateMachineArn:
     Type: String
-    Description: ARN of the Reactive Solicitation Step Functions State Machine
+    Description: ARN of the Reactive CEAP Step Functions State Machine
 
 Resources:
   # ============================================================================
@@ -50,7 +50,7 @@ Resources:
                   - states:StartExecution
                 Resource:
                   - !Ref BatchIngestionStateMachineArn
-                  - !Ref ReactiveSolicitationStateMachineArn
+                  - !Ref ReactiveCeapStateMachineArn
       Tags:
         - Key: Environment
           Value: !Ref Environment
@@ -66,7 +66,7 @@ Resources:
     Type: AWS::Events::Rule
     Properties:
       Name: !Sub '${ProjectName}-retail-batch-schedule-${Environment}'
-      Description: 'Daily batch ingestion for retail solicitation program'
+      Description: 'Daily batch ingestion for retail ceap program'
       ScheduleExpression: 'cron(0 2 * * ? *)'  # 2 AM UTC daily
       State: ENABLED
       Targets:
@@ -89,7 +89,7 @@ Resources:
     Type: AWS::Events::Rule
     Properties:
       Name: !Sub '${ProjectName}-subscription-batch-schedule-${Environment}'
-      Description: 'Weekly batch ingestion for subscription solicitation program'
+      Description: 'Weekly batch ingestion for subscription ceap program'
       ScheduleExpression: 'cron(0 3 ? * MON *)'  # 3 AM UTC every Monday
       State: ENABLED
       Targets:
@@ -112,7 +112,7 @@ Resources:
     Type: AWS::Events::Rule
     Properties:
       Name: !Sub '${ProjectName}-highfreq-batch-schedule-${Environment}'
-      Description: 'Hourly batch ingestion for high-frequency solicitation program'
+      Description: 'Hourly batch ingestion for high-frequency ceap program'
       ScheduleExpression: 'rate(1 hour)'
       State: ENABLED
       Targets:
@@ -131,7 +131,7 @@ Resources:
             MaximumEventAge: 3600
 
   # ============================================================================
-  # Event Patterns for Reactive Solicitation
+  # Event Patterns for Reactive CEAP
   # ============================================================================
 
   # Customer order placed event
@@ -139,7 +139,7 @@ Resources:
     Type: AWS::Events::Rule
     Properties:
       Name: !Sub '${ProjectName}-customer-order-placed-${Environment}'
-      Description: 'Trigger reactive solicitation when customer places an order'
+      Description: 'Trigger reactive ceap when customer places an order'
       EventPattern:
         source:
           - com.amazon.orders
@@ -150,7 +150,7 @@ Resources:
             - CONFIRMED
       State: ENABLED
       Targets:
-        - Arn: !Ref ReactiveSolicitationStateMachineArn
+        - Arn: !Ref ReactiveCeapStateMachineArn
           RoleArn: !GetAtt EventBridgeStepFunctionsRole.Arn
           Id: OrderPlacedTarget
           InputTransformer:
@@ -191,7 +191,7 @@ Resources:
     Type: AWS::Events::Rule
     Properties:
       Name: !Sub '${ProjectName}-subscription-renewal-${Environment}'
-      Description: 'Trigger reactive solicitation for subscription renewals'
+      Description: 'Trigger reactive ceap for subscription renewals'
       EventPattern:
         source:
           - com.amazon.subscriptions
@@ -203,7 +203,7 @@ Resources:
             - FAILED
       State: ENABLED
       Targets:
-        - Arn: !Ref ReactiveSolicitationStateMachineArn
+        - Arn: !Ref ReactiveCeapStateMachineArn
           RoleArn: !GetAtt EventBridgeStepFunctionsRole.Arn
           Id: SubscriptionRenewalTarget
           InputTransformer:
@@ -244,7 +244,7 @@ Resources:
     Type: AWS::Events::Rule
     Properties:
       Name: !Sub '${ProjectName}-product-view-${Environment}'
-      Description: 'Trigger reactive solicitation for high-value product views'
+      Description: 'Trigger reactive ceap for high-value product views'
       EventPattern:
         source:
           - com.amazon.catalog
@@ -260,7 +260,7 @@ Resources:
                 - 30
       State: ENABLED
       Targets:
-        - Arn: !Ref ReactiveSolicitationStateMachineArn
+        - Arn: !Ref ReactiveCeapStateMachineArn
           RoleArn: !GetAtt EventBridgeStepFunctionsRole.Arn
           Id: ProductViewTarget
           InputTransformer:
@@ -301,7 +301,7 @@ Resources:
     Type: AWS::Events::Rule
     Properties:
       Name: !Sub '${ProjectName}-cart-abandonment-${Environment}'
-      Description: 'Trigger reactive solicitation for cart abandonment'
+      Description: 'Trigger reactive ceap for cart abandonment'
       EventPattern:
         source:
           - com.amazon.cart
@@ -314,7 +314,7 @@ Resources:
                 - 50
       State: ENABLED
       Targets:
-        - Arn: !Ref ReactiveSolicitationStateMachineArn
+        - Arn: !Ref ReactiveCeapStateMachineArn
           RoleArn: !GetAtt EventBridgeStepFunctionsRole.Arn
           Id: CartAbandonmentTarget
           InputTransformer:
@@ -375,7 +375,7 @@ Resources:
     Type: AWS::CloudWatch::Alarm
     Properties:
       AlarmName: !Sub '${ProjectName}-reactive-solicitation-failures-${Environment}'
-      AlarmDescription: 'Alert when reactive solicitation rules fail to trigger'
+      AlarmDescription: 'Alert when reactive ceap rules fail to trigger'
       MetricName: FailedInvocations
       Namespace: AWS/Events
       Statistic: Sum
