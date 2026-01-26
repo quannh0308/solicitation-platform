@@ -22,7 +22,7 @@ class StoreWorkflowStack(
     val storeLambda = CeapLambda(
         this,
         "StoreLambda",
-        handler = "com.ceap.workflow.StoreHandler::handleRequest",
+        handler = "com.ceap.workflow.store.StoreHandler::handleRequest",
         jarPath = "../ceap-workflow-store/build/libs/ceap-workflow-store-1.0.0-SNAPSHOT.jar",
         environment = mapOf(
             "ENVIRONMENT" to envName,

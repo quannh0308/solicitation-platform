@@ -22,7 +22,7 @@ class ScoreWorkflowStack(
     val scoreLambda = CeapLambda(
         this,
         "ScoreLambda",
-        handler = "com.ceap.workflow.ScoreHandler::handleRequest",
+        handler = "com.ceap.workflow.score.ScoreHandler::handleRequest",
         jarPath = "../ceap-workflow-score/build/libs/ceap-workflow-score-1.0.0-SNAPSHOT.jar",
         environment = mapOf(
             "ENVIRONMENT" to envName,

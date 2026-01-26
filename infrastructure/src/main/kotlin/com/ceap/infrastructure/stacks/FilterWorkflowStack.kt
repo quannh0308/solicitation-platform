@@ -22,7 +22,7 @@ class FilterWorkflowStack(
     val filterLambda = CeapLambda(
         this,
         "FilterLambda",
-        handler = "com.ceap.workflow.FilterHandler::handleRequest",
+        handler = "com.ceap.workflow.filter.FilterHandler::handleRequest",
         jarPath = "../ceap-workflow-filter/build/libs/ceap-workflow-filter-1.0.0-SNAPSHOT.jar",
         environment = mapOf(
             "ENVIRONMENT" to envName,

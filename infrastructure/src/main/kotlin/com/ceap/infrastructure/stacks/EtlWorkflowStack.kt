@@ -27,7 +27,7 @@ class EtlWorkflowStack(
     val etlLambda = CeapLambda(
         this,
         "ETLLambda",
-        handler = "com.ceap.workflow.ETLHandler::handleRequest",
+        handler = "com.ceap.workflow.etl.ETLHandler::handleRequest",
         jarPath = "../ceap-workflow-etl/build/libs/ceap-workflow-etl-1.0.0-SNAPSHOT.jar",
         environment = mapOf(
             "ENVIRONMENT" to envName,
