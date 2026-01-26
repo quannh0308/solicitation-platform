@@ -86,3 +86,11 @@ samconfig.toml
 # Temporary files
 *.tmp
 *.temp
+
+# CDK
+cdk.out/
+*.assets.json
+*.template.json
+
+# jqwik property-based testing
+.jqwik-database
