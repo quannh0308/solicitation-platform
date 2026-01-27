@@ -2,6 +2,7 @@ package com.ceap.workflow.store
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.ceap.model.Candidate
@@ -22,7 +23,7 @@ import org.slf4j.LoggerFactory
  * 
  * Validates: Requirements 5.2, 8.1
  */
-class StoreHandler : RequestHandler<StoreInput, StoreResponse> {
+class StoreHandler : RequestHandler<Map<String, Any>, StoreResponse> {
     
     private val logger = LoggerFactory.getLogger(StoreHandler::class.java)
     private val objectMapper: ObjectMapper = jacksonObjectMapper()
@@ -74,18 +75,21 @@ class StoreHandler : RequestHandler<StoreInput, StoreResponse> {
         }
     }
     
-    override fun handleRequest(input: StoreInput, context: Context): StoreResponse {
+    override fun handleRequest(input: Map<String, Any>, context: Context): StoreResponse {
         val requestId = context.awsRequestId
         val startTime = System.currentTimeMillis()
         
-        logger.info("Starting Store stage: requestId={}, candidateCount={}, programId={}", 
-            requestId, input.candidates.size, input.programId)
-        
         try {
-            val candidates = input.candidates
-            val programId = input.programId
-            val marketplace = input.marketplace
-            val executionId = input.executionId
+            // Manually deserialize input to StoreInput
+            val storeInput = objectMapper.convertValue(input, StoreInput::class.java)
+            
+            logger.info("Starting Store stage: requestId={}, candidateCount={}, programId={}", 
+                requestId, storeInput.candidates.size, storeInput.programId)
+            
+            val candidates = storeInput.candidates
+            val programId = storeInput.programId
+            val marketplace = storeInput.marketplace
+            val executionId = storeInput.executionId
             
             if (candidates.isEmpty()) {
                 logger.info("No candidates to store")
@@ -180,6 +184,7 @@ class StoreHandler : RequestHandler<StoreInput, StoreResponse> {
 /**
  * Input to Store stage
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class StoreInput(
     val candidates: List<Candidate>,
     val programId: String,

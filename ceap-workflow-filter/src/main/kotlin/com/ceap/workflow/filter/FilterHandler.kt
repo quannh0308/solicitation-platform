@@ -2,6 +2,7 @@ package com.ceap.workflow.filter
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -25,7 +26,7 @@ import java.time.Instant
  * 
  * Validates: Requirements 4.1, 4.2, 8.1
  */
-class FilterHandler : RequestHandler<FilterInput, FilterResponse> {
+class FilterHandler : RequestHandler<Map<String, Any>, FilterResponse> {
     
     private val logger = LoggerFactory.getLogger(FilterHandler::class.java)
     private val objectMapper: ObjectMapper = jacksonObjectMapper()
@@ -76,18 +77,21 @@ class FilterHandler : RequestHandler<FilterInput, FilterResponse> {
         return FilterChainExecutor(filters, config)
     }
     
-    override fun handleRequest(input: FilterInput, context: Context): FilterResponse {
+    override fun handleRequest(input: Map<String, Any>, context: Context): FilterResponse {
         val requestId = context.awsRequestId
         val startTime = System.currentTimeMillis()
         
-        logger.info("Starting Filter stage: requestId={}, candidateCount={}, programId={}", 
-            requestId, input.candidates.size, input.programId)
-        
         try {
-            val candidates = input.candidates
-            val programId = input.programId
-            val marketplace = input.marketplace
-            val executionId = input.executionId
+            // Manually deserialize input to FilterInput
+            val filterInput = objectMapper.convertValue(input, FilterInput::class.java)
+            
+            logger.info("Starting Filter stage: requestId={}, candidateCount={}, programId={}", 
+                requestId, filterInput.candidates.size, filterInput.programId)
+            
+            val candidates = filterInput.candidates
+            val programId = filterInput.programId
+            val marketplace = filterInput.marketplace
+            val executionId = filterInput.executionId
             
             if (candidates.isEmpty()) {
                 logger.info("No candidates to filter")
@@ -180,6 +184,7 @@ class FilterHandler : RequestHandler<FilterInput, FilterResponse> {
 /**
  * Input to Filter stage
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class FilterInput(
     val candidates: List<Candidate>,
     val programId: String,

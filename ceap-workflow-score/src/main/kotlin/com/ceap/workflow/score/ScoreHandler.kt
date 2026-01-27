@@ -2,6 +2,7 @@ package com.ceap.workflow.score
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.ceap.model.Candidate
@@ -21,24 +22,27 @@ import java.time.Instant
  * 
  * Validates: Requirements 3.2, 3.3, 8.1
  */
-class ScoreHandler : RequestHandler<ScoreInput, ScoreResponse> {
+class ScoreHandler : RequestHandler<Map<String, Any>, ScoreResponse> {
     
     private val logger = LoggerFactory.getLogger(ScoreHandler::class.java)
     private val objectMapper: ObjectMapper = jacksonObjectMapper()
     private val metricsPublisher = WorkflowMetricsPublisher()
     
-    override fun handleRequest(input: ScoreInput, context: Context): ScoreResponse {
+    override fun handleRequest(input: Map<String, Any>, context: Context): ScoreResponse {
         val requestId = context.awsRequestId
         val startTime = System.currentTimeMillis()
         
-        logger.info("Starting Score stage: requestId={}, candidateCount={}, programId={}", 
-            requestId, input.candidates.size, input.programId)
-        
         try {
-            val candidates = input.candidates
-            val programId = input.programId
-            val marketplace = input.marketplace
-            val executionId = input.executionId
+            // Manually deserialize input to ScoreInput
+            val scoreInput = objectMapper.convertValue(input, ScoreInput::class.java)
+            
+            logger.info("Starting Score stage: requestId={}, candidateCount={}, programId={}", 
+                requestId, scoreInput.candidates.size, scoreInput.programId)
+            
+            val candidates = scoreInput.candidates
+            val programId = scoreInput.programId
+            val marketplace = scoreInput.marketplace
+            val executionId = scoreInput.executionId
             
             if (candidates.isEmpty()) {
                 logger.info("No candidates to score")
@@ -128,6 +132,7 @@ class ScoreHandler : RequestHandler<ScoreInput, ScoreResponse> {
 /**
  * Input to Score stage
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class ScoreInput(
     val candidates: List<Candidate>,
     val programId: String,
