@@ -14,6 +14,10 @@ import software.amazon.awscdk.services.lambda.Code
 import software.amazon.awscdk.services.lambda.Function
 import software.amazon.awscdk.services.lambda.Runtime
 import software.amazon.awscdk.services.logs.RetentionDays
+import software.amazon.awscdk.services.s3.BlockPublicAccess
+import software.amazon.awscdk.services.s3.Bucket
+import software.amazon.awscdk.services.s3.BucketEncryption
+import software.amazon.awscdk.services.s3.LifecycleRule
 import software.amazon.awscdk.services.stepfunctions.*
 import software.amazon.awscdk.services.stepfunctions.tasks.LambdaInvoke
 import software.constructs.Construct
@@ -103,6 +107,11 @@ class DataPlatformStack(
     // Preserves original logical ID "BatchIngestionWorkflow" (Requirement 8.1)
     val batchIngestionWorkflow: StateMachine
     
+    // S3 Workflow Bucket - for Step Functions intermediate storage
+    // Stores execution data between workflow stages
+    // Validates: Requirements 2.5, 2.7
+    val workflowBucket: Bucket
+    
     init {
         // Set stack description
         this.templateOptions.description = 
@@ -134,6 +143,28 @@ class DataPlatformStack(
                 "10.1: Uses CloudFormation exports for cross-stack references"
             )
         )
+        
+        // ========================================
+        // S3 Workflow Bucket
+        // ========================================
+        
+        // Create S3 bucket for workflow intermediate storage
+        // Naming convention: ceap-workflow-{environment}-{accountId}
+        // Validates: Requirements 2.5, 2.7
+        workflowBucket = Bucket.Builder.create(this, "WorkflowBucket")
+            .bucketName("ceap-workflow-$envName-${this.account}")
+            .versioned(false)
+            .encryption(BucketEncryption.S3_MANAGED)
+            .blockPublicAccess(BlockPublicAccess.BLOCK_ALL)
+            .lifecycleRules(listOf(
+                LifecycleRule.builder()
+                    .id("DeleteOldExecutions")
+                    .prefix("executions/")
+                    .expiration(Duration.days(7))
+                    .enabled(true)
+                    .build()
+            ))
+            .build()
         
         // ========================================
         // ETL Resources (from CeapEtlWorkflow-dev)
@@ -333,6 +364,18 @@ class DataPlatformStack(
                 .resources(listOf(candidatesTableArn))
                 .build()
         )
+        
+        // ========================================
+        // S3 Workflow Bucket IAM Permissions
+        // ========================================
+        
+        // Grant S3 read/write permissions to all Lambda functions
+        // Follows least-privilege principles: only access to executions/* prefix
+        // Validates: Requirements 11.2, 11.9
+        workflowBucket.grantReadWrite(etlLambda, "executions/*")
+        workflowBucket.grantReadWrite(filterLambda, "executions/*")
+        workflowBucket.grantReadWrite(scoreLambda, "executions/*")
+        workflowBucket.grantReadWrite(storeLambda, "executions/*")
         
         // TODO: Task 2.5 - COMPLETED
         // ✓ Copied Lambda function definition from CeapStoreWorkflow-dev
@@ -548,6 +591,20 @@ class DataPlatformStack(
             .value(storeLambda.functionArn)
             .exportName("$stackName-StoreLambdaArn")
             .description("ARN of the Store Lambda function.")
+            .build()
+        
+        // Export Workflow Bucket name for cross-stack references
+        CfnOutput.Builder.create(this, "WorkflowBucketNameOutput")
+            .value(workflowBucket.bucketName)
+            .exportName("$stackName-WorkflowBucketName")
+            .description("Name of the S3 bucket for workflow intermediate storage.")
+            .build()
+        
+        // Export Workflow Bucket ARN for IAM policy references
+        CfnOutput.Builder.create(this, "WorkflowBucketArnOutput")
+            .value(workflowBucket.bucketArn)
+            .exportName("$stackName-WorkflowBucketArn")
+            .description("ARN of the S3 bucket for workflow intermediate storage.")
             .build()
         
         // Task 2.6 - COMPLETED
