@@ -179,6 +179,8 @@ class ServingAPIStack(
          * Memory: 1024 MB
          * Timeout: 1 minute
          * 
+         * Uses explicit functionName to prevent CloudFormation auto-generated suffixes (Requirement 1.1, 1.2)
+         * 
          * Environment Variables:
          * - ENVIRONMENT: Deployment environment (dev/prod)
          * - CANDIDATES_TABLE: Name of candidates DynamoDB table (imported from DatabaseStack)
@@ -197,6 +199,7 @@ class ServingAPIStack(
          * Validates: Requirement 10.2 (use Fn::ImportValue for database tables)
          */
         val reactiveLambda = Function.Builder.create(this, "ReactiveLambda")
+            .functionName("$stackName-$envName-ReactiveLambda")
             .runtime(Runtime.JAVA_17)
             .handler("com.ceap.workflow.reactive.ReactiveHandler::handleRequest")
             .code(Code.fromAsset("../ceap-workflow-reactive/build/libs/ceap-workflow-reactive-1.0.0-SNAPSHOT.jar"))

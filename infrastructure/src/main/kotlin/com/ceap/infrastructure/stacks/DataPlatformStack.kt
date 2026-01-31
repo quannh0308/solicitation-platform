@@ -149,7 +149,9 @@ class DataPlatformStack(
         // ETL Lambda function
         // Preserves original logical ID "ETLLambdaFunction49DD508A" (Requirement 8.1)
         // Configuration matches original EtlWorkflowStack (Requirement 2.1)
+        // Uses explicit functionName to prevent CloudFormation auto-generated suffixes (Requirement 1.1, 1.2)
         etlLambda = Function.Builder.create(this, "ETLLambda")
+            .functionName("$stackName-$envName-ETLLambda")
             .runtime(Runtime.JAVA_17)
             .handler("com.ceap.workflow.etl.ETLHandler::handleRequest")
             .code(Code.fromAsset("../ceap-workflow-etl/build/libs/ceap-workflow-etl-1.0.0-SNAPSHOT.jar"))
@@ -202,7 +204,9 @@ class DataPlatformStack(
         // Filter Lambda function
         // Preserves original logical ID "FilterLambdaFunction29040EBB" (Requirement 8.1)
         // Configuration matches original FilterWorkflowStack (Requirement 2.1)
+        // Uses explicit functionName to prevent CloudFormation auto-generated suffixes (Requirement 1.1, 1.2)
         filterLambda = Function.Builder.create(this, "FilterLambda")
+            .functionName("$stackName-$envName-FilterLambda")
             .runtime(Runtime.JAVA_17)
             .handler("com.ceap.workflow.filter.FilterHandler::handleRequest")
             .code(Code.fromAsset("../ceap-workflow-filter/build/libs/ceap-workflow-filter-1.0.0-SNAPSHOT.jar"))
@@ -244,7 +248,9 @@ class DataPlatformStack(
         // Score Lambda function
         // Preserves original logical ID "ScoreLambdaFunction04AD330A" (Requirement 8.1)
         // Configuration matches original ScoreWorkflowStack (Requirement 2.1)
+        // Uses explicit functionName to prevent CloudFormation auto-generated suffixes (Requirement 1.1, 1.2)
         scoreLambda = Function.Builder.create(this, "ScoreLambda")
+            .functionName("$stackName-$envName-ScoreLambda")
             .runtime(Runtime.JAVA_17)
             .handler("com.ceap.workflow.score.ScoreHandler::handleRequest")
             .code(Code.fromAsset("../ceap-workflow-score/build/libs/ceap-workflow-score-1.0.0-SNAPSHOT.jar"))
@@ -295,7 +301,9 @@ class DataPlatformStack(
         // Store Lambda function
         // Preserves original logical ID "StoreLambdaFunction7FC1576D" (Requirement 8.1)
         // Configuration matches original StoreWorkflowStack (Requirement 2.1)
+        // Uses explicit functionName to prevent CloudFormation auto-generated suffixes (Requirement 1.1, 1.2)
         storeLambda = Function.Builder.create(this, "StoreLambda")
+            .functionName("$stackName-$envName-StoreLambda")
             .runtime(Runtime.JAVA_17)
             .handler("com.ceap.workflow.store.StoreHandler::handleRequest")
             .code(Code.fromAsset("../ceap-workflow-store/build/libs/ceap-workflow-store-1.0.0-SNAPSHOT.jar"))
