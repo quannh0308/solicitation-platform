@@ -14,13 +14,13 @@ This plan consolidates the CEAP platform from 7 CloudFormation stacks to 3 stack
   - _Requirements: 5.1, 5.3_
 
 - [ ] 2. Create consolidated CloudFormation templates
-  - [ ] 2.1 Create CeapDataPlatform-dev template structure
+  - [x] 2.1 Create CeapDataPlatform-dev template structure
     - Set up template parameters for cross-stack references
     - Add DatabaseStackName parameter
     - Define template metadata and description
     - _Requirements: 1.3, 7.1_
   
-  - [ ] 2.2 Migrate ETL resources to CeapDataPlatform-dev
+  - [x] 2.2 Migrate ETL resources to CeapDataPlatform-dev
     - Copy Lambda function definitions from CeapEtlWorkflow-dev
     - Copy Step Function definitions from CeapEtlWorkflow-dev
     - Copy EventBridge rules from CeapEtlWorkflow-dev
@@ -28,28 +28,28 @@ This plan consolidates the CEAP platform from 7 CloudFormation stacks to 3 stack
     - Preserve original logical IDs
     - _Requirements: 1.5, 2.1, 2.2, 2.3, 8.1, 10.1_
   
-  - [ ] 2.3 Migrate Filter resources to CeapDataPlatform-dev
+  - [x] 2.3 Migrate Filter resources to CeapDataPlatform-dev
     - Copy Lambda function definitions from CeapFilterWorkflow-dev
     - Copy Step Function definitions from CeapFilterWorkflow-dev
     - Update cross-stack references to use Fn::ImportValue
     - Preserve original logical IDs
     - _Requirements: 1.5, 2.1, 2.2, 8.1, 10.1_
   
-  - [ ] 2.4 Migrate Score resources to CeapDataPlatform-dev
+  - [x] 2.4 Migrate Score resources to CeapDataPlatform-dev
     - Copy Lambda function definitions from CeapScoreWorkflow-dev
     - Copy Step Function definitions from CeapScoreWorkflow-dev
     - Update cross-stack references to use Fn::ImportValue
     - Preserve original logical IDs
     - _Requirements: 1.5, 2.1, 2.2, 8.1, 10.1_
   
-  - [ ] 2.5 Migrate Store resources to CeapDataPlatform-dev
+  - [x] 2.5 Migrate Store resources to CeapDataPlatform-dev
     - Copy Lambda function definitions from CeapStoreWorkflow-dev
     - Copy Step Function definitions from CeapStoreWorkflow-dev
     - Update cross-stack references to use Fn::ImportValue
     - Preserve original logical IDs
     - _Requirements: 1.5, 2.1, 2.2, 8.1, 10.1_
   
-  - [ ] 2.6 Migrate Orchestration resources to CeapDataPlatform-dev
+  - [x] 2.6 Migrate Orchestration resources to CeapDataPlatform-dev
     - Copy Step Function definitions from CeapOrchestration-dev
     - Copy EventBridge rules from CeapOrchestration-dev
     - Update cross-stack references to use Fn::ImportValue
@@ -57,14 +57,14 @@ This plan consolidates the CEAP platform from 7 CloudFormation stacks to 3 stack
     - Add stack outputs for orchestration resources
     - _Requirements: 1.5, 2.2, 2.3, 8.1, 10.1_
   
-  - [ ] 2.7 Create CeapServingAPI-dev template structure
+  - [x] 2.7 Create CeapServingAPI-dev template structure
     - Set up template parameters for cross-stack references
     - Add DatabaseStackName parameter
     - Add DataPlatformStackName parameter
     - Define template metadata and description
     - _Requirements: 1.4, 7.2_
   
-  - [ ] 2.8 Migrate Reactive resources to CeapServingAPI-dev
+  - [x] 2.8 Migrate Reactive resources to CeapServingAPI-dev
     - Copy Lambda function definitions from CeapReactiveWorkflow-dev
     - Copy Step Function definitions from CeapReactiveWorkflow-dev
     - Update cross-stack references to use Fn::ImportValue
@@ -73,36 +73,36 @@ This plan consolidates the CEAP platform from 7 CloudFormation stacks to 3 stack
     - _Requirements: 1.4, 2.1, 2.2, 8.2, 10.2, 10.3_
 
 - [ ] 3. Validate consolidated templates
-  - [ ] 3.1 Run CloudFormation template validation
+  - [x] 3.1 Run CloudFormation template validation
     - Validate CeapDataPlatform-dev template syntax with cfn-lint
     - Validate CeapServingAPI-dev template syntax with cfn-lint
     - Check for template size limits
     - _Requirements: 5.3_
   
-  - [ ] 3.2 Write property test for resource consolidation completeness
+  - [x] 3.2 Write property test for resource consolidation completeness
     - **Property 2: Resource Consolidation Completeness**
     - **Validates: Requirements 1.3, 1.4, 1.5**
   
-  - [ ] 3.3 Write property test for resource preservation
+  - [x] 3.3 Write property test for resource preservation
     - **Property 3: Resource Preservation**
     - **Validates: Requirements 2.1, 2.2, 2.3, 2.4, 2.5**
   
-  - [ ] 3.4 Write property test for logical name preservation
+  - [x] 3.4 Write property test for logical name preservation
     - **Property 7: Logical Name Preservation**
     - **Validates: Requirements 8.1, 8.2**
   
-  - [ ] 3.5 Write property test for cross-stack reference mechanisms
+  - [x] 3.5 Write property test for cross-stack reference mechanisms
     - **Property 9: Cross-Stack Reference Mechanisms**
     - **Validates: Requirements 10.1, 10.2, 10.3**
   
-  - [ ] 3.6 Write unit tests for template structure
+  - [x] 3.6 Write unit tests for template structure
     - Test that CeapDataPlatform-dev contains all expected resource types
     - Test that CeapServingAPI-dev contains all expected resource types
     - Test that stack parameters are correctly defined
     - Test that stack outputs are correctly defined
     - _Requirements: 1.3, 1.4, 7.1, 7.2_
 
-- [ ] 4. Checkpoint - Ensure all validation tests pass
+- [x] 4. Checkpoint - Ensure all validation tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 5. Create migration and deployment scripts

@@ -16,6 +16,9 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     
+    // JSON parsing
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.16.1")
+    
     // Testing
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.1")
     testImplementation("org.assertj:assertj-core:3.24.2")
@@ -28,7 +31,7 @@ dependencies {
 }
 
 application {
-    mainClass.set("com.ceap.infrastructure.CeapPlatformAppKt")
+    mainClass.set("com.ceap.infrastructure.ConsolidatedCeapPlatformAppKt")
 }
 
 tasks.test {

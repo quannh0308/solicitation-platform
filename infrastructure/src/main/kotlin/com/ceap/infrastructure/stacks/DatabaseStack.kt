@@ -1,5 +1,6 @@
 package com.ceap.infrastructure.stacks
 
+import software.amazon.awscdk.CfnOutput
 import software.amazon.awscdk.RemovalPolicy
 import software.amazon.awscdk.Stack
 import software.amazon.awscdk.StackProps
@@ -109,4 +110,43 @@ class DatabaseStack(
         .encryption(TableEncryption.AWS_MANAGED)
         .removalPolicy(RemovalPolicy.DESTROY)  // Cache can be destroyed
         .build()
+    
+    init {
+        // Export table names and ARNs for cross-stack references
+        CfnOutput.Builder.create(this, "CandidatesTableNameOutput")
+            .value(candidatesTable.tableName)
+            .exportName("$id-CandidatesTableName")
+            .description("Candidates table name for cross-stack references")
+            .build()
+        
+        CfnOutput.Builder.create(this, "CandidatesTableArnOutput")
+            .value(candidatesTable.tableArn)
+            .exportName("$id-CandidatesTableArn")
+            .description("Candidates table ARN for cross-stack references")
+            .build()
+        
+        CfnOutput.Builder.create(this, "ProgramConfigTableNameOutput")
+            .value(programConfigTable.tableName)
+            .exportName("$id-ProgramConfigTableName")
+            .description("Program config table name for cross-stack references")
+            .build()
+        
+        CfnOutput.Builder.create(this, "ProgramConfigTableArnOutput")
+            .value(programConfigTable.tableArn)
+            .exportName("$id-ProgramConfigTableArn")
+            .description("Program config table ARN for cross-stack references")
+            .build()
+        
+        CfnOutput.Builder.create(this, "ScoreCacheTableNameOutput")
+            .value(scoreCacheTable.tableName)
+            .exportName("$id-ScoreCacheTableName")
+            .description("Score cache table name for cross-stack references")
+            .build()
+        
+        CfnOutput.Builder.create(this, "ScoreCacheTableArnOutput")
+            .value(scoreCacheTable.tableArn)
+            .exportName("$id-ScoreCacheTableArn")
+            .description("Score cache table ARN for cross-stack references")
+            .build()
+    }
 }
