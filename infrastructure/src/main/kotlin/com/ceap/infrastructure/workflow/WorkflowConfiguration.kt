@@ -115,26 +115,100 @@ data class WorkflowConfiguration(
     val retryConfig: RetryConfiguration = RetryConfiguration()
 ) {
     init {
-        // Validate: Express workflows cannot contain Glue steps
-        if (workflowType == WorkflowType.EXPRESS) {
-            val hasGlueSteps = steps.any { it is WorkflowStepType.Glue }
-            require(!hasGlueSteps) {
-                "Express workflows only support Lambda steps. Use Standard workflow for Glue jobs. " +
-                "Found ${steps.count { it is WorkflowStepType.Glue }} Glue step(s) in configuration."
-            }
-        }
-        
-        // Validate: All Lambda function keys must exist in the functions map
-        steps.filterIsInstance<WorkflowStepType.Lambda>().forEach { lambdaStep ->
-            require(lambdaFunctions.containsKey(lambdaStep.step.lambdaFunctionKey)) {
-                "Lambda function key '${lambdaStep.step.lambdaFunctionKey}' not found in functions map. " +
-                "Available keys: ${lambdaFunctions.keys.joinToString(", ")}"
-            }
+        // Validate configuration on construction
+        validate()
+    }
+    
+    /**
+     * Validates the workflow configuration.
+     * 
+     * This method performs comprehensive validation including:
+     * - Express workflows cannot contain Glue steps
+     * - All Lambda function keys must exist in the functions map
+     * - At least one step is required
+     * - Workflow name must not be empty
+     * 
+     * @throws IllegalArgumentException if validation fails with descriptive error message
+     * 
+     * Validates: Requirements 6.1, 6.2, 6.4
+     */
+    private fun validate() {
+        // Validate: Workflow name must not be empty
+        require(workflowName.isNotBlank()) {
+            "Workflow name cannot be empty or blank."
         }
         
         // Validate: At least one step is required
         require(steps.isNotEmpty()) {
             "Workflow must contain at least one step. Received empty steps list."
+        }
+        
+        // Validate: Express workflows cannot contain Glue steps (Requirement 6.1, 6.2)
+        if (workflowType == WorkflowType.EXPRESS) {
+            val glueSteps = steps.filterIsInstance<WorkflowStepType.Glue>()
+            require(glueSteps.isEmpty()) {
+                buildString {
+                    appendLine("Express workflows only support Lambda steps. Use Standard workflow for Glue jobs.")
+                    appendLine()
+                    appendLine("Reason: Express workflows have a 5-minute maximum duration and use synchronous")
+                    appendLine("invocation (REQUEST_RESPONSE). Glue jobs typically run longer than 5 minutes and")
+                    appendLine("require asynchronous invocation (FIRE_AND_FORGET) available in Standard workflows.")
+                    appendLine()
+                    appendLine("Found ${glueSteps.size} Glue step(s) in configuration:")
+                    glueSteps.forEach { glueStep ->
+                        appendLine("  - ${glueStep.step.stateName} (Glue job: ${glueStep.step.glueJobName})")
+                    }
+                    appendLine()
+                    appendLine("Solution: Change workflowType to WorkflowType.STANDARD to use Glue jobs.")
+                }
+            }
+        }
+        
+        // Validate: All Lambda function keys must exist in the functions map
+        val lambdaSteps = steps.filterIsInstance<WorkflowStepType.Lambda>()
+        lambdaSteps.forEach { lambdaStep ->
+            val functionKey = lambdaStep.step.lambdaFunctionKey
+            require(lambdaFunctions.containsKey(functionKey)) {
+                buildString {
+                    appendLine("Lambda function key '$functionKey' not found in functions map.")
+                    appendLine()
+                    appendLine("Step: ${lambdaStep.step.stateName}")
+                    appendLine("Missing key: $functionKey")
+                    appendLine()
+                    appendLine("Available function keys:")
+                    if (lambdaFunctions.isEmpty()) {
+                        appendLine("  (none - functions map is empty)")
+                    } else {
+                        lambdaFunctions.keys.sorted().forEach { key ->
+                            appendLine("  - $key")
+                        }
+                    }
+                    appendLine()
+                    appendLine("Solution: Add the Lambda function to the lambdaFunctions map with key '$functionKey'")
+                    appendLine("or update the step configuration to use an existing function key.")
+                }
+            }
+        }
+        
+        // Validate: Step names must be unique
+        val stepNames = steps.map { step ->
+            when (step) {
+                is WorkflowStepType.Lambda -> step.step.stateName
+                is WorkflowStepType.Glue -> step.step.stateName
+            }
+        }
+        val duplicateNames = stepNames.groupingBy { it }.eachCount().filter { it.value > 1 }
+        require(duplicateNames.isEmpty()) {
+            buildString {
+                appendLine("Step names must be unique within a workflow.")
+                appendLine()
+                appendLine("Duplicate step names found:")
+                duplicateNames.forEach { (name, count) ->
+                    appendLine("  - '$name' appears $count times")
+                }
+                appendLine()
+                appendLine("Solution: Rename duplicate steps to have unique names.")
+            }
         }
     }
 }

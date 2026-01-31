@@ -29,6 +29,31 @@ import software.constructs.Construct
 object WorkflowFactory {
     
     /**
+     * Determines the appropriate EventBridge Pipe invocation type based on workflow type.
+     * 
+     * This function implements automatic invocation type configuration:
+     * - EXPRESS workflows use REQUEST_RESPONSE (synchronous)
+     * - STANDARD workflows use FIRE_AND_FORGET (asynchronous)
+     * 
+     * Rationale:
+     * - Express workflows complete quickly (<5 minutes) and benefit from synchronous
+     *   invocation to enable immediate failure detection and SQS message retry
+     * - Standard workflows can run for extended periods and use asynchronous invocation
+     *   to avoid blocking the EventBridge Pipe
+     * 
+     * @param workflowType The workflow type (EXPRESS or STANDARD)
+     * @return Invocation type string: "REQUEST_RESPONSE" or "FIRE_AND_FORGET"
+     * 
+     * Validates: Requirement 6.5
+     */
+    private fun getInvocationType(workflowType: WorkflowType): String {
+        return when (workflowType) {
+            WorkflowType.EXPRESS -> "REQUEST_RESPONSE"  // Synchronous for Express
+            WorkflowType.STANDARD -> "FIRE_AND_FORGET"  // Asynchronous for Standard
+        }
+    }
+    
+    /**
      * Creates an Express workflow for fast processing pipelines.
      * 
      * Express workflows are designed for:
@@ -160,12 +185,13 @@ object WorkflowFactory {
         
         // Create EventBridge Pipe to connect SQS queue to Step Function
         // Uses REQUEST_RESPONSE (synchronous) invocation type (Requirement 4.2)
+        // Automatically configured based on workflow type (Requirement 6.5)
         createEventBridgePipe(
             scope = scope,
             pipeName = "${config.workflowName}-pipe",
             sourceQueue = config.sourceQueue,
             targetStateMachine = stateMachine,
-            invocationType = "REQUEST_RESPONSE"  // Synchronous for Express workflows
+            invocationType = getInvocationType(config.workflowType)
         )
         
         return stateMachine
@@ -334,12 +360,13 @@ object WorkflowFactory {
         
         // Create EventBridge Pipe to connect SQS queue to Step Function
         // Uses FIRE_AND_FORGET (asynchronous) invocation type (Requirement 5.2)
+        // Automatically configured based on workflow type (Requirement 6.5)
         createEventBridgePipe(
             scope = scope,
             pipeName = "${config.workflowName}-pipe",
             sourceQueue = config.sourceQueue,
             targetStateMachine = stateMachine,
-            invocationType = "FIRE_AND_FORGET"  // Asynchronous for Standard workflows
+            invocationType = getInvocationType(config.workflowType)
         )
         
         // Create EventBridge rule for failure detection (Requirement 8.7)

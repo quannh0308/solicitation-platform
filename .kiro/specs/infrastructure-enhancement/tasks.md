@@ -238,7 +238,7 @@ Each task builds on previous work, with checkpoints to validate progress. The im
   - Commit message: "feat: implement Standard workflow CDK infrastructure"
   - Push to remote repository
 
-- [-] 9. Implement Glue job integration
+- [x] 9. Implement Glue job integration
   - [x] 9.1 Create Glue job PySpark script template
     - Read arguments from Step Functions (execution-id, input/output paths)
     - Read input from S3 using input-bucket and input-key
@@ -268,17 +268,17 @@ Each task builds on previous work, with checkpoints to validate progress. The im
     - **Property 28: Glue Job Positioning Flexibility**
     - **Validates: Requirements 7.1**
 
-- [-] 9.7 Git commit and push Task 9 changes
+- [x] 9.7 Git commit and push Task 9 changes
   - Commit message: "feat: implement Glue job integration"
   - Push to remote repository
 
-- [~] 10. Implement workflow type selection and validation
-  - [ ] 10.1 Add workflow type validation logic
+- [-] 10. Implement workflow type selection and validation
+  - [x] 10.1 Add workflow type validation logic
     - Validate Express workflows don't contain Glue steps
     - Provide clear error messages for invalid configurations
     - _Requirements: 6.1, 6.2, 6.4_
   
-  - [ ] 10.2 Implement automatic invocation type configuration
+  - [x] 10.2 Implement automatic invocation type configuration
     - Set REQUEST_RESPONSE for Express workflows
     - Set FIRE_AND_FORGET for Standard workflows
     - _Requirements: 6.5_
@@ -295,7 +295,7 @@ Each task builds on previous work, with checkpoints to validate progress. The im
     - **Property 27: Automatic Invocation Type Configuration**
     - **Validates: Requirements 6.5**
 
-- [ ] 10.6 Git commit and push Task 10 changes
+- [-] 10.6 Git commit and push Task 10 changes
   - Commit message: "feat: implement workflow type selection and validation"
   - Push to remote repository
 
