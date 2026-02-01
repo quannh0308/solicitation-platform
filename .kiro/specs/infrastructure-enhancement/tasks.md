@@ -302,7 +302,7 @@ Each task builds on previous work, with checkpoints to validate progress. The im
 - [x] 11. Checkpoint - Validate Standard workflow and Glue integration
   - Ensure all tests pass, ask the user if questions arise.
 
-- [-] 12. Implement error handling and retry logic
+- [x] 12. Implement error handling and retry logic
   - [x] 12.1 Configure SQS Dead Letter Queue
     - Create DLQ for main workflow queue
     - Set maxReceiveCount = 3
@@ -351,22 +351,22 @@ Each task builds on previous work, with checkpoints to validate progress. The im
     - Test retry exhaustion scenario
     - _Requirements: 12.7_
 
-- [-] 12.11 Git commit and push Task 12 changes
+- [x] 12.11 Git commit and push Task 12 changes
   - Commit message: "feat: implement error handling and retry logic"
   - Push to remote repository
 
-- [~] 13. Implement observability features
-  - [ ] 13.1 Configure CloudWatch Logs for Step Functions
+- [-] 13. Implement observability features
+  - [x] 13.1 Configure CloudWatch Logs for Step Functions
     - Enable logs with includeExecutionData=true
     - Set log level to ALL
     - Configure 14-day retention
     - _Requirements: 9.2, 9.3_
   
-  - [ ] 13.2 Enable X-Ray tracing for Step Functions
+  - [x] 13.2 Enable X-Ray tracing for Step Functions
     - Set tracingEnabled=true in Step Function configuration
     - _Requirements: 9.1_
   
-  - [ ] 13.3 Add execution context logging to Lambda handlers
+  - [x] 13.3 Add execution context logging to Lambda handlers
     - Log executionId and currentStage at start
     - Log S3 input and output paths
     - _Requirements: 9.5, 9.6_
@@ -383,7 +383,7 @@ Each task builds on previous work, with checkpoints to validate progress. The im
     - **Property 37: Lambda S3 Path Logging**
     - **Validates: Requirements 9.6**
 
-- [ ] 13.7 Git commit and push Task 13 changes
+- [-] 13.7 Git commit and push Task 13 changes
   - Commit message: "feat: implement observability features"
   - Push to remote repository
 
