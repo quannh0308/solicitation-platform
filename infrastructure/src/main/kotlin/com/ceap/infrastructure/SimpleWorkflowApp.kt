@@ -74,7 +74,6 @@ class SimpleWorkflowStack(
             .code(Code.fromAsset("../ceap-workflow-etl/build/libs/ceap-workflow-etl-1.0.0-SNAPSHOT.jar"))
             .memorySize(1024)
             .timeout(Duration.minutes(5))
-            .logRetention(RetentionDays.TWO_WEEKS)
             .build()
         
         val filterLambda = Function.Builder.create(this, "FilterLambda")
@@ -84,7 +83,6 @@ class SimpleWorkflowStack(
             .code(Code.fromAsset("../ceap-workflow-filter/build/libs/ceap-workflow-filter-1.0.0-SNAPSHOT.jar"))
             .memorySize(512)
             .timeout(Duration.seconds(60))
-            .logRetention(RetentionDays.TWO_WEEKS)
             .build()
         
         val scoreLambda = Function.Builder.create(this, "ScoreLambda")
@@ -94,7 +92,6 @@ class SimpleWorkflowStack(
             .code(Code.fromAsset("../ceap-workflow-score/build/libs/ceap-workflow-score-1.0.0-SNAPSHOT.jar"))
             .memorySize(1024)
             .timeout(Duration.minutes(2))
-            .logRetention(RetentionDays.TWO_WEEKS)
             .build()
         
         val storeLambda = Function.Builder.create(this, "StoreLambda")
@@ -104,7 +101,6 @@ class SimpleWorkflowStack(
             .code(Code.fromAsset("../ceap-workflow-store/build/libs/ceap-workflow-store-1.0.0-SNAPSHOT.jar"))
             .memorySize(512)
             .timeout(Duration.seconds(60))
-            .logRetention(RetentionDays.TWO_WEEKS)
             .build()
         
         val reactiveLambda = Function.Builder.create(this, "ReactiveLambda")
@@ -114,7 +110,6 @@ class SimpleWorkflowStack(
             .code(Code.fromAsset("../ceap-workflow-reactive/build/libs/ceap-workflow-reactive-1.0.0-SNAPSHOT.jar"))
             .memorySize(1024)
             .timeout(Duration.minutes(1))
-            .logRetention(RetentionDays.TWO_WEEKS)
             .build()
         
         // Grant S3 permissions
@@ -190,7 +185,6 @@ class SimpleWorkflowStack(
         // CloudWatch Logs
         val logGroup = LogGroup.Builder.create(this, "Logs")
             .logGroupName("/aws/stepfunctions/Ceap-$workflowName-Workflow")
-            .retention(RetentionDays.TWO_WEEKS)
             .build()
         
         // Step Functions State Machine
@@ -209,7 +203,9 @@ class SimpleWorkflowStack(
         
         bucket.grantReadWrite(stateMachine)
         
-        // EventBridge Pipe
+        // Note: EventBridge Pipe commented out due to deployment issues
+        // Can be added later or triggered manually via AWS CLI
+        /*
         val pipeRole = Role.Builder.create(this, "PipeRole")
             .assumedBy(ServicePrincipal("pipes.amazonaws.com"))
             .build()
@@ -238,6 +234,7 @@ class SimpleWorkflowStack(
                 .build())
             .desiredState("RUNNING")
             .build()
+        */
         
         // Outputs
         CfnOutput.Builder.create(this, "WorkflowBucketNameOutput")

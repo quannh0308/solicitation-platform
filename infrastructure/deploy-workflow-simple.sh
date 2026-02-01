@@ -51,7 +51,7 @@ echo ""
 echo -e "${YELLOW}Deploying to AWS...${NC}"
 cd infrastructure
 cdk deploy "CeapWorkflow-$WORKFLOW_NAME" \
-    --app "./gradlew runWorkflowApp" \
+    --app "../gradlew :infrastructure:runWorkflowApp" \
     --context workflowName="$WORKFLOW_NAME" \
     --context workflowType="$WORKFLOW_TYPE" \
     --require-approval never \

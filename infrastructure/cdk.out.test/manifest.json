@@ -1,0 +1,288 @@
+{
+  "version": "38.0.1",
+  "artifacts": {
+    "CeapWorkflow-realtime.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "CeapWorkflow-realtime.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "CeapWorkflow-realtime": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://728093470684/us-east-1",
+      "properties": {
+        "templateFile": "CeapWorkflow-realtime.template.json",
+        "terminationProtection": false,
+        "validateOnSynth": false,
+        "notificationArns": [],
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::728093470684:role/cdk-hnb659fds-deploy-role-728093470684-us-east-1",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::728093470684:role/cdk-hnb659fds-cfn-exec-role-728093470684-us-east-1",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-728093470684-us-east-1/4117cc4b716188367a97f4601395719d5e6c70a08d0aa04254b417c1b31b66e7.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "CeapWorkflow-realtime.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::728093470684:role/cdk-hnb659fds-lookup-role-728093470684-us-east-1",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "CeapWorkflow-realtime.assets"
+      ],
+      "metadata": {
+        "/CeapWorkflow-realtime/Bucket/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "Bucket83908E77"
+          }
+        ],
+        "/CeapWorkflow-realtime/DLQ/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DLQ581697C4"
+          }
+        ],
+        "/CeapWorkflow-realtime/Queue/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "Queue4A7E3555"
+          }
+        ],
+        "/CeapWorkflow-realtime/ETLLambda/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ETLLambdaServiceRole91516A56"
+          }
+        ],
+        "/CeapWorkflow-realtime/ETLLambda/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ETLLambdaServiceRoleDefaultPolicy450142D6"
+          }
+        ],
+        "/CeapWorkflow-realtime/ETLLambda/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ETLLambdaD26B66B0"
+          }
+        ],
+        "/CeapWorkflow-realtime/ETLLambda/LogRetention/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ETLLambdaLogRetentionDDEAEAF3"
+          }
+        ],
+        "/CeapWorkflow-realtime/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB"
+          }
+        ],
+        "/CeapWorkflow-realtime/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB"
+          }
+        ],
+        "/CeapWorkflow-realtime/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A"
+          }
+        ],
+        "/CeapWorkflow-realtime/FilterLambda/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FilterLambdaServiceRoleBE2F350F"
+          }
+        ],
+        "/CeapWorkflow-realtime/FilterLambda/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FilterLambdaServiceRoleDefaultPolicyA5050364"
+          }
+        ],
+        "/CeapWorkflow-realtime/FilterLambda/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FilterLambda41437474"
+          }
+        ],
+        "/CeapWorkflow-realtime/FilterLambda/LogRetention/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FilterLambdaLogRetention06A6DAC7"
+          }
+        ],
+        "/CeapWorkflow-realtime/ScoreLambda/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ScoreLambdaServiceRole4FE6E68C"
+          }
+        ],
+        "/CeapWorkflow-realtime/ScoreLambda/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ScoreLambdaServiceRoleDefaultPolicyB3CC1451"
+          }
+        ],
+        "/CeapWorkflow-realtime/ScoreLambda/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ScoreLambda54D562F7"
+          }
+        ],
+        "/CeapWorkflow-realtime/ScoreLambda/LogRetention/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ScoreLambdaLogRetention1E7FB3AB"
+          }
+        ],
+        "/CeapWorkflow-realtime/StoreLambda/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "StoreLambdaServiceRole2269A608"
+          }
+        ],
+        "/CeapWorkflow-realtime/StoreLambda/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "StoreLambdaServiceRoleDefaultPolicy8D0625A8"
+          }
+        ],
+        "/CeapWorkflow-realtime/StoreLambda/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "StoreLambda2E8941EF"
+          }
+        ],
+        "/CeapWorkflow-realtime/StoreLambda/LogRetention/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "StoreLambdaLogRetention696988F1"
+          }
+        ],
+        "/CeapWorkflow-realtime/ReactiveLambda/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ReactiveLambdaServiceRole9270F6F2"
+          }
+        ],
+        "/CeapWorkflow-realtime/ReactiveLambda/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ReactiveLambdaServiceRoleDefaultPolicyFBE00476"
+          }
+        ],
+        "/CeapWorkflow-realtime/ReactiveLambda/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ReactiveLambda3A0FEE16"
+          }
+        ],
+        "/CeapWorkflow-realtime/ReactiveLambda/LogRetention/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ReactiveLambdaLogRetentionD23EA20B"
+          }
+        ],
+        "/CeapWorkflow-realtime/Logs/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "Logs6819BB44"
+          }
+        ],
+        "/CeapWorkflow-realtime/StateMachine/Role/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "StateMachineRoleB840431D"
+          }
+        ],
+        "/CeapWorkflow-realtime/StateMachine/Role/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "StateMachineRoleDefaultPolicyDF1E6607"
+          }
+        ],
+        "/CeapWorkflow-realtime/StateMachine/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "StateMachine2E01A3A5"
+          }
+        ],
+        "/CeapWorkflow-realtime/PipeRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PipeRole4D7B8476"
+          }
+        ],
+        "/CeapWorkflow-realtime/PipeRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PipeRoleDefaultPolicy84F54597"
+          }
+        ],
+        "/CeapWorkflow-realtime/Pipe": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "Pipe"
+          }
+        ],
+        "/CeapWorkflow-realtime/WorkflowBucketNameOutput": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "WorkflowBucketNameOutput"
+          }
+        ],
+        "/CeapWorkflow-realtime/StateMachineArnOutput": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "StateMachineArnOutput"
+          }
+        ],
+        "/CeapWorkflow-realtime/QueueUrlOutput": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "QueueUrlOutput"
+          }
+        ],
+        "/CeapWorkflow-realtime/DLQUrlOutput": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DLQUrlOutput"
+          }
+        ],
+        "/CeapWorkflow-realtime/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/CeapWorkflow-realtime/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/CeapWorkflow-realtime/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "CeapWorkflow-realtime"
+    },
+    "Tree": {
+      "type": "cdk:tree",
+      "properties": {
+        "file": "tree.json"
+      }
+    }
+  }
+}
