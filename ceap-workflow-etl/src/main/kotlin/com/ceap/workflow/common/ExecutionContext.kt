@@ -1,7 +1,5 @@
 package com.ceap.workflow.common
 
-import com.fasterxml.jackson.databind.JsonNode
-
 /**
  * Execution context passed from Step Functions to each Lambda stage.
  * 
@@ -17,9 +15,12 @@ import com.fasterxml.jackson.databind.JsonNode
  * Validates: Requirements 2.1
  */
 data class ExecutionContext(
-    val executionId: String,
-    val currentStage: String,
-    val previousStage: String?,
-    val workflowBucket: String,
-    val initialData: JsonNode?
-)
+    var executionId: String = "",
+    var currentStage: String = "",
+    var previousStage: String? = null,
+    var workflowBucket: String = "",
+    var initialData: Map<String, Any>? = null
+) {
+    // No-arg constructor for Jackson
+    constructor() : this("", "", null, "", null)
+}

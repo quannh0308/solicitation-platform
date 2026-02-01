@@ -125,6 +125,13 @@ class SimpleWorkflowStack(
         // Create Step Functions tasks
         val etlTask = LambdaInvoke.Builder.create(this, "ETLTask")
             .lambdaFunction(etlLambda)
+            .payload(TaskInput.fromObject(mapOf(
+                "executionId.$" to "$$.Execution.Name",
+                "currentStage" to "ETLTask",
+                "previousStage" to null,
+                "workflowBucket" to bucket.bucketName,
+                "initialData.$" to "$"
+            )))
             .resultPath(JsonPath.DISCARD)
             .build()
             .addRetry(RetryProps.builder()
@@ -136,6 +143,13 @@ class SimpleWorkflowStack(
         
         val filterTask = LambdaInvoke.Builder.create(this, "FilterTask")
             .lambdaFunction(filterLambda)
+            .payload(TaskInput.fromObject(mapOf(
+                "executionId.$" to "$$.Execution.Name",
+                "currentStage" to "FilterTask",
+                "previousStage" to "ETLTask",
+                "workflowBucket" to bucket.bucketName,
+                "initialData" to null
+            )))
             .resultPath(JsonPath.DISCARD)
             .build()
             .addRetry(RetryProps.builder()
@@ -145,8 +159,18 @@ class SimpleWorkflowStack(
                 .backoffRate(2.0)
                 .build())
         
+        // Update previousStage for tasks after Glue (if Glue is present)
+        val scoreTaskPreviousStage = if (workflowType == "standard") "HeavyETLTask" else "FilterTask"
+        
         val scoreTask = LambdaInvoke.Builder.create(this, "ScoreTask")
             .lambdaFunction(scoreLambda)
+            .payload(TaskInput.fromObject(mapOf(
+                "executionId.$" to "$$.Execution.Name",
+                "currentStage" to "ScoreTask",
+                "previousStage" to scoreTaskPreviousStage,
+                "workflowBucket" to bucket.bucketName,
+                "initialData" to null
+            )))
             .resultPath(JsonPath.DISCARD)
             .build()
             .addRetry(RetryProps.builder()
@@ -158,6 +182,13 @@ class SimpleWorkflowStack(
         
         val storeTask = LambdaInvoke.Builder.create(this, "StoreTask")
             .lambdaFunction(storeLambda)
+            .payload(TaskInput.fromObject(mapOf(
+                "executionId.$" to "$$.Execution.Name",
+                "currentStage" to "StoreTask",
+                "previousStage" to "ScoreTask",
+                "workflowBucket" to bucket.bucketName,
+                "initialData" to null
+            )))
             .resultPath(JsonPath.DISCARD)
             .build()
             .addRetry(RetryProps.builder()
@@ -169,6 +200,13 @@ class SimpleWorkflowStack(
         
         val reactiveTask = LambdaInvoke.Builder.create(this, "ReactiveTask")
             .lambdaFunction(reactiveLambda)
+            .payload(TaskInput.fromObject(mapOf(
+                "executionId.$" to "$$.Execution.Name",
+                "currentStage" to "ReactiveTask",
+                "previousStage" to "StoreTask",
+                "workflowBucket" to bucket.bucketName,
+                "initialData" to null
+            )))
             .resultPath(JsonPath.DISCARD)
             .build()
             .addRetry(RetryProps.builder()
@@ -228,13 +266,13 @@ class SimpleWorkflowStack(
                 .glueJobName(glueJob.name)
                 .integrationPattern(IntegrationPattern.RUN_JOB)  // Wait for completion
                 .arguments(TaskInput.fromObject(mapOf(
-                    "--execution-id" to JsonPath.stringAt("\$.Execution.Name"),
+                    "--execution-id.$" to "$$.Execution.Name",
                     "--input-bucket" to bucket.bucketName,
-                    "--input-key" to "executions/\${JsonPath.stringAt(\"\$.Execution.Name\")}/FilterStage/output.json",
+                    "--input-key.$" to "States.Format('executions/{}/FilterTask/output.json', $$.Execution.Name)",
                     "--output-bucket" to bucket.bucketName,
-                    "--output-key" to "executions/\${JsonPath.stringAt(\"\$.Execution.Name\")}/HeavyETLStage/output.json",
-                    "--current-stage" to "HeavyETLStage",
-                    "--previous-stage" to "FilterStage"
+                    "--output-key.$" to "States.Format('executions/{}/HeavyETLTask/output.json', $$.Execution.Name)",
+                    "--current-stage" to "HeavyETLTask",
+                    "--previous-stage" to "FilterTask"
                 )))
                 .resultPath(JsonPath.DISCARD)
                 .build()

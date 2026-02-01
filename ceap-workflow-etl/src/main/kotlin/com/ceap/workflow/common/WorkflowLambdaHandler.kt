@@ -262,8 +262,11 @@ abstract class WorkflowLambdaHandler : RequestHandler<ExecutionContext, StageRes
             // First stage: Use initial SQS message data (Requirement 2.4)
             logger.info("Using initial data from SQS message (first stage)")
             
-            context.initialData
+            val initialData = context.initialData
                 ?: throw IllegalStateException("initialData is null for first stage")
+            
+            // Convert Map to JsonNode
+            objectMapper.valueToTree(initialData)
         }
     }
     
