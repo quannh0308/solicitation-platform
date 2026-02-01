@@ -250,7 +250,7 @@ class SimpleWorkflowStack(
                     .build())
                 .glueVersion("4.0")
                 .workerType("G.1X")
-                .numberOfWorkers(1)  // Reduced from 2 to 1 to minimize DPU usage
+                .numberOfWorkers(2)  // Minimum 2 workers for G.1X
                 .maxRetries(0)  // Retries handled by Step Functions
                 .timeout(120)  // 2 hours
                 .defaultArguments(mapOf(
