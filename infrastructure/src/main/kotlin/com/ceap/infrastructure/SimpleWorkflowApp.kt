@@ -6,6 +6,8 @@ import software.amazon.awscdk.Duration
 import software.amazon.awscdk.Environment
 import software.amazon.awscdk.Stack
 import software.amazon.awscdk.StackProps
+import software.amazon.awscdk.services.glue.CfnJob
+import software.amazon.awscdk.services.iam.Effect
 import software.amazon.awscdk.services.iam.PolicyStatement
 import software.amazon.awscdk.services.iam.Role
 import software.amazon.awscdk.services.iam.ServicePrincipal
@@ -22,11 +24,12 @@ import software.amazon.awscdk.services.s3.LifecycleRule
 import software.amazon.awscdk.services.sqs.DeadLetterQueue
 import software.amazon.awscdk.services.sqs.Queue
 import software.amazon.awscdk.services.stepfunctions.*
+import software.amazon.awscdk.services.stepfunctions.tasks.GlueStartJobRun
 import software.amazon.awscdk.services.stepfunctions.tasks.LambdaInvoke
 import software.constructs.Construct
 
 /**
- * Simple Workflow Stack - Minimal working implementation for deployment.
+ * Simple Workflow Stack - Minimal working implementation with Glue support.
  */
 class SimpleWorkflowStack(
     scope: Construct,
@@ -175,12 +178,93 @@ class SimpleWorkflowStack(
                 .backoffRate(2.0)
                 .build())
         
+        // Glue Job (Standard workflow only)
+        val glueTask = if (workflowType == "standard") {
+            // Create Glue job role
+            val glueRole = Role.Builder.create(this, "GlueRole")
+                .assumedBy(ServicePrincipal("glue.amazonaws.com"))
+                .build()
+            
+            // Grant S3 permissions
+            bucket.grantReadWrite(glueRole)
+            
+            // Grant CloudWatch Logs permissions
+            glueRole.addToPolicy(
+                PolicyStatement.Builder.create()
+                    .effect(Effect.ALLOW)
+                    .actions(listOf(
+                        "logs:CreateLogGroup",
+                        "logs:CreateLogStream",
+                        "logs:PutLogEvents"
+                    ))
+                    .resources(listOf("arn:aws:logs:*:*:log-group:/aws-glue/jobs/*"))
+                    .build()
+            )
+            
+            // Create Glue job
+            val glueJob = CfnJob.Builder.create(this, "HeavyETLJob")
+                .name("ceap-workflow-$workflowName-heavy-etl")
+                .role(glueRole.roleArn)
+                .command(CfnJob.JobCommandProperty.builder()
+                    .name("glueetl")
+                    .scriptLocation("s3://ceap-glue-scripts-${this.account}/scripts/heavy-etl.py")
+                    .pythonVersion("3")
+                    .build())
+                .glueVersion("4.0")
+                .workerType("G.1X")
+                .numberOfWorkers(2)
+                .maxRetries(0)  // Retries handled by Step Functions
+                .timeout(120)  // 2 hours
+                .defaultArguments(mapOf(
+                    "--enable-metrics" to "true",
+                    "--enable-spark-ui" to "true",
+                    "--enable-job-insights" to "true",
+                    "--TempDir" to "s3://${bucket.bucketName}/glue-temp/"
+                ))
+                .build()
+            
+            // Create Glue job task
+            GlueStartJobRun.Builder.create(this, "HeavyETLTask")
+                .glueJobName(glueJob.name)
+                .integrationPattern(IntegrationPattern.RUN_JOB)  // Wait for completion
+                .arguments(TaskInput.fromObject(mapOf(
+                    "--execution-id" to JsonPath.stringAt("\$.Execution.Name"),
+                    "--input-bucket" to bucket.bucketName,
+                    "--input-key" to "executions/\${JsonPath.stringAt(\"\$.Execution.Name\")}/FilterStage/output.json",
+                    "--output-bucket" to bucket.bucketName,
+                    "--output-key" to "executions/\${JsonPath.stringAt(\"\$.Execution.Name\")}/HeavyETLStage/output.json",
+                    "--current-stage" to "HeavyETLStage",
+                    "--previous-stage" to "FilterStage"
+                )))
+                .resultPath(JsonPath.DISCARD)
+                .build()
+                .addRetry(RetryProps.builder()
+                    .errors(listOf("States.ALL"))
+                    .interval(Duration.minutes(5))
+                    .maxAttempts(2)
+                    .backoffRate(2.0)
+                    .build())
+        } else {
+            null
+        }
+        
         // Chain tasks
-        val definition = etlTask
-            .next(filterTask)
-            .next(scoreTask)
-            .next(storeTask)
-            .next(reactiveTask)
+        val definition = if (workflowType == "standard" && glueTask != null) {
+            // Standard workflow with Glue: ETL → Filter → Glue → Score → Store → Reactive
+            etlTask
+                .next(filterTask)
+                .next(glueTask)
+                .next(scoreTask)
+                .next(storeTask)
+                .next(reactiveTask)
+        } else {
+            // Express workflow (no Glue): ETL → Filter → Score → Store → Reactive
+            etlTask
+                .next(filterTask)
+                .next(scoreTask)
+                .next(storeTask)
+                .next(reactiveTask)
+        }
         
         // CloudWatch Logs
         val logGroup = LogGroup.Builder.create(this, "Logs")
