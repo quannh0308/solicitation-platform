@@ -53,6 +53,13 @@ DLQUrl: https://sqs.us-east-1.amazonaws.com/728093470684/ceap-workflow-realtime-
 
 **Resources Created**:
 - **Step Functions**: `Ceap-batch-Workflow` (STANDARD)
+- **Glue Job**: `ceap-workflow-batch-heavy-etl` ⭐ NEW!
+  - Workers: 2 (G.1X type)
+  - Timeout: 120 minutes (2 hours)
+  - Glue Version: 4.0
+  - Script: `s3://ceap-glue-scripts-728093470684/scripts/heavy-etl.py`
+  - Integration: RUN_JOB (Step Functions waits for completion)
+  - Retry: 2 attempts, 5 min interval, 2x backoff
 - **S3 Bucket**: `ceap-workflow-batch-728093470684`
   - Lifecycle: Deletes executions after 7 days
   - Encryption: S3-managed
@@ -67,6 +74,13 @@ DLQUrl: https://sqs.us-east-1.amazonaws.com/728093470684/ceap-workflow-realtime-
   - Main: `ceap-workflow-batch-queue` (10 min visibility)
   - DLQ: `ceap-workflow-batch-dlq` (14 day retention)
 - **CloudWatch Logs**: `/aws/stepfunctions/Ceap-batch-Workflow`
+
+**Workflow Structure**:
+```
+ETL Lambda → Filter Lambda → Glue Job (Heavy ETL) → Score Lambda → Store Lambda → Reactive Lambda
+    ↓            ↓                ↓                      ↓              ↓               ↓
+   S3           S3               S3                     S3             S3              S3
+```
 
 **Outputs**:
 ```
@@ -166,9 +180,14 @@ aws stepfunctions list-executions \
   --state-machine-arn arn:aws:states:us-east-1:728093470684:stateMachine:Ceap-batch-Workflow \
   --max-results 5
 
-# Check S3 outputs
+# Check S3 outputs (including Glue job output)
 aws s3 ls s3://ceap-workflow-batch-728093470684/executions/ --recursive
+
+# Check Glue job runs
+aws glue get-job-runs --job-name ceap-workflow-batch-heavy-etl --max-results 5
 ```
+
+**Note**: The Standard workflow with Glue will take longer to complete (potentially hours) compared to the Express workflow (seconds).
 
 ## Monitoring
 
@@ -213,12 +232,14 @@ aws logs tail /aws/lambda/CeapWorkflow-batch-FilterLambda --follow
 
 ### Standard Workflow (batch)
 - **Step Functions**: $25 per million transitions
-  - 5 stages × 30 executions/month = 150 transitions/month
-  - Monthly: ~$0.004
+  - 6 stages × 30 executions/month = 180 transitions/month
+  - Monthly: ~$0.005
+- **Glue Job**: $0.44 per DPU-hour ⭐
+  - 2 DPUs × 1 hour/execution × 30 executions = 60 DPU-hours
+  - Monthly: ~$26.40
 - **Lambda**: Pay per invocation
 - **S3**: ~$0.01/month
-- **Total**: ~$0.01/month + Lambda costs
-- **Note**: Add Glue costs if using Glue jobs (~$0.44 per DPU-hour)
+- **Total**: ~$26.42/month (mostly Glue)
 
 ## What's Different from Before
 
@@ -279,6 +300,7 @@ aws cloudformation delete-stack --stack-name CeapWorkflow-batch
 - ✅ 2 CloudFormation stacks deployed successfully
 - ✅ 10 Lambda functions with clean naming
 - ✅ 2 Step Functions workflows (1 Express, 1 Standard)
+- ✅ 1 Glue job integrated into Standard workflow ⭐
 - ✅ 2 S3 buckets with lifecycle policies
 - ✅ 4 SQS queues (2 main + 2 DLQ)
 - ✅ CloudWatch Logs configured
@@ -287,4 +309,4 @@ aws cloudformation delete-stack --stack-name CeapWorkflow-batch
 - ✅ No `-dev` postfix in resource names
 
 **Deployment Time**: ~3 minutes per workflow
-**Total Resources**: 30+ AWS resources across 2 stacks
+**Total Resources**: 35+ AWS resources across 2 stacks (including Glue job)
