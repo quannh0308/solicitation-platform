@@ -66,7 +66,7 @@ StoreTask:  {"stage":"StoreTask","status":"success","test":true,"message":"Store
 
 **Duration**: ~35 seconds
 
-### ✅ Test 3: Standard Workflow - Started Successfully
+### ⏳ Test 3: Standard Workflow - Started (Incomplete)
 
 **Input**:
 ```json
@@ -78,21 +78,40 @@ StoreTask:  {"stage":"StoreTask","status":"success","test":true,"message":"Store
 
 **Execution**: `test-e2e-1769966599`
 
-**Result**: ✅ STARTED (Running)
+**Result**: ⏳ STARTED (Not Yet Verified)
 
-**Note**: Standard workflow with Glue job will take ~2 hours to complete. The workflow started successfully and is processing through:
-1. ETL Lambda
-2. Filter Lambda
-3. **Glue Job** (2 hours) ← Currently here
-4. Score Lambda
-5. Store Lambda
-6. Reactive Lambda
+**Status**: The Standard workflow was started successfully but not verified to completion due to:
+1. Glue job takes ~2 hours to complete
+2. AWS credentials expired before completion
+3. Need to wait for Glue job to finish and verify S3 outputs
 
-**Monitor Progress**:
+**Expected Flow**:
+1. ETL Lambda → S3
+2. Filter Lambda → S3
+3. **Glue Job** (2 hours) → S3
+4. Score Lambda → S3
+5. Store Lambda → S3
+6. Reactive Lambda → SUCCESS
+
+**To Complete This Test**:
 ```bash
+# Check execution status
 aws stepfunctions describe-execution \
   --execution-arn arn:aws:states:us-east-1:728093470684:execution:Ceap-batch-Workflow:test-e2e-1769966599
+
+# Check S3 outputs (after Glue completes)
+aws s3 ls s3://ceap-workflow-batch-728093470684/executions/test-e2e-1769966599/ --recursive
+
+# Verify all 6 stages created outputs:
+# - ETLTask/output.json
+# - FilterTask/output.json
+# - HeavyETLTask/output.json (Glue job output)
+# - ScoreTask/output.json
+# - StoreTask/output.json
+# - ReactiveTask (may not write to S3)
 ```
+
+**Note**: This test needs to be completed separately after Glue job finishes (~2 hours from start time: 2026-02-01 17:23 UTC)
 
 ## Complete S3 Orchestration Verification ✅
 
