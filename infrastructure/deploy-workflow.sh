@@ -176,6 +176,7 @@ export AWS_PROFILE=$AWS_PROFILE
 # Synthesize CDK templates
 echo -e "${YELLOW}Synthesizing CDK templates...${NC}"
 cdk synth \
+    --app "./gradlew runWorkflowApp" \
     --context environment="$ENVIRONMENT" \
     --context workflowType="$WORKFLOW_TYPE" \
     --context workflowName="$WORKFLOW_NAME" \
@@ -207,6 +208,7 @@ fi
 if [ "$SHOW_DIFF" = true ]; then
     echo -e "${YELLOW}Showing deployment diff...${NC}"
     cdk diff \
+        --app "cd infrastructure && ./gradlew runWorkflowApp" \
         --context environment="$ENVIRONMENT" \
         --context workflowType="$WORKFLOW_TYPE" \
         --context workflowName="$WORKFLOW_NAME" \
@@ -224,9 +226,10 @@ fi
 echo -e "${YELLOW}Deploying workflow infrastructure...${NC}"
 echo ""
 
-# Phase 1: Deploy S3 workflow bucket
-echo -e "${BLUE}Phase 1: Deploying S3 Workflow Bucket${NC}"
-cdk deploy "CeapWorkflowStorage-$WORKFLOW_NAME" \
+# Deploy single workflow stack
+echo -e "${BLUE}Deploying Workflow Orchestration Stack${NC}"
+cdk deploy "CeapWorkflow-$WORKFLOW_NAME" \
+    --app "cd infrastructure && ./gradlew runWorkflowApp" \
     --context environment="$ENVIRONMENT" \
     --context workflowType="$WORKFLOW_TYPE" \
     --context workflowName="$WORKFLOW_NAME" \
@@ -234,62 +237,30 @@ cdk deploy "CeapWorkflowStorage-$WORKFLOW_NAME" \
     --profile "$AWS_PROFILE"
 
 if [ $? -ne 0 ]; then
-    echo -e "${RED}S3 bucket deployment failed${NC}"
+    echo -e "${RED}Workflow deployment failed${NC}"
     exit 1
 fi
-echo -e "${GREEN}✓ S3 workflow bucket deployed${NC}"
-echo ""
-
-# Phase 2: Deploy Lambda functions with base handler
-echo -e "${BLUE}Phase 2: Deploying Lambda Functions${NC}"
-cdk deploy "CeapWorkflowLambdas-$WORKFLOW_NAME" \
-    --context environment="$ENVIRONMENT" \
-    --context workflowType="$WORKFLOW_TYPE" \
-    --context workflowName="$WORKFLOW_NAME" \
-    --require-approval never \
-    --profile "$AWS_PROFILE"
-
-if [ $? -ne 0 ]; then
-    echo -e "${RED}Lambda deployment failed${NC}"
-    exit 1
-fi
-echo -e "${GREEN}✓ Lambda functions deployed${NC}"
-echo ""
-
-# Phase 3: Deploy Step Functions workflow
-echo -e "${BLUE}Phase 3: Deploying Step Functions Workflow${NC}"
-cdk deploy "CeapWorkflowOrchestration-$WORKFLOW_NAME" \
-    --context environment="$ENVIRONMENT" \
-    --context workflowType="$WORKFLOW_TYPE" \
-    --context workflowName="$WORKFLOW_NAME" \
-    --require-approval never \
-    --profile "$AWS_PROFILE"
-
-if [ $? -ne 0 ]; then
-    echo -e "${RED}Step Functions deployment failed${NC}"
-    exit 1
-fi
-echo -e "${GREEN}✓ Step Functions workflow deployed${NC}"
+echo -e "${GREEN}✓ Workflow orchestration deployed${NC}"
 echo ""
 
 # Get stack outputs
 echo -e "${YELLOW}Retrieving stack outputs...${NC}"
 WORKFLOW_BUCKET=$(aws cloudformation describe-stacks \
-    --stack-name "CeapWorkflowStorage-$WORKFLOW_NAME" \
+    --stack-name "CeapWorkflow-$WORKFLOW_NAME" \
     --profile "$AWS_PROFILE" \
-    --query 'Stacks[0].Outputs[?OutputKey==`WorkflowBucketName`].OutputValue' \
+    --query 'Stacks[0].Outputs[?OutputKey==`WorkflowBucketNameOutput`].OutputValue' \
     --output text)
 
 STATE_MACHINE_ARN=$(aws cloudformation describe-stacks \
-    --stack-name "CeapWorkflowOrchestration-$WORKFLOW_NAME" \
+    --stack-name "CeapWorkflow-$WORKFLOW_NAME" \
     --profile "$AWS_PROFILE" \
-    --query 'Stacks[0].Outputs[?OutputKey==`StateMachineArn`].OutputValue' \
+    --query 'Stacks[0].Outputs[?OutputKey==`StateMachineArnOutput`].OutputValue' \
     --output text)
 
 QUEUE_URL=$(aws cloudformation describe-stacks \
-    --stack-name "CeapWorkflowOrchestration-$WORKFLOW_NAME" \
+    --stack-name "CeapWorkflow-$WORKFLOW_NAME" \
     --profile "$AWS_PROFILE" \
-    --query 'Stacks[0].Outputs[?OutputKey==`QueueUrl`].OutputValue' \
+    --query 'Stacks[0].Outputs[?OutputKey==`QueueUrlOutput`].OutputValue' \
     --output text)
 
 echo ""

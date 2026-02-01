@@ -34,6 +34,13 @@ application {
     mainClass.set("com.ceap.infrastructure.ConsolidatedCeapPlatformAppKt")
 }
 
+tasks.register<JavaExec>("runWorkflowApp") {
+    group = "application"
+    description = "Run the workflow orchestration CDK app"
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("com.ceap.infrastructure.SimpleWorkflowAppKt")
+}
+
 tasks.test {
     useJUnitPlatform()
 }
