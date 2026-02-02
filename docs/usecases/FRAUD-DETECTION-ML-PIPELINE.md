@@ -1698,3 +1698,247 @@ This fraud detection system leverages your existing CEAP workflow infrastructure
 - ✅ Production-ready architecture
 
 The workflows you built (Express + Standard with Glue) are perfect for this use case!
+
+
+## Fraud Detection Datasets
+
+### Recommended Datasets for Your Project
+
+#### 1. Kaggle Credit Card Fraud Detection Dataset (Most Popular) ⭐
+
+**Source**: [Kaggle - Credit Card Fraud Detection](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud)
+
+**Description**:
+- 284,807 credit card transactions from September 2013
+- 492 fraudulent transactions (0.172% fraud rate)
+- Highly imbalanced dataset (realistic scenario)
+- Anonymized features (PCA-transformed for privacy)
+- 2 days of transactions from European cardholders
+
+**Features**:
+- Time: Seconds elapsed between transactions
+- V1-V28: PCA-transformed features (anonymized)
+- Amount: Transaction amount
+- Class: 1 = fraud, 0 = legitimate
+
+**Size**: ~150 MB
+
+**Download**:
+```bash
+# Requires Kaggle account (free)
+# 1. Create account at kaggle.com
+# 2. Go to: https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud
+# 3. Click "Download" button
+# 4. Upload to your S3 bucket
+
+aws s3 cp creditcard.csv s3://bank-transactions-YOUR-ACCOUNT-ID/raw/creditcard.csv
+```
+
+**Pros**:
+- ✅ Real-world fraud patterns
+- ✅ Well-documented and widely used
+- ✅ Good for benchmarking
+- ✅ Anonymized (privacy-safe)
+
+**Cons**:
+- ⚠️ Features are anonymized (can't interpret)
+- ⚠️ Small dataset (only 2 days)
+- ⚠️ Highly imbalanced (need SMOTE or class weights)
+
+**Best For**: Initial POC and testing your pipeline
+
+#### 2. PaySim Synthetic Financial Dataset (Larger Scale)
+
+**Source**: [GitHub - PaySim Dataset](https://github.com/BBQtime/Synthetic-Financial-Datasets-For-Fraud-Detection)
+
+**Description**:
+- 6.3 million mobile money transactions
+- Synthetic data based on real African mobile money service
+- Multiple transaction types (CASH_IN, CASH_OUT, DEBIT, PAYMENT, TRANSFER)
+- More realistic fraud patterns
+
+**Features**:
+- step: Time step (1 step = 1 hour)
+- type: Transaction type
+- amount: Transaction amount
+- nameOrig: Customer ID (sender)
+- oldbalanceOrg: Initial balance before transaction
+- newbalanceOrig: New balance after transaction
+- nameDest: Recipient ID
+- oldbalanceDest: Initial recipient balance
+- newbalanceDest: New recipient balance
+- isFraud: 1 = fraud, 0 = legitimate
+- isFlaggedFraud: Flagged by system (>$200K transfers)
+
+**Size**: ~500 MB
+
+**Download**:
+```bash
+# Download from Kaggle
+# URL: https://www.kaggle.com/datasets/ealaxi/paysim1
+
+# Or from GitHub
+git clone https://github.com/BBQtime/Synthetic-Financial-Datasets-For-Fraud-Detection.git
+cd Synthetic-Financial-Datasets-For-Fraud-Detection
+
+# Upload to S3
+aws s3 cp PS_20174392719_1491204439457_log.csv \
+  s3://bank-transactions-YOUR-ACCOUNT-ID/raw/paysim.csv
+```
+
+**Pros**:
+- ✅ Large dataset (6.3M transactions)
+- ✅ Interpretable features
+- ✅ Multiple transaction types
+- ✅ Realistic fraud patterns
+- ✅ Good for production-scale testing
+
+**Cons**:
+- ⚠️ Synthetic data (not real transactions)
+- ⚠️ Mobile money (not credit cards)
+
+**Best For**: Production-scale testing and feature engineering practice
+
+#### 3. IEEE-CIS Fraud Detection Dataset (Competition Dataset)
+
+**Source**: [Kaggle - IEEE-CIS Fraud Detection](https://www.kaggle.com/c/ieee-fraud-detection/data)
+
+**Description**:
+- Real-world e-commerce transactions
+- Vesta Corporation data
+- Rich feature set (400+ features)
+- Transaction and identity information
+
+**Size**: ~1 GB
+
+**Pros**:
+- ✅ Real-world data
+- ✅ Rich features (device, browser, email domain, etc.)
+- ✅ Large scale
+- ✅ Recent data (2019)
+
+**Cons**:
+- ⚠️ Competition dataset (may have restrictions)
+- ⚠️ Complex feature engineering required
+
+**Best For**: Advanced fraud detection with rich features
+
+### Dataset Comparison
+
+| Dataset | Size | Transactions | Fraud Rate | Features | Best For |
+|---------|------|--------------|------------|----------|----------|
+| **Kaggle Credit Card** | 150 MB | 284K | 0.172% | 30 (anonymized) | POC, Testing |
+| **PaySim** | 500 MB | 6.3M | ~0.13% | 11 (interpretable) | Production Scale |
+| **IEEE-CIS** | 1 GB | 590K | ~3.5% | 400+ | Advanced Features |
+
+### Recommendation for Your Project
+
+**Phase 1 (POC)**: Start with **Kaggle Credit Card Fraud** dataset
+- Quick to download and test
+- Well-documented
+- Perfect for validating your pipeline
+
+**Phase 2 (Production)**: Move to **PaySim** dataset
+- Larger scale (6.3M transactions)
+- Interpretable features
+- Better for feature engineering
+
+**Phase 3 (Advanced)**: Consider **IEEE-CIS** dataset
+- Rich feature set
+- Real-world complexity
+
+### How to Use the Dataset
+
+#### Step 1: Download Dataset
+```bash
+# Download from Kaggle (requires account)
+# Save as: creditcard.csv
+```
+
+#### Step 2: Upload to S3
+```bash
+# Create S3 bucket for your data
+aws s3 mb s3://bank-transactions-YOUR-ACCOUNT-ID
+
+# Upload dataset
+aws s3 cp creditcard.csv s3://bank-transactions-YOUR-ACCOUNT-ID/raw/
+
+# Convert to Parquet for better performance (optional)
+# Use Glue or Spark to convert CSV to Parquet
+```
+
+#### Step 3: Prepare Training Data
+```bash
+# Split into train/test
+# Add to labeled/ folder
+aws s3 cp train.parquet s3://bank-transactions-YOUR-ACCOUNT-ID/labeled/train.parquet
+aws s3 cp test.parquet s3://bank-transactions-YOUR-ACCOUNT-ID/labeled/test.parquet
+```
+
+#### Step 4: Test Your Pipeline
+```bash
+# Trigger training workflow
+aws sqs send-message \
+  --queue-url https://sqs.us-east-1.amazonaws.com/YOUR-ACCOUNT-ID/ceap-workflow-fraud-training-queue \
+  --message-body '{
+    "training_data_path": "s3://bank-transactions-YOUR-ACCOUNT-ID/labeled/train.parquet",
+    "test_data_path": "s3://bank-transactions-YOUR-ACCOUNT-ID/labeled/test.parquet",
+    "model_version": "v1"
+  }'
+```
+
+### Dataset Licensing
+
+**Kaggle Credit Card Fraud**: [Database Contents License (DbCL)](https://opendatacommons.org/licenses/dbcl/1-0/)
+- ✅ Free to use for research and commercial purposes
+- ✅ Attribution required
+- ✅ Share-alike for derived databases
+
+**PaySim**: Open source (GitHub)
+- ✅ Free to use
+- ✅ MIT-style license
+
+**IEEE-CIS**: Competition license
+- ⚠️ Check Kaggle competition rules
+- ⚠️ May have restrictions on commercial use
+
+### Additional Resources
+
+**Kaggle Datasets**:
+- [Credit Card Fraud Detection](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud)
+- [PaySim Mobile Money](https://www.kaggle.com/datasets/ealaxi/paysim1)
+- [IEEE-CIS Fraud Detection](https://www.kaggle.com/c/ieee-fraud-detection/data)
+
+**GitHub Repositories with Datasets**:
+- [PaySim Synthetic Datasets](https://github.com/BBQtime/Synthetic-Financial-Datasets-For-Fraud-Detection)
+- [Credit Card Fraud Examples](https://github.com/nsethi31/Kaggle-Data-Credit-Card-Fraud-Detection)
+
+**AWS Public Datasets**:
+- [AWS Open Data Registry](https://registry.opendata.aws/) - Search for "fraud" or "financial"
+
+### Quick Start with Sample Data
+
+If you want to test immediately without downloading large datasets:
+
+```python
+# Generate synthetic test data
+import pandas as pd
+import numpy as np
+
+# Create 1000 sample transactions
+transactions = pd.DataFrame({
+    'transaction_id': [f'TXN-{i:06d}' for i in range(1000)],
+    'amount': np.random.lognormal(4, 2, 1000),
+    'merchant': np.random.choice(['Amazon', 'Walmart', 'Target'], 1000),
+    'timestamp': pd.date_range('2026-01-01', periods=1000, freq='1H'),
+    'is_fraud': np.random.choice([0, 1], 1000, p=[0.98, 0.02])
+})
+
+# Save to CSV
+transactions.to_csv('sample_transactions.csv', index=False)
+
+# Upload to S3
+# aws s3 cp sample_transactions.csv s3://your-bucket/raw/
+```
+
+This lets you test your pipeline immediately while you prepare real datasets.
