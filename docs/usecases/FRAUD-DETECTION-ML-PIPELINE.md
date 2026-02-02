@@ -1,11 +1,221 @@
-# Fraud Detection ML Pipeline - Architecture Design
+# Fraud Detection ML Pipeline - Client Implementation Guide
+
+## For Clients: Quick Start
+
+**You are a client** who wants to build a fraud detection system. This guide shows you how to:
+1. ✅ Clone the CEAP platform (this repository)
+2. ✅ Deploy CEAP workflows to your AWS account
+3. ✅ Create your own fraud detection repository
+4. ✅ Build your Lambda handlers that run on CEAP workflows
+5. ✅ Deploy and test your fraud detection system
+
+**Time to implement**: 2-3 weeks  
+**Cost**: ~$144/month  
+**What you reuse from CEAP**: 60% of infrastructure  
+**What you build**: 40% (your fraud detection logic)
 
 ## Overview
 
-This document describes a complete fraud detection solution using CEAP workflow orchestration infrastructure with two pipelines:
+This guide shows how to build a fraud detection system using the **CEAP (Customer Engagement & Action Platform)** workflow orchestration framework. As a client, you'll leverage CEAP's infrastructure to build two pipelines:
 
 1. **Training Pipeline** (Weekly/Monthly): Train ML model on historical data, deploy to SageMaker
 2. **Inference Pipeline** (Daily): Score daily transactions for fraud, alert on suspicious activity
+
+## Prerequisites
+
+### What You Need
+- AWS Account with appropriate permissions
+- GitHub account
+- Basic knowledge of Kotlin and Python
+- Historical transaction data with fraud labels
+
+### CEAP Platform Access
+
+**Option 1: Clone CEAP Repository (Recommended)**
+```bash
+# Clone the CEAP platform repository
+git clone https://github.com/quannh0308/customer-engagement-platform.git ceap-platform
+
+# This gives you the complete workflow orchestration framework
+cd ceap-platform
+```
+
+**What you get**:
+- ✅ Step Functions orchestration (Express + Standard workflows)
+- ✅ S3-based intermediate storage
+- ✅ Lambda deployment infrastructure
+- ✅ Glue job integration
+- ✅ Retry logic and error handling
+- ✅ CloudWatch monitoring
+- ✅ Deployment scripts
+
+**Option 2: Fork CEAP Repository**
+```bash
+# Fork the repository on GitHub to your account
+# Then clone your fork
+git clone https://github.com/YOUR-USERNAME/customer-engagement-platform.git ceap-platform
+```
+
+**Benefits**:
+- Keep your customizations separate
+- Pull updates from upstream CEAP
+- Contribute improvements back
+
+### Your Project Structure
+
+After cloning CEAP, create your fraud detection project:
+
+```
+your-workspace/
+├── ceap-platform/                    # Cloned CEAP framework (read-only)
+│   ├── infrastructure/               # Workflow orchestration infrastructure
+│   ├── docs/                         # CEAP documentation
+│   └── [other CEAP modules]
+│
+└── fraud-detection-system/           # Your new project (your code)
+    ├── .git/                         # Your Git repository
+    ├── fraud-training-pipeline/      # Training Lambda handlers
+    │   ├── src/main/kotlin/
+    │   └── build.gradle.kts
+    ├── fraud-inference-pipeline/     # Inference Lambda handlers
+    │   ├── src/main/kotlin/
+    │   └── build.gradle.kts
+    ├── glue-scripts/                 # Your Glue ETL scripts
+    │   ├── fraud_data_extract.py
+    │   └── fraud_feature_engineering.py
+    ├── infrastructure/               # Your infrastructure code
+    │   └── FraudDetectionStack.kt    # Uses CEAP workflows
+    ├── build.gradle.kts              # Your project build
+    └── README.md                     # Your project docs
+```
+
+## Repository Setup
+
+### Step 1: Create Your GitHub Repository
+
+```bash
+# Create new repository on GitHub
+# Name: fraud-detection-system
+# Description: Fraud detection ML pipelines using CEAP platform
+
+# Initialize your project
+mkdir fraud-detection-system
+cd fraud-detection-system
+git init
+git remote add origin https://github.com/YOUR-USERNAME/fraud-detection-system.git
+```
+
+### Step 2: Reference CEAP as Dependency
+
+**Option A: Git Submodule (Recommended)**
+```bash
+# Add CEAP as a submodule
+cd fraud-detection-system
+git submodule add https://github.com/quannh0308/customer-engagement-platform.git ceap-platform
+
+# Your project uses CEAP's infrastructure
+```
+
+**Option B: Copy CEAP Infrastructure**
+```bash
+# Copy only the infrastructure you need
+cp -r ../ceap-platform/infrastructure ./ceap-infrastructure
+cp -r ../ceap-platform/docs/WORKFLOW-*.md ./docs/
+
+# Customize for your needs
+```
+
+**Option C: Gradle Dependency (If CEAP is published)**
+```kotlin
+// In your build.gradle.kts
+dependencies {
+    implementation("com.ceap:ceap-workflow-orchestration:1.0.0")
+}
+```
+
+### Step 3: Create Your Project Structure
+
+```bash
+# Create your Lambda modules
+mkdir -p fraud-training-pipeline/src/main/kotlin/com/yourcompany/fraud/training
+mkdir -p fraud-inference-pipeline/src/main/kotlin/com/yourcompany/fraud/inference
+mkdir -p glue-scripts
+mkdir -p infrastructure/src/main/kotlin/com/yourcompany/fraud/infrastructure
+```
+
+**Your `settings.gradle.kts`**:
+```kotlin
+rootProject.name = "fraud-detection-system"
+
+// Your modules
+include("fraud-training-pipeline")
+include("fraud-inference-pipeline")
+
+// Reference CEAP platform (if using submodule)
+includeBuild("ceap-platform")
+```
+
+## Client Setup Visualization
+
+```
+┌────────────────────────────────────────────────────────────────┐
+│                    Your Setup as a Client                       │
+└────────────────────────────────────────────────────────────────┘
+
+Step 1: Clone CEAP Platform
+────────────────────────────
+GitHub: quannh0308/customer-engagement-platform (Public)
+    ↓ git clone
+Your Machine: ceap-platform/ (Read-only reference)
+
+
+Step 2: Create Your Repository
+───────────────────────────────
+GitHub: YOUR-USERNAME/fraud-detection-system (Your repo)
+    ↓ git init
+Your Machine: fraud-detection-system/ (Your code)
+    ├── ceap-platform/ (submodule → CEAP)
+    ├── fraud-training-pipeline/ (your code)
+    ├── fraud-inference-pipeline/ (your code)
+    └── glue-scripts/ (your scripts)
+
+
+Step 3: Deploy to Your AWS Account
+───────────────────────────────────
+Your AWS Account (YOUR-ACCOUNT-ID)
+    ↓ ./deploy-workflow-simple.sh
+    ├── Step Functions: Ceap-fraud-training-Workflow
+    ├── Step Functions: Ceap-fraud-detection-Workflow
+    ├── Lambda: YOUR fraud detection handlers
+    ├── S3: YOUR transaction data
+    ├── SageMaker: YOUR fraud model
+    └── DynamoDB: YOUR fraud scores
+
+
+Result: Your fraud detection system running on CEAP infrastructure!
+```
+
+## What You Own vs What CEAP Provides
+
+### CEAP Platform Provides (You Reuse) ✅
+- Step Functions workflow templates
+- S3 orchestration patterns
+- Lambda base classes (WorkflowLambdaHandler)
+- Deployment scripts
+- Retry logic and error handling
+- CloudWatch monitoring setup
+- Documentation and examples
+
+### You Build (Your IP) 🔨
+- Lambda handlers with fraud detection logic
+- Glue scripts for feature engineering
+- SageMaker training configuration
+- Fraud detection algorithms
+- Alerting rules and thresholds
+- Your transaction data and models
+- Your DynamoDB tables and schemas
+
+**Key Point**: CEAP is infrastructure, your fraud detection logic is yours!
 
 ## Technology Stack
 
@@ -804,9 +1014,123 @@ Use **Express Workflow** for real-time:
 This architecture leverages your existing CEAP workflow infrastructure perfectly!
 
 
-## Implementation Roadmap
+## Implementation Roadmap (Client Perspective)
 
-### Phase 1: Infrastructure Setup (1-2 days)
+### Phase 0: Setup Your Project (Day 1)
+
+#### 0.1 Clone CEAP Platform
+```bash
+# Clone CEAP platform
+git clone https://github.com/quannh0308/customer-engagement-platform.git ceap-platform
+
+# Explore the platform
+cd ceap-platform
+cat README.md
+cat TECH-STACK.md
+cat docs/WORKFLOW-ORCHESTRATION-GUIDE.md
+```
+
+#### 0.2 Create Your Project Repository
+```bash
+# Create your fraud detection project
+mkdir fraud-detection-system
+cd fraud-detection-system
+git init
+
+# Add CEAP as submodule
+git submodule add https://github.com/quannh0308/customer-engagement-platform.git ceap-platform
+
+# Create initial structure
+mkdir -p fraud-training-pipeline/src/main/kotlin/com/yourcompany/fraud/training
+mkdir -p fraud-inference-pipeline/src/main/kotlin/com/yourcompany/fraud/inference
+mkdir -p glue-scripts
+mkdir -p infrastructure
+
+# Initialize Git
+git add .
+git commit -m "Initial project structure with CEAP platform"
+
+# Push to your GitHub
+git remote add origin https://github.com/YOUR-USERNAME/fraud-detection-system.git
+git push -u origin main
+```
+
+**Deliverables**:
+- ✅ Your GitHub repository created
+- ✅ CEAP platform referenced as submodule
+- ✅ Project structure initialized
+
+**Effort**: 2 hours
+
+### Phase 1: Deploy CEAP Workflows to Your AWS Account (Day 1-2)
+
+#### 1.1 Configure AWS Credentials
+```bash
+# Configure your AWS account
+aws configure
+# Enter your AWS Access Key ID
+# Enter your AWS Secret Access Key
+# Enter region: us-east-1
+```
+
+#### 1.2 Deploy CEAP Workflows
+```bash
+# Navigate to CEAP platform
+cd ceap-platform/infrastructure
+
+# Deploy training workflow (Standard with Glue support)
+./deploy-workflow-simple.sh -n fraud-training -t standard
+
+# Deploy inference workflow (Express, fast)
+./deploy-workflow-simple.sh -n fraud-detection -t express
+```
+
+**What gets deployed to YOUR AWS account**:
+- ✅ 2 Step Functions workflows
+- ✅ 10 Lambda functions (placeholder handlers from CEAP)
+- ✅ 2 S3 buckets for intermediate storage
+- ✅ 4 SQS queues (2 main + 2 DLQ)
+- ✅ CloudWatch Logs and X-Ray tracing
+
+**Deliverables**:
+- ✅ CEAP workflows running in your AWS account
+- ✅ Infrastructure ready for your Lambda handlers
+
+**Effort**: 4 hours (including AWS setup)
+
+#### 1.3 Create Your DynamoDB Tables
+```bash
+# In your fraud-detection-system project
+cd ../fraud-detection-system
+
+# Create fraud scores table
+aws dynamodb create-table \
+  --table-name FraudScores \
+  --attribute-definitions \
+    AttributeName=transaction_id,AttributeType=S \
+    AttributeName=date,AttributeType=S \
+  --key-schema \
+    AttributeName=transaction_id,KeyType=HASH \
+    AttributeName=date,KeyType=RANGE \
+  --billing-mode PAY_PER_REQUEST
+
+# Create model metadata table
+aws dynamodb create-table \
+  --table-name FraudModels \
+  --attribute-definitions \
+    AttributeName=model_version,AttributeType=S \
+  --key-schema \
+    AttributeName=model_version,KeyType=HASH \
+  --billing-mode PAY_PER_REQUEST
+```
+
+**Deliverables**:
+- ✅ FraudScores table (your data)
+- ✅ FraudModels table (your models)
+
+**Effort**: 30 minutes
+
+### Phase 2: Build Your Training Pipeline (Day 3-7)
 
 #### 1.1 Deploy Workflows
 ```bash
